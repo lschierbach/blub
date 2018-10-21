@@ -1,0 +1,7 @@
+*.ao
+*.o
+*.dll
+/lib/*
+/dll/*
+/bin/*
+/data/chunks/*
