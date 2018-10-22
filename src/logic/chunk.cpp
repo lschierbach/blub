@@ -104,7 +104,7 @@ void Chunk::save()
 
 
   // get unique path
-  std::string path = "chunks/" + std::to_string(m_p) + "." + std::to_string(m_q);
+  std::string path = "data/chunks/" + std::to_string(m_p) + "." + std::to_string(m_q);
 
   tilesetVector temp;
 
