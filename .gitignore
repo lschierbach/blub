@@ -5,3 +5,7 @@
 /dll/*
 /bin/*
 /data/chunks/*
+/CMakeFiles/*
+CMakeCache.txt
+Makefile
+cmake_install.cmake
