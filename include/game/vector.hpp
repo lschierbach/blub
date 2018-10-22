@@ -56,7 +56,7 @@ namespace game
       Vector& operator=(const Vector<N, Type>&& rhs) { data = std::move(rhs.data); return *this; };
 
       // destruct
-      ~Vector() {} = default;
+      ~Vector() = default;
 
       // operators (General)
       Type                operator[](std::size_t id)                                          { if (id >= N) throw std::out_of_range("Vector: out of bounds"); return data.at(id); };
@@ -106,7 +106,7 @@ namespace game
         printf("Vector<%u>[\n", N);
         for(auto i = 0u; i < N; i++)
         {
-          printf("\t%f\n", data[i]);
+          printf("\t%u\n", data[i]);
         }
         printf("]\n");
       };
@@ -129,8 +129,15 @@ namespace game
     Vector<N, Type> norm(Vector<N, Type>& vec) { return Vector<N, Type>( vec / vec.abs()); };
 
     // no ugly sqrt
-    template<size_t N, typename Type = float>
-    bool parallel(const Vector<N, Type>& a, const Vector<N, Type>& b) { Type c = a[0] / b[0]; for(auto i = 1u; i < N; i++) { if(!(a[i] / b[i] >= c - epsilon && a[i] / b[i] <= c + epsilon)) return false; } return true; };
+    template<size_t N, typename Type = float, typename T = bool>
+      auto parallel(const Vector<N, Type>& a, const Vector<N, Type>& b)
+        -> typename std::enable_if<std::is_floating_point<Type>::value, T>::type
+          { float c = a[0] / b[0]; for(auto i = 1u; i < N; i++) { if(!(a[i] / b[i] >= c - epsilon && a[i] / b[i] <= c + epsilon)) return false; } return true; };
+          
+    template<size_t N, typename Type = float, typename T = bool>
+      auto parallel(const Vector<N, Type>& a, const Vector<N, Type>& b)
+        -> typename std::enable_if<!std::is_floating_point<Type>::value, T>::type
+          { float c = 1.f * a[0] / b[0]; for(auto i = 1u; i < N; i++) { if(!(1.f * a[i] / b[i] >= c - epsilon && 1.f * a[i] / b[i] <= c + epsilon)) return false; } return true; };
 
     inline Vector<3, float> crossproduct(const Vector<3, float>& a, const Vector<3, float>& b) { return { (a[1]*b[2]) - (a[2]*b[1]),  (a[2]*b[0]) - (a[0]*b[2]), (a[0]*b[1]) - (a[1]*b[0]) }; };
   };
