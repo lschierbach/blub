@@ -56,11 +56,11 @@ namespace game
       Vector& operator=(const Vector<N, Type>&& rhs) { data = std::move(rhs.data); return *this; };
 
       // destruct
-      ~Vector() {};
+      ~Vector() {} = default;
 
       // operators (General)
-      Type                operator[](std::size_t id)                                          { return data[id]; };
-      const Type          operator[](std::size_t id) const                                    { return data[id]; };
+      Type                operator[](std::size_t id)                                          { if (id >= N) throw std::out_of_range("Vector: out of bounds"); return data.at(id); };
+      const Type          operator[](std::size_t id) const                                    { if (id >= N) throw std::out_of_range("Vector: out of bounds"); return data.at(id); };
 
       // operators (Vectors)
       Vector&             operator+=(const Vector<N, Type>& rhs)                              { for(auto i = 0u; i < N; i++) { data[i] += rhs[i]; } return *this; };
