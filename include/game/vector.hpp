@@ -91,9 +91,16 @@ namespace game
       friend inline bool  operator<=(const Vector<N, Type>& lhs, const Vector<N, Type>& rhs)  { return !(lhs > rhs); }
       friend inline bool  operator>=(const Vector<N, Type>& lhs, const Vector<N, Type>& rhs)  { return !(lhs < rhs); }
 
-      friend inline bool  operator==(const Vector<N, Type>& lhs, const Vector<N, Type>& rhs)  { for(auto i = 0u; i < N; i++) { if(!(lhs[i] >= rhs[i] - epsilon && lhs[i] <= rhs[i] + epsilon)) return false; } return true; }
-
-
+      template<typename T = bool>
+      friend inline auto  operator==(const Vector<N, Type>& lhs, const Vector<N, Type>& rhs)
+        -> typename std::enable_if<std::is_floating_point<Type>::value, T>::type
+          { for(auto i = 0u; i < N; i++) { if(!(lhs[i] >= rhs[i] - epsilon && lhs[i] <= rhs[i] + epsilon)) return false; } return true; }
+          
+      template<typename T = bool>
+      friend inline auto  operator==(const Vector<N, Type>& lhs, const Vector<N, Type>& rhs)
+        -> typename std::enable_if<!std::is_floating_point<Type>::value, T>::type
+          { for(auto i = 0u; i < N; i++) { if(!(lhs[i] == rhs[i] && lhs[i] == rhs[i])) return false; } return true; }
+        
       void print()
       {
         printf("Vector<%u>[\n", N);
