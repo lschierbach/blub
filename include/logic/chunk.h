@@ -38,6 +38,7 @@
 
 #include "structs/tile.h"
 #include "structs/tileset.h"
+#include "game/vector.hpp"
 
 class Chunk
 {
@@ -54,8 +55,7 @@ class Chunk
   void load();
   void generate();
 
-  int m_p;
-  int m_q;
+  game::Vector<2, int> m_pos;
 
   tilesetVector m_tilesets;
   Tileset m_tileset;
@@ -64,7 +64,8 @@ class Chunk
   public:
 
     static const int size = 64;
-
+    const std::string chunkFolder = "data/chunks/";
+    
     Chunk(int p, int q);
     Chunk(Chunk& cpy);
     ~Chunk();
@@ -72,7 +73,9 @@ class Chunk
     int getQ() const;
     int getP() const;
 
-    void setPos(int p, int q);
+    void setPos(game::Vector<2, int> pos);
+    
+    game::Vector<2, int> getPos() const;
 
     tilesetVector getTilesets();
 };
