@@ -100,7 +100,9 @@ namespace game
       friend inline auto  operator==(const Vector<N, Type>& lhs, const Vector<N, Type>& rhs)
         -> typename std::enable_if<!std::is_floating_point<Type>::value, T>::type
           { for(auto i = 0u; i < N; i++) { if(!(lhs[i] == rhs[i] && lhs[i] == rhs[i])) return false; } return true; }
-        
+      
+      friend inline auto  operator!=(const Vector<N, Type>& lhs, const Vector<N, Type>& rhs)  { return !(lhs == rhs); };
+      
       void print()
       {
         printf("Vector<%u>[\n", N);
@@ -116,7 +118,7 @@ namespace game
 
       Vector<N, Type> norm() { return Vector<N, Type>( *this / abs() ); };
   };
-
+  
   namespace math
   {
     template<size_t N, typename Type = float>

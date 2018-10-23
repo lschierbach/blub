@@ -17,10 +17,8 @@
 #include "game/filesystem.hpp"
 #include "game/generator.hpp"
 
-Chunk::Chunk(int p, int q)
+Chunk::Chunk(int p, int q) : m_pos({p, q})
 {
-  this->m_p = p;
-  this->m_q = q;
   reload();
 }
 
@@ -34,7 +32,7 @@ Chunk::~Chunk()
 */
 int Chunk::getP() const
 {
-  return m_p;
+  return m_pos[0];
 }
 
 /**
@@ -42,7 +40,12 @@ int Chunk::getP() const
 */
 int Chunk::getQ() const
 {
-  return m_q;
+  return m_pos[1];
+}
+
+game::Vector<2, int> Chunk::getPos() const
+{
+  return m_pos;
 }
 
 /**
@@ -61,10 +64,10 @@ Chunk::tilesetVector Chunk::getTilesets()
     @param p    p
     @param q    q
 */
-void Chunk::setPos(int p, int q)
+void Chunk::setPos(game::Vector<2, int> pos)
 {
   // don't reload if position hasn't changed
-  if(p == this->m_p && q == this->m_q)
+  if(pos == this->m_pos)
   {
     return;
   }
@@ -78,9 +81,7 @@ void Chunk::setPos(int p, int q)
     save();
   }
 
-
-  this->m_p = p;
-  this->m_q = q;
+  this->m_pos = pos;
 
   m_reloadThread = std::thread(&Chunk::reload, this);
 }
@@ -104,7 +105,7 @@ void Chunk::save()
 
 
   // get unique path
-  std::string path = chunkFolder + std::to_string(m_p) + "." + std::to_string(m_q);
+  std::string path = chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]);
 
   tilesetVector temp;
 
@@ -125,7 +126,7 @@ void Chunk::save()
 void Chunk::load()
 {
   // get unique path
-  std::string path = chunkFolder + std::to_string(m_p) + "." + std::to_string(m_q);
+  std::string path = chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]);
 
   tilesetVector temp;
 
@@ -159,7 +160,7 @@ void Chunk::generate()
   // dummy data
   std::lock_guard<std::mutex> lock(m_tilesets_mutex);
 
-  generator::generateChunk(m_tilesets, m_p, m_q, size);
+  generator::generateChunk(m_tilesets, m_pos[0], m_pos[1], size);
 
   #ifdef DEBUG_CHUNK_RELOAD
     printf("[CHUNK]GENERATE\n");
@@ -176,7 +177,7 @@ void Chunk::reload()
   m_tilesets.clear();
 
   // if chunk-data exists
-  if (filesystem::fileExists(chunkFolder + std::to_string(m_p) + "." + std::to_string(m_q) + ".tdat"))
+  if (filesystem::fileExists(chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]) + ".tdat"))
   {
     // load it from disk
     load();
@@ -209,9 +210,8 @@ void Chunk::joinThreads()
 
 Chunk::Chunk(Chunk& cpy)
 {
-  this->m_p = cpy.m_p;
-  this->m_q = cpy.m_q;
-
+  this->m_pos = cpy.m_pos;
+  
   this->m_tilesets = cpy.getTilesets();
 }
 

@@ -142,30 +142,29 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
 
   SharedChunkPtrArr tempChunks = { nullptr };
 
-  game::Vector<2, int> entityPos = entity.get()->getChunkPQ();
-
+  auto entityPos = entity.get()->getChunkPQ();
+  auto centerChunkPos = chunks[loadingDistance][loadingDistance].get()->getPos();
+  
   // has entity moved? Or is it its first update?
-  if (chunks[loadingDistance][loadingDistance].get()->getP() != entityPos[0] ||
-      chunks[loadingDistance][loadingDistance].get()->getQ() != entityPos[1] ||
-      firstUpdate)
+  if (centerChunkPos != entityPos || firstUpdate)
   {
     // get diff
-    int dP = entityPos[0] - chunks[loadingDistance][loadingDistance].get()->getP();
-    int dQ = entityPos[1] - chunks[loadingDistance][loadingDistance].get()->getQ();
-
-
+    auto diff = entityPos - centerChunkPos;
+    
     // iterate over each coordinate
     for (size_t p = 0; p < containerLength; p++)
     {
       for (size_t q = 0; q < containerLength; q++)
       {
         // get new array-position
-        int arrayP = mod(p - dP, containerLength);
-        int arrayQ = mod(q - dQ, containerLength);
-
+        
+        auto arrayPosition = game::Vector<2, int> {
+          mod(p - diff[0], containerLength),
+          mod(q - diff[1], containerLength)
+        };
 
         #ifdef DEBUG_MAP_UPDATE
-          printf("[MAP]\tChunk %i, %i, arrayPos %i, %i -> %i, %i\n", chunks[loadingDistance][loadingDistance].get()->getP(), chunks[loadingDistance][loadingDistance].get()->getQ(), p, q, arrayP, arrayQ);
+          printf("[MAP]\tChunk %i, %i, arrayPos %i, %i -> %i, %i\n", centerChunkPos[0], centerChunkPos[1], p, q, arrayPosition[0], arrayPosition[1]);
         #endif
 
         // iterate over each entity
@@ -175,17 +174,18 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
           if (otherEntity != entity)
           {
             auto& otherEntityChunks = m_Chunks.find(otherEntity)->second;
-
+            auto otherEntityCenterPos = otherEntityChunks[loadingDistance][loadingDistance].get()->getPos();
+            
             // get chunk position of other entity instead of entitypos, in case both player moved the same frame
-            int otherEntityArrayP = arrayP + (entityPos[0] - otherEntityChunks[loadingDistance][loadingDistance].get()->getP());
-            int otherEntityArrayQ = arrayQ + (entityPos[1] - otherEntityChunks[loadingDistance][loadingDistance].get()->getQ());
-
+            auto otherEntityArrayPosition = arrayPosition + entityPos - otherEntityCenterPos;
+            
+            
             // check for each dimension if arrayIndex is in bounds
-            if (otherEntityArrayP > -1 && otherEntityArrayP < containerLength &&
-                otherEntityArrayQ > -1 && otherEntityArrayQ < containerLength)
+            if (otherEntityArrayPosition[0] > -1 && otherEntityArrayPosition[0] < containerLength &&
+                otherEntityArrayPosition[1] > -1 && otherEntityArrayPosition[1] < containerLength)
             {
-              // copy it
-              tempChunks[arrayP][arrayQ] = otherEntityChunks[otherEntityArrayP][otherEntityArrayQ];
+              
+              tempChunks[arrayPosition[0]][arrayPosition[1]] = otherEntityChunks[otherEntityArrayPosition[0]][otherEntityArrayPosition[1]];
 
               #ifdef DEBUG_MAP_UPDATE
                 printf("[MAP]\tCopied chunkptr from other entity\n");
@@ -196,7 +196,7 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
         }
 
         // if chunk hasn't been found at other entity
-        if (tempChunks[arrayP][arrayQ] == nullptr)
+        if (tempChunks[arrayPosition[0]][arrayPosition[1]] == nullptr)
         {
           // if other entity uses current chunk, take one from stack
           if (chunks[p][q].use_count() > 1)
@@ -209,11 +209,10 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
             {
               // move everything from main-stack to temp-stack
               // and check if chunk searched for lies on it
-              if (m_unusedChunks.top()->getP() == entityPos[0]+(arrayP-loadingDistance) &&
-                  m_unusedChunks.top()->getQ() == entityPos[1]+(arrayQ-loadingDistance))
+              if (m_unusedChunks.top()->getPos() == entityPos + arrayPosition - game::Vector<2, int>{ static_cast<int>(loadingDistance), static_cast<int>(loadingDistance) })
               {
                 foundChunk = true;
-                tempChunks[arrayP][arrayQ] = m_unusedChunks.top();
+                tempChunks[arrayPosition[0]][arrayPosition[1]] = m_unusedChunks.top();
                 m_unusedChunks.pop();
                 break;
               }
@@ -249,18 +248,21 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
           }
 
           // check if arrayIndex is out of bounds
-          if (p - dP >= containerLength || p - dP < 0 ||
-              q - dQ >= containerLength || q - dQ < 0)
+          if (p - diff[0] >= containerLength || p - diff[0] < 0 ||
+              q - diff[1] >= containerLength || q - diff[1] < 0)
           {
             // override chunk
-            chunks[p][q]->setPos(entityPos[0]+(arrayP-loadingDistance), entityPos[1]+(arrayQ-loadingDistance));
+            chunks[p][q]->setPos({
+              entityPos[0] + (arrayPosition[0] - static_cast<int>(loadingDistance)), 
+              entityPos[1] + (arrayPosition[1] - static_cast<int>(loadingDistance)) 
+            });
 
             #ifdef DEBUG_MAP_UPDATE
               printf("[MAP]\tOverride Chunk\n");
             #endif
           }
           // move its pointer
-          tempChunks[arrayP][arrayQ] = chunks[p][q];
+          tempChunks[arrayPosition[0]][arrayPosition[1]] = chunks[p][q];
 
           #ifdef DEBUG_MAP_UPDATE
             printf("[MAP]\tMove Pointer\n");
