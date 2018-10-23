@@ -50,25 +50,24 @@ size_t Renderer::addCamera(float x, float y, float w, float h, float scale)
 #endif
 
   size_t theId = getCameraId();
-  cameras.push_back(
-    std::make_tuple(
-      std::static_pointer_cast<Entity>(
-        std::make_shared<Camera>(
-          0,
-          0,
-          getWidth()*w,
-          getHeight()*h,
-          scale
-        )),
-        std::array<float, 4>{x, y, w, h},
-        theId
-      )
-    );
+  cameras.push_back(CameraEntry{
+    std::make_shared<Camera>(
+      0,
+      0,
+      getWidth()*w,
+      getHeight()*h,
+      scale
+    ),
+
+    std::array<float,4>{x, y, w, h},
+
+    theId
+  });
     
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] adding camera " << theId << " to map" << std::endl;
 #endif
-  map->addEntity(std::get<Map::SharedEntityPtr>(getCamera(theId)));
+  map->addEntity(getCamera(theId).camera);
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] done adding camera" << std::endl;
 #endif
@@ -76,17 +75,17 @@ size_t Renderer::addCamera(float x, float y, float w, float h, float scale)
   return theId;
 }
 
-std::tuple<Map::SharedEntityPtr, std::array<float, 4>, size_t> Renderer::getCamera(size_t index)
+CameraEntry Renderer::getCamera(size_t id)
 {
-  for(std::list<std::tuple<Map::SharedEntityPtr, std::array<float, 4>, size_t>>::iterator camera = cameras.begin(); camera != cameras.end(); ++camera) 
+  for(std::list<CameraEntry>::iterator camIt = cameras.begin(); camIt != cameras.end(); ++camIt)
   {
-    if(std::get<size_t>(*camera) == index) 
+    if(camIt->id == id)
     {
-      return *camera;
+      return *camIt;
     }
   }
   
-  return std::make_tuple(nullptr, std::array<float, 4> { 0.f }, 0);
+  return CameraEntry{nullptr, std::array<float, 4> { 0.f }, 0};
 }
 
 float Renderer::getWidth() const
@@ -138,15 +137,15 @@ void Renderer::resizeCameras() {
   float w = getWidth();
   float h = getHeight();
   
-  for(std::tuple<Map::SharedEntityPtr, std::array<float,4>, size_t> camera: cameras) 
+  for(CameraEntry camera: cameras)
   {
 #ifdef DEBUG_RENDERER_RESIZE
   std::cout << "[RENDERER] camera resize to " << w << " x " << h << std::endl;
 #endif
-  std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(camera)).get()->setSize(
+  std::static_pointer_cast<Camera>(camera.camera).get()->setSize(
       vec2(
-        w*std::get<std::array<float, 4>>(camera)[2],
-        h*std::get<std::array<float, 4>>(camera)[3]
+        w*camera.data[2],
+        h*camera.data[3]
       )
     );
     
@@ -157,16 +156,16 @@ void Renderer::renderFrame()
 {
   GPU_ClearRGB(renderTarget, 50, 50, 50);
   
-  for(std::tuple<Map::SharedEntityPtr, std::array<float, 4>, size_t> camera: cameras)
+  for(CameraEntry camera: cameras)
   {
     renderCamera(camera);
   }
   
-  for(std::tuple<Map::SharedEntityPtr, std::array<float, 4>, size_t> camera: cameras) 
+  for(CameraEntry camera: cameras)
   {
-    std::shared_ptr camcast = std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(camera));
+    std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
 
-    std::array<float, 4> camData = std::get<std::array<float,4>>(camera);
+    std::array<float,4> camData = camera.data;
     GPU_Rect cameraRect = GPU_MakeRect(
       camData[0]*getWidth(),
       camData[1]*getHeight(),
@@ -179,7 +178,7 @@ void Renderer::renderFrame()
   }
 }
 
-void Renderer::renderCamera(std::tuple<Map::SharedEntityPtr, std::array<float, 4>, size_t>& camera)
+void Renderer::renderCamera(CameraEntry& camera)
 {
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] Rendering camera frames" << std::endl;
@@ -187,7 +186,7 @@ void Renderer::renderCamera(std::tuple<Map::SharedEntityPtr, std::array<float, 4
 
   static GPU_Image* testImg = GPU_LoadImage("data/img/defaultTileset.png");
   //GPU_SetImageFilter(testImg, GPU_FILTER_NEAREST);
-  Map::SharedEntityPtr theCam = std::get<Map::SharedEntityPtr>(camera);
+  Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 
 #ifdef DEBUG_RENDERER_VERBOSE
@@ -239,27 +238,27 @@ void Renderer::show()
   GPU_Flip(renderTarget);
 }
 
-void Renderer::cameraTrack(size_t cameraIndex, Map::SharedEntityPtr entity)
+void Renderer::cameraTrack(size_t cameraId, Map::SharedEntityPtr entity)
 {
-  std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get()->track(entity);
+  std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get()->track(entity);
 }
 
-void Renderer::moveCamera(size_t cameraIndex, float x, float y)
+void Renderer::moveCamera(size_t cameraId, float x, float y)
 {
-  std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get()->modXY(vec2(x,y));
+  std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get()->modXY(vec2(x,y));
 }
 
-void Renderer::zoomCamera(size_t cameraIndex, float factor)
+void Renderer::zoomCamera(size_t cameraId, float factor)
 {
-  Camera* cam = std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get();
+  Camera* cam = std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get();
   cam->setScale(cam->getScale()*factor);
 }
 
 void Renderer::tick(const float tickTime)
 {
-  for(std::tuple<Map::SharedEntityPtr,std::array<float,4>, size_t> entry: cameras)
+  for(CameraEntry entry: cameras)
   {
-    std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(entry)).get()->tick(tickTime);
+    std::static_pointer_cast<Camera>(entry.camera).get()->tick(tickTime);
   }
 
   renderFrame();
@@ -267,21 +266,21 @@ void Renderer::tick(const float tickTime)
 
 float Renderer::getCameraScale(size_t cameraIndex)
 {
-  float ret = std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get()->getScale();
+  float ret = std::static_pointer_cast<Camera>(getCamera(cameraIndex).camera).get()->getScale();
   return ret;
 }
 
 void Renderer::addOverlay(size_t cameraIndex, const Overlay* const o)
 {
-  std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get()->addOverlay(o);
+  std::static_pointer_cast<Camera>(getCamera(cameraIndex).camera).get()->addOverlay(o);
 }
 
 void Renderer::removeOverlay(size_t cameraIndex, const Overlay* const element)
 {
-  std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get()->removeOverlay(element);
+  std::static_pointer_cast<Camera>(getCamera(cameraIndex).camera).get()->removeOverlay(element);
 }
 
 void Renderer::clearOverlays(size_t cameraIndex)
 {
-  std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get()->clearOverlays();
+  std::static_pointer_cast<Camera>(getCamera(cameraIndex).camera).get()->clearOverlays();
 }

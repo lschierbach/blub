@@ -30,6 +30,7 @@
 
 #include "logic/map.h"
 #include "game/entities/camera.h"
+#include "renderer/cameraentry.h"
 
 class Renderer
 {
@@ -42,16 +43,16 @@ class Renderer
     * 2. the x and y, w and h *relative* to complete renderer's target, as fraction of 1.
     *   -> i.e. 0.5 0 0.5 1 means "camera starts at half the window's width (from the left), top of the window, half as wide as window and as tall as window".
     */
-    std::list<std::tuple<Map::SharedEntityPtr, std::array<float, 4>, size_t>> cameras;
+    std::list<CameraEntry> cameras;
 
     GPU_Target* renderTarget;
     const static GPU_InitFlagEnum RENDERER_INIT_FLAGS = GPU_DEFAULT_INIT_FLAGS;
     Map* map;
     bool isFullscreen;
     void resizeCameras();
-    void renderCamera(std::tuple<Map::SharedEntityPtr, std::array<float, 4>, size_t>& camera);
+    void renderCamera(CameraEntry& camera);
     size_t getCameraId() const;
-    std::tuple<Map::SharedEntityPtr, std::array<float, 4>, size_t> getCamera(size_t index);
+    CameraEntry getCamera(size_t index);
 
   public:
     Renderer(float w, float h, bool fullscreen, Map* map);
@@ -71,15 +72,15 @@ class Renderer
     void renderFrame();
     void show();
 
-    void moveCamera(size_t cameraIndex, float x, float y);
-    void cameraTrack(size_t cameraIndex, Map::SharedEntityPtr entity);
-    void zoomCamera(size_t cameraIndex, float factor);
+    void moveCamera(size_t cameraId, float x, float y);
+    void cameraTrack(size_t cameraId, Map::SharedEntityPtr entity);
+    void zoomCamera(size_t cameraId, float factor);
     
-    float getCameraScale(size_t cameraIndex);
+    float getCameraScale(size_t cameraId);
 
-    void addOverlay(size_t cameraIndex, const Overlay* const o);
-    void removeOverlay(size_t cameraIndex, const Overlay* const element);
-    void clearOverlays(size_t cameraIndex);
+    void addOverlay(size_t cameraId, const Overlay* const o);
+    void removeOverlay(size_t cameraId, const Overlay* const element);
+    void clearOverlays(size_t cameraId);
 
     void tick(const float tickTime);
 };
