@@ -144,7 +144,7 @@ void Renderer::resizeCameras() {
   std::cout << "[RENDERER] camera resize to " << w << " x " << h << std::endl;
 #endif
   std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(camera)).get()->setSize(
-      vec2(
+      vec2<float>(
         w*std::get<std::array<float, 4>>(camera)[2],
         h*std::get<std::array<float, 4>>(camera)[3]
       )
@@ -202,7 +202,7 @@ void Renderer::renderCamera(std::tuple<Map::SharedEntityPtr, std::array<float, 4
     { //p
 
 #ifdef DEBUG_RENDERER_PREMUL_COORDINATES
-  vec2 oldCoord = theCam.get()->getPQ();
+  vec2<float> oldCoord = theCam.get()->getPQ();
   theCam.get()->setPQ(oldCoord/(float)Chunk::size);
 #endif
 
@@ -221,8 +221,8 @@ void Renderer::renderCamera(std::tuple<Map::SharedEntityPtr, std::array<float, 4
   std::cout << "[RENDERER] iterating over tilesets" << std::endl;
 #endif
 
-        vec2 chunkOffset = Entity::axialToCartesian(
-          vec2{
+        vec2<float> chunkOffset = Entity::axialToCartesian(
+          vec2<float>{
             (float)((c.getP() * Chunk::size) + ts.offsetX),
             (float)((c.getQ() * Chunk::size) + ts.offsetY)
           }
@@ -246,7 +246,7 @@ void Renderer::cameraTrack(size_t cameraIndex, Map::SharedEntityPtr entity)
 
 void Renderer::moveCamera(size_t cameraIndex, float x, float y)
 {
-  std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get()->modXY(vec2(x,y));
+  std::static_pointer_cast<Camera>(std::get<Map::SharedEntityPtr>(getCamera(cameraIndex))).get()->modXY(vec2<float>(x,y));
 }
 
 void Renderer::zoomCamera(size_t cameraIndex, float factor)

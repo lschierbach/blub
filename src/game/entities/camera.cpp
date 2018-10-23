@@ -38,12 +38,12 @@ Camera::Camera(float x, float y, float w, float h, float scale)
   GPU_GetTarget(image);
   GPU_SetImageFilter(image, GPU_FILTER_NEAREST); //No blur when scaling up
 
-  setXY(vec2(x,y));
-  setSize(vec2(w,h));
+  setXY(vec2<float>(x,y));
+  setSize(vec2<float>(w,h));
   setScale(scale);
 }
 
-void Camera::setSize(const vec2 s)
+void Camera::setSize(const vec2<float> s)
 {
   GPU_FreeImage(image);
   image = GPU_CreateImage(s[0], s[1], GPU_FORMAT_RGB);

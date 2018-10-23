@@ -46,7 +46,7 @@ class Camera: public Entity
 
         void tick(const float tickTime);
 
-        void setSize(const vec2 s); //Override to recreate image
+        void setSize(const vec2<float> s); //Override to recreate image
         void setSize(const float w, const float h);
         void setScale(const float s);
 

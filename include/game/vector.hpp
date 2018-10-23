@@ -119,6 +119,9 @@ namespace game
       Vector<N, Type> norm() { return Vector<N, Type>( *this / abs() ); };
   };
   
+  template<typename Type = float>
+  using vec2 = Vector<2, Type>;
+
   namespace math
   {
     template<size_t N, typename Type = float>
