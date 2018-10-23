@@ -153,11 +153,15 @@ void Camera::render2dMap(int* data, SDL_Color (*conversion)(int), size_t w, size
     for(size_t j=0; j<w; j++)
     {
       SDL_Color col = {0,0,0,255};
-      if(conversion == NULL && data[j+w*i])
+      if(conversion == NULL)
       {
-        col = {255,255,255,255};
+        if(data[j+w*i])
+        {
+          col = {255,255,255,255};
+        }
       } 
-      else {
+      else
+      {
         col = conversion(data[j+w*i]);
       }
 
