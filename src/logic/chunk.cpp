@@ -104,7 +104,7 @@ void Chunk::save()
 
 
   // get unique path
-  std::string path = "data/chunks/" + std::to_string(m_p) + "." + std::to_string(m_q);
+  std::string path = chunkFolder + std::to_string(m_p) + "." + std::to_string(m_q);
 
   tilesetVector temp;
 
@@ -125,7 +125,7 @@ void Chunk::save()
 void Chunk::load()
 {
   // get unique path
-  std::string path = "chunks/" + std::to_string(m_p) + "." + std::to_string(m_q);
+  std::string path = chunkFolder + std::to_string(m_p) + "." + std::to_string(m_q);
 
   tilesetVector temp;
 
@@ -176,7 +176,7 @@ void Chunk::reload()
   m_tilesets.clear();
 
   // if chunk-data exists
-  if (filesystem::fileExists("chunks/" + std::to_string(m_p) + "." + std::to_string(m_q) + ".tdat"))
+  if (filesystem::fileExists(chunkFolder + std::to_string(m_p) + "." + std::to_string(m_q) + ".tdat"))
   {
     // load it from disk
     load();

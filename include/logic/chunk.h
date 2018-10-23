@@ -64,7 +64,8 @@ class Chunk
   public:
 
     static const int size = 64;
-
+    const std::string chunkFolder = "data/chunks/";
+    
     Chunk(int p, int q);
     Chunk(Chunk& cpy);
     ~Chunk();
