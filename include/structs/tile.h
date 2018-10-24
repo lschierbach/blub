@@ -1,7 +1,10 @@
 #ifndef TILE_H
 #define TILE_H
 
-struct Tile
+#include "game/saveable.h"
+#include "game/filesystem.hpp"
+
+struct Tile : public Saveable
 {
   char index;
   float rot;
@@ -13,6 +16,18 @@ struct Tile
   }
   
   Tile() {}
+  
+  void write(std::ofstream& out) override
+  {
+    filesystem::writeStruct(out, index);
+    filesystem::writeStruct(out, rot);
+  }
+
+  void read(std::ifstream& in) override
+  {
+    filesystem::readStruct(in, index);
+    filesystem::readStruct(in, rot);
+  }
 };
 
 #endif /* TILE_H */

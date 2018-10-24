@@ -1,6 +1,7 @@
 *.ao
 *.o
 *.dll
+*.exe
 /lib/*
 /dll/*
 /bin/*
