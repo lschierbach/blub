@@ -8,16 +8,16 @@
  *      struct bool           is_range TRUE if Type has methods: size, begin, end
  *      struct bool           is_saveable TRUE if Type has methods: read, write
  *
- *      void        template  writeStruct(std::ofstream&, Type) -> isSaveable
- *      void        template  writeStruct(std::ofstream&, Type) -> !isSaveable
+ *      void        template  writeStruct(std::ofstream&, Type) -> isPrimitive
+ *      void        template  writeStruct(std::ofstream&, Type) -> !isPrimitive
  *      void        template  writeStruct(const std::string&, Type)
  *
  *      void        template  writeContainer(std::ofstream&, Type) -> isrange
  *      void        template  writeContainer(std::ofstream&, Type) -> !isrange
  *      void        template  writeContainer(const std::string&, Type)
  *
- *      void        template  readStruct(std::ifstream&, Type) -> isSaveable
- *      void        template  readStruct(std::ifstream&, Type) -> !isSaveable
+ *      void        template  readStruct(std::ifstream&, Type) -> isPrimitive
+ *      void        template  readStruct(std::ifstream&, Type) -> !isPrimitive
  *      void        template  readStruct(const std::string&, Type)
  *
  *      void        template  readContainer(std::ifstream&, Type) -> isRange
@@ -39,7 +39,8 @@
  *      LS, 21.10.2018
  *                 -Handles files now in Binary to ignore control-characters 
  *
- *      
+ *      LS, 25.10.2018
+ *                 -Saves/Loads non-primitive Structs using streaming operators << & >> instead as Byte-Array
  */
 #ifndef FILESYSTEM_HPP
 #define FILESYSTEM_HPP
@@ -75,48 +76,20 @@ using enable_if_t = typename std::enable_if<B,T>::type;
 namespace filesystem
 {
   
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   *                                           WRITE_STRUCT                                            *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-  ** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  ////////////////////// WRITE_STRUCT /////////////////////
   
-  
-  /**
-    Writes a saveable struct using operator <<
-    
-    @param out              ofstream which should be written in
-    @param saveableStruct   the struct which should be saved
-  */
   template<typename Struct>
-  auto writeStruct(std::ofstream& out, Struct& saveableStruct) -> enable_if_t<!std::is_fundamental<Struct>::value>
+  auto writeStruct(std::ofstream& out, Struct& saveableStruct)  -> enable_if_t<!std::is_fundamental<Struct>::value>
   {
     out << saveableStruct;
   }
-  
-  /**
-    Writes a nonsaveable struct. A struct is non-saveable if it doesn't contain the methods "write" and "read". its data will be written plain
-    
-    Note: If the struct to be written contains non-pod (e.g. strings, arrays..) it will lose its data.
-    
-    @param out              ofstream which should be written in
-    @param primitive        the struct which should be saved
-  */
+
   template<typename Fundamental>
-  auto writeStruct(std::ofstream& out, Fundamental& primitive) -> enable_if_t<std::is_fundamental<Fundamental>::value>
+  auto writeStruct(std::ofstream& out, Fundamental& primitive)  -> enable_if_t<std::is_fundamental<Fundamental>::value>
   {
-    //printf("Wrirw Struct, size %u\n", sizeof(Struct));
     out.write(reinterpret_cast<const char*>(&primitive), sizeof(Fundamental));
   }
-  
-  /**
-    Helper method for function write-calls without a given ofstream.
-    
-    @param filePath         filePath
-    @param strct            a struct
-  */
+
   template<typename Struct>
   void writeStruct(const std::string& filePath, Struct& strct) 
   {
@@ -124,102 +97,47 @@ namespace filesystem
     writeStruct(fstream, strct);
   }
 
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   *                                           WRITE_RANGE                                             *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-  ** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  ////////////////////// WRITE_RANGE //////////////////////
   
-  /**
-    Is called if the given struct isn't a range.
-    
-    @param out              stream for writing
-    @param strct            a struct
-  */
   template <typename Struct>
-  auto writeRange(std::ofstream& out, Struct& strct, int i = 0) -> enable_if_t<!is_range<Struct>::value>
+  auto writeRange(std::ofstream& out, Struct& strct)            -> enable_if_t<!is_range<Struct>::value>
   {
     writeStruct(out, strct);
   }
 
-  /**
-    Is called if the given struct is a range. Calls "writeRange" for each element of the range.
-    
-    @param out              stream for writing
-    @param currentRange     range
-  */
   template<typename Range>
-  auto writeRange(std::ofstream& out, Range& currentRange, int i = 0) -> enable_if_t<is_range<Range>::value>
+  auto writeRange(std::ofstream& out, Range& currentRange)      -> enable_if_t<is_range<Range>::value>
   {
-    // first save size
     uint32_t size = currentRange.size();
     writeStruct<uint32_t>(out, size);
     
-    //printf("Write Long (Size: %u, Content: %ul, dimension %i)\n", sizeof(size), size, i);
-    
-    // then content (recursive)
     for(auto& elem : currentRange)
     {
-      writeRange(out, elem, i + 1);
+      writeRange(out, elem);
     }
   }
   
-  /**
-    Helper method for function write-calls without a given ofstream.
-    
-    @param filePath         filePath
-    @param range            range
-  */
   template <typename Range>
-  void writeRange(const std::string& filePath, Range& range, int i = 0)
+  void writeRange(const std::string& filePath, Range& range)
   {
     std::ofstream fstream(filePath, std::ios::out | std::ios::binary);
-    writeRange(fstream, range, i);
+    writeRange(fstream, range);
   }
   
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   *                                           READ_STRUCT                                             *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-  ** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  ////////////////////// READ_STRUCT //////////////////////
   
-  
-  /**
-    Reads a saveable struct. A struct is saveable if it contains the methods "write" and "read". It will then manage the writeprocess itself.
-    
-    @param in               ifstream which should be read in
-    @param saveableStruct   the struct which should be read
-  */
   template<typename Struct>
-  auto readStruct(std::ifstream& in, Struct& saveableStruct) -> enable_if_t<!std::is_fundamental<Struct>::value>
+  auto readStruct(std::ifstream& in, Struct& saveableStruct)    -> enable_if_t<!std::is_fundamental<Struct>::value>
   {
     in >> saveableStruct;
   }
-  
-  /**
-    Reads a nonsaveable struct. A struct is non-saveable if it doesn't contain the methods "write" and "read". its data will be read plain
-    
-    Note: If the struct to be read contains non-pod (e.g. strings, arrays..) it will give unpredictable results.
-    
-    @param out              ifstream which should be read in
-    @param podStruct        the struct which should be read
-  */
+
   template<typename Fundamental>
-  auto readStruct(std::ifstream& in, Fundamental& primitive) -> enable_if_t<std::is_fundamental<Fundamental>::value>
+  auto readStruct(std::ifstream& in, Fundamental& primitive)    -> enable_if_t<std::is_fundamental<Fundamental>::value>
   {
     in.read(reinterpret_cast<char*>(&primitive), sizeof(Fundamental));
   }
-  
-  /**
-    Helper method for function read-calls without a given ifstream.
-    
-    @param filePath         filePath
-    @param strct            a struct
-  */
+
   template<typename Struct>
   void readStruct(const std::string& filePath, Struct& strct) 
   {
@@ -227,71 +145,36 @@ namespace filesystem
     readStruct(fstream, strct);
   }
 
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   *                                           READ_RANGE                                              *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-  ** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  /////////////////////// READ_RANGE //////////////////////
   
-  
-  /**
-    Is called if the given struct isn't a range.
-    
-    @param in               stream for readin
-    @param strct            a struct
-  */
   template<typename Struct>
-  auto readRange(std::ifstream& in, Struct& strct, int i = 0) -> enable_if_t<!is_range<Struct>::value>
+  auto readRange(std::ifstream& in, Struct& strct)              -> enable_if_t<!is_range<Struct>::value>
   {
     readStruct(in, strct);
   }
-  
-  /**
-    Is called if the given struct isn't a range. Calls "readRange" for each element of the range.
-    
-    @param out              stream for writing
-    @param currentRange     range
-  */
+
   template<typename Range>
-  auto readRange(std::ifstream& in, Range& range, int d = 0) -> enable_if_t<is_range<Range>::value>
+  auto readRange(std::ifstream& in, Range& range)               -> enable_if_t<is_range<Range>::value>
   {
-    // first get size
     uint32_t size;
     readStruct<uint32_t>(in, size);
     
-    //printf("Read Long (Size: %u, Content: %ul, Dimension %i)\n", sizeof(size), size, d);
-    
-    // then content
     for (auto i = 0; i < size; i++)
     {
       typename Range::value_type elem;
-      readRange(in, elem, d+1);
+      readRange(in, elem);
       range.push_back(elem);
     }
   }
-  
-  /**
-    Helper method for function read-calls without a given ifstream.
-    
-    @param filePath         filePath
-    @param range            range
-  */
+
   template<typename Range>
-  void readRange(const std::string& filePath, Range& range, int i = 0)
+  void readRange(const std::string& filePath, Range& range)
   {
     std::ifstream filestream(filePath, std::ios::in | std::ios::binary);
-    readRange(filestream, range, i);
+    readRange(filestream, range);
   }
   
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   *                                           NON_TEMPLATE                                            *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-  ** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  ////////////////////// NON_TEMPLATE /////////////////////
   
   
   inline bool fileExists(const std::string& fileName)
