@@ -82,12 +82,16 @@ class Entity : public Saveable {
     {
       filesystem::writeStruct(out, p);
       filesystem::writeStruct(out, q);
+      filesystem::writeStruct(out, size);
+      filesystem::writeStruct(out, anchor);
     }
     
     void read(std::ifstream& in) override
     {
       filesystem::readStruct(in, p);
       filesystem::readStruct(in, q);
+      filesystem::readStruct(in, size);
+      filesystem::readStruct(in, anchor);
     }
 };
 

@@ -22,7 +22,7 @@ namespace generator
     return 0.5 * (a+b)*(a+b+1)+b;
   }
 
-  void generateChunk(tilesetVector& tilesets, int chunkP, int chunkQ, int size)
+  void generateChunk(Chunk::Data& chunkData, int chunkP, int chunkQ, int size)
   {
     std::srand(seed + pair(static_cast<long>(chunkP), static_cast<long>(chunkQ)));
 
@@ -43,7 +43,16 @@ namespace generator
       tileData.push_back(temp);
     }
 
-    tilesets.push_back(Tileset(0.5f, 1.0f, 1.0f, imgName, tileData));
+    chunkData.m_Tilesets.push_back(Tileset(0.5f, 1.0f, 1.0f, imgName, tileData));
+    
+    for (auto i = 0u; i < 5; i++)
+    {
+      auto p = vec2<float>(chunkP * Chunk::size + i + 1 + rand() % 10, chunkQ * Chunk::size + i + 1 + rand() % 10);
+      auto s = vec2<float>(1.f, .5f);
+      auto a = vec2<float>(rand() / 1.f, .5f);
+      Entity e(p, s, a);
+      chunkData.m_Entities.push_back(e);
+    }
   }
 }
 

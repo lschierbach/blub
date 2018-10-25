@@ -22,6 +22,9 @@
 #include <array>
 #include <cmath>
 
+#include "game/saveable.h"
+#include "game/filesystem.hpp"
+
 namespace game
 {
   template< bool B, class T = void >
@@ -30,7 +33,7 @@ namespace game
   static constexpr float epsilon = 0.0001f;
 
   template <size_t N, typename Type = float>
-  class Vector
+  class Vector : public Saveable
   {
     private:
       std::array<Type, N> data;
@@ -102,6 +105,22 @@ namespace game
           { for(auto i = 0u; i < N; i++) { if(!(lhs[i] == rhs[i] && lhs[i] == rhs[i])) return false; } return true; }
       
       friend inline auto  operator!=(const Vector<N, Type>& lhs, const Vector<N, Type>& rhs)  { return !(lhs == rhs); };
+      
+      void write(std::ofstream& out) override
+      {
+        for(auto i= 0u; i < N; i++)
+        {
+          filesystem::writeStruct(out, data[i]);
+        }
+      }
+      
+      void read(std::ifstream& in) override
+      {
+        for(auto i= 0u; i < N; i++)
+        {
+          filesystem::readStruct(in, data[i]);
+        }
+      }
       
       void print()
       {

@@ -29,6 +29,7 @@
 #ifdef DEBUG_CHUNK
   #define DEBUG_CHUNK_TILESET
   #define DEBUG_CHUNK_RELOAD
+  #define DEBUG_CHUNK_ENTITY
 #endif
 
 #include <thread>   //std::thread
@@ -42,46 +43,51 @@
 
 class Chunk
 {
+  private:
   
-  const std::string chunkFolder = "data/chunks/";
-    
-  std::thread m_saveThread;
-  std::thread m_reloadThread;
+    const std::string chunkFolder = "data/chunks/";
+      
+    std::thread m_saveThread;
+    std::thread m_reloadThread;
 
-  void joinThreads();
+    void joinThreads();
 
-  using tilesetVector = std::vector<Tileset>;
-  using entityVector = std::vector<Entity>;
+    using tilesetVector = std::vector<Tileset>;
+    using entityVector = std::vector<Entity>;
 
-  void reload();
+    void reload();
 
-  void save();
-  void load();
-  void generate();
+    void save();
+    void load();
+    void generate();
 
-  game::Vector<2, int> m_pos;
+    game::Vector<2, int> m_pos;
 
-  std::mutex    m_DataMutex;
-  
-  struct Data : public Saveable
-  {
-    tilesetVector m_Tilesets;
-    entityVector m_Entities;
-    
-    void write(std::ofstream& out) override
+    std::mutex    m_DataMutex;
+ 
+  public:
+ 
+    struct Data : public Saveable
     {
-      filesystem::writeRange(out, m_Tilesets);
-      filesystem::writeRange(out, m_Entities);
-    }
-    
-    void read(std::ifstream& in) override
-    {
-      filesystem::readRange(in, m_Tilesets);
-      filesystem::readRange(in, m_Entities);
-    }
-  };
-  
-  Data getData();
+      tilesetVector m_Tilesets;
+      entityVector m_Entities;
+      
+      void write(std::ofstream& out) override
+      {
+        filesystem::writeRange(out, m_Tilesets);
+        filesystem::writeRange(out, m_Entities);
+      }
+      
+      void read(std::ifstream& in) override
+      {
+        filesystem::readRange(in, m_Tilesets);
+        filesystem::readRange(in, m_Entities);
+      }
+    };
+
+  private:
+
+    Data getData();
   
   public:
 

@@ -102,7 +102,15 @@ void Chunk::save()
       set.printTiles();
     }
   #endif /* DEBUG_CHUNK_TILESET */
-
+  #ifdef DEBUG_CHUNK_ENTITY
+  for (const auto& ent : m_Data.m_Entities)
+  {
+    printf("Entity with pos, anchor, size:\n");
+    ent.getPQ().print();
+    ent.getAnchor().print();
+    ent.getSize().print();
+  }
+  #endif /* DEBUG_CHUNK_ENTITY */
 
   // get unique path
   std::string path = chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]);
@@ -143,12 +151,21 @@ void Chunk::load()
   #endif /* DEBUG_CHUNK_RELOAD */
 
   #ifdef DEBUG_CHUNK_TILESET
-  for(const auto& set : m_Data.m_Tilesets)
+  for (const auto& set : m_Data.m_Tilesets)
   {
     std::cout << "Tileset\t" << set.imgName << std::endl;
     set.printTiles();
   }
   #endif /* DEBUG_CHUNK_TILESET */
+  #ifdef DEBUG_CHUNK_ENTITY
+  for (const auto& ent : m_Data.m_Entities)
+  {
+    printf("Entity with pos, anchor, size:\n");
+    ent.getPQ().print();
+    ent.getAnchor().print();
+    ent.getSize().print();
+  }
+  #endif /* DEBUG_CHUNK_ENTITY */
 }
 
 /**
@@ -159,13 +176,7 @@ void Chunk::generate()
   // dummy m_Data
   std::lock_guard<std::mutex> lock(m_DataMutex);
 
-  generator::generateChunk(m_Data.m_Tilesets, m_pos[0], m_pos[1], size);
-
-  for (auto i = 0u; i < 5; i++)
-  {
-    Entity a(m_pos[0] * Chunk::size + i + 1, m_pos[1] * Chunk::size + i + 1);
-    m_Data.m_Entities.push_back(a);
-  }
+  generator::generateChunk(m_Data, m_pos[0], m_pos[1], size);
   
   #ifdef DEBUG_CHUNK_RELOAD
     printf("[CHUNK]GENERATE\n");
