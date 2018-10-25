@@ -215,7 +215,7 @@ void Renderer::renderCamera(std::tuple<Map::SharedEntityPtr, std::array<float, 4
   std::cout << "[RENDERER] got chunk" << std::endl;
 #endif
 
-      for(Tileset ts: c.getTilesets())
+      for(Tileset ts: c.m_Data.m_Tilesets)
       {
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] iterating over tilesets" << std::endl;

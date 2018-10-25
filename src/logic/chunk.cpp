@@ -51,15 +51,15 @@ game::Vector<2, int> Chunk::getPos() const
 /**
     returns m_tilesets threadsafe
 */
-Chunk::tilesetVector Chunk::getTilesets()
+Chunk::Data Chunk::getData()
 {
-  std::lock_guard<std::mutex> lock(m_tilesets_mutex);
-  return m_tilesets;
+  std::lock_guard<std::mutex> lock(m_DataMutex);
+  return m_Data;
 }
 
 /**
     Changes position of chunk on the world.
-    If the new position doesn't equal the old, the chunk will save its current data and load/generate new.
+    If the new position doesn't equal the old, the chunk will save its current m_Data and load/generate new.
 
     @param p    p
     @param q    q
@@ -72,11 +72,11 @@ void Chunk::setPos(game::Vector<2, int> pos)
     return;
   }
 
-  // make sure no one is accessing tilesetdata at the moment
+  // make sure no one is accessing tilesetm_Data at the moment
   joinThreads();
 
-  // on start no data is in m_tilesets...
-  if (!m_tilesets.empty())
+  // on start no m_Data is in m_tilesets...
+  if (!m_Data.m_Tilesets.empty())
   {
     save();
   }
@@ -87,7 +87,7 @@ void Chunk::setPos(game::Vector<2, int> pos)
 }
 
 /**
-    Saves the data of the tilesets on the disk
+    Saves the m_Data of the tilesets on the disk
 */
 void Chunk::save()
 {
@@ -96,7 +96,7 @@ void Chunk::save()
   #endif /* DEBUG_CHUNK_RELOAD */
 
   #ifdef DEBUG_CHUNK_TILESET
-    for(const auto& set : m_tilesets)
+    for(const auto& set : m_Data.m_Tilesets)
     {
       std::cout << "Tileset\t" << set.imgName << std::endl;
       set.printTiles();
@@ -107,36 +107,35 @@ void Chunk::save()
   // get unique path
   std::string path = chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]);
 
-  tilesetVector temp;
+  Data temp;
 
   // copy threadsafe
-  std::unique_lock<std::mutex> lock(m_tilesets_mutex);
+  std::unique_lock<std::mutex> lock(m_DataMutex);
 
-  temp = m_tilesets;
+  temp = m_Data;
 
   lock.unlock();
 
-  // write data into .tdat file
-  filesystem::writeRange(path + ".tdat", temp);
+  // write m_Data into .tdat file
+  filesystem::writeStruct(path + ".tdat", temp);
 }
 
 /**
-    Loads data from the disk, depenting on the position, into its tilesets
+    Loads m_Data from the disk, depenting on the position, into its tilesets
 */
 void Chunk::load()
 {
   // get unique path
   std::string path = chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]);
 
-  tilesetVector temp;
+  Data temp;
 
   // read m_tilesets from .tdat file
-  filesystem::readRange(path + ".tdat", temp);
-
+  filesystem::readStruct(path + ".tdat", temp);
   // copy it threadsafe
-  std::lock_guard<std::mutex> lock(m_tilesets_mutex);
+  std::lock_guard<std::mutex> lock(m_DataMutex);
 
-  m_tilesets = temp;
+  m_Data = temp;
 
 
   #ifdef DEBUG_CHUNK_RELOAD
@@ -144,7 +143,7 @@ void Chunk::load()
   #endif /* DEBUG_CHUNK_RELOAD */
 
   #ifdef DEBUG_CHUNK_TILESET
-  for(const auto& set : m_tilesets)
+  for(const auto& set : m_Data.m_Tilesets)
   {
     std::cout << "Tileset\t" << set.imgName << std::endl;
     set.printTiles();
@@ -157,11 +156,17 @@ void Chunk::load()
 */
 void Chunk::generate()
 {
-  // dummy data
-  std::lock_guard<std::mutex> lock(m_tilesets_mutex);
+  // dummy m_Data
+  std::lock_guard<std::mutex> lock(m_DataMutex);
 
-  generator::generateChunk(m_tilesets, m_pos[0], m_pos[1], size);
+  generator::generateChunk(m_Data.m_Tilesets, m_pos[0], m_pos[1], size);
 
+  for (auto i = 0u; i < 5; i++)
+  {
+    Entity a(m_pos[0] * Chunk::size + i + 1, m_pos[1] * Chunk::size + i + 1);
+    m_Data.m_Entities.push_back(a);
+  }
+  
   #ifdef DEBUG_CHUNK_RELOAD
     printf("[CHUNK]GENERATE\n");
   #endif /* DEBUG_CHUNK_RELOAD */
@@ -173,10 +178,11 @@ void Chunk::generate()
 */
 void Chunk::reload()
 {
-  // remove old tileset data
-  m_tilesets.clear();
-
-  // if chunk-data exists
+  // remove old tileset m_Data
+  m_Data.m_Tilesets.clear();
+  m_Data.m_Entities.clear();
+  
+  // if chunk-m_Data exists
   if (filesystem::fileExists(chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]) + ".tdat"))
   {
     // load it from disk
@@ -211,7 +217,6 @@ void Chunk::joinThreads()
 Chunk::Chunk(Chunk& cpy)
 {
   this->m_pos = cpy.m_pos;
-  
-  this->m_tilesets = cpy.getTilesets();
+  this->m_Data = cpy.getData();
 }
 

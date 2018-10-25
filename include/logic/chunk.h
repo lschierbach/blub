@@ -36,18 +36,22 @@
 
 #include <vector>   //std::vector
 
-#include "structs/tile.h"
 #include "structs/tileset.h"
 #include "game/vector.hpp"
+#include "game/entity.h"
 
 class Chunk
 {
+  
+  const std::string chunkFolder = "data/chunks/";
+    
   std::thread m_saveThread;
   std::thread m_reloadThread;
 
   void joinThreads();
 
   using tilesetVector = std::vector<Tileset>;
+  using entityVector = std::vector<Entity>;
 
   void reload();
 
@@ -57,14 +61,31 @@ class Chunk
 
   game::Vector<2, int> m_pos;
 
-  tilesetVector m_tilesets;
-  Tileset m_tileset;
-  std::mutex    m_tilesets_mutex;
-
+  std::mutex    m_DataMutex;
+  
+  struct Data : public Saveable
+  {
+    tilesetVector m_Tilesets;
+    entityVector m_Entities;
+    
+    void write(std::ofstream& out) override
+    {
+      filesystem::writeRange(out, m_Tilesets);
+      filesystem::writeRange(out, m_Entities);
+    }
+    
+    void read(std::ifstream& in) override
+    {
+      filesystem::readRange(in, m_Tilesets);
+      filesystem::readRange(in, m_Entities);
+    }
+  };
+  
+  Data getData();
+  
   public:
 
-    static const int size = 64;
-    const std::string chunkFolder = "data/chunks/";
+    static const int size = 32;
     
     Chunk(int p, int q);
     Chunk(Chunk& cpy);
@@ -75,9 +96,9 @@ class Chunk
 
     void setPos(game::Vector<2, int> pos);
     
+    Data m_Data;
+    
     game::Vector<2, int> getPos() const;
-
-    tilesetVector getTilesets();
 };
 
 #endif /* CHUNK_H */

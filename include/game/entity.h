@@ -21,7 +21,8 @@
 #include <cmath>
 
 #include "game/vector.hpp"
-#include "logic/chunk.h"
+#include "game/filesystem.hpp"
+#include "game/saveable.h"
 
 namespace game::math {
   const static float hexWidth = 0.86602540378f;
@@ -42,7 +43,7 @@ namespace game::math {
 
 using game::vec2;
 
-class Entity {
+class Entity : public Saveable {
 
   private:
     vec2<float> size; // w h
@@ -76,6 +77,18 @@ class Entity {
     vec2<int> getChunkPQ() const;
     void modXY(const vec2<float>& xy);
     void modPQ(const vec2<float>& pq);
+    
+    void write(std::ofstream& out) override
+    {
+      filesystem::writeStruct(out, p);
+      filesystem::writeStruct(out, q);
+    }
+    
+    void read(std::ifstream& in) override
+    {
+      filesystem::readStruct(in, p);
+      filesystem::readStruct(in, q);
+    }
 };
 
 #endif /* ENTITY_H */

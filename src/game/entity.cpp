@@ -22,6 +22,8 @@
 #include <cmath>
 
 #include "game/entity.h"
+#include "logic/chunk.h"
+
 
 Entity::Entity(vec2<float> p, vec2<float> s, vec2<float> a)
 {
