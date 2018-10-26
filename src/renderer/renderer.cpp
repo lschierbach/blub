@@ -143,7 +143,7 @@ void Renderer::resizeCameras() {
   std::cout << "[RENDERER] camera resize to " << w << " x " << h << std::endl;
 #endif
   std::static_pointer_cast<Camera>(camera.camera).get()->setSize(
-      vec2(
+      vec2<float>(
         w*camera.data[2],
         h*camera.data[3]
       )
@@ -245,7 +245,7 @@ void Renderer::cameraTrack(size_t cameraId, Map::SharedEntityPtr entity)
 
 void Renderer::moveCamera(size_t cameraId, float x, float y)
 {
-  std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get()->modXY(vec2(x,y));
+  std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get()->modXY(vec2<float>(x,y));
 }
 
 void Renderer::zoomCamera(size_t cameraId, float factor)
