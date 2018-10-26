@@ -54,6 +54,8 @@ class Renderer
     size_t getCameraId() const;
     CameraEntry getCamera(size_t index);
 
+    GPU_Image* LoadImageWithMipmaps(const char* filename);
+
   public:
     Renderer(float w, float h, bool fullscreen, Map* map);
     ~Renderer();
