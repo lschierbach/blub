@@ -100,7 +100,7 @@ GPU_Rect Camera::getTile(GPU_Image* img, unsigned char index)
   char x = index % 16;
   char y = index / 16;
 
-  GPU_Rect r = GPU_MakeRect((img->w/16)*x, (img->h/16)*y, (img->w/16), (img->h/16));
+  GPU_Rect r = GPU_MakeRect((img->w/16.f)*x, (img->h/16.f)*y, (img->w/16.f), (img->h/16.f));
   return r;
 }
 
