@@ -156,11 +156,21 @@ void Renderer::renderFrame()
 {
   GPU_ClearRGB(renderTarget, 50, 50, 50);
   
+  //tiles & entities
   for(CameraEntry camera: cameras)
   {
     renderCamera(camera);
   }
-  
+
+  //overlays
+  for(CameraEntry camera: cameras)
+  {
+    std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
+
+    camcast.get()->renderOverlays();
+  }
+
+  //final blitting
   for(CameraEntry camera: cameras)
   {
     std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
@@ -172,7 +182,7 @@ void Renderer::renderFrame()
       camData[2]*getWidth(),
       camData[3]*getHeight()
     );
-    camcast.get()->renderOverlays();
+
     GPU_BlitRect(camcast.get()->getRender(), NULL, renderTarget, &cameraRect);
 
   }
@@ -205,6 +215,7 @@ void Renderer::renderCamera(CameraEntry& camera)
 
   camcast.get()->clearRender();
 
+  //for all chunks within loading distance
   for(int i=0-(int)Map::getLoadingDistance(); i<=(int)Map::getLoadingDistance(); i++)
   { //q
     for(int j=0-(int)Map::getLoadingDistance(); j<=(int)Map::getLoadingDistance(); j++)
@@ -216,6 +227,7 @@ void Renderer::renderCamera(CameraEntry& camera)
 #endif
 
       Chunk c = map->getChunk(j, i, theCam);
+
 #ifdef DEBUG_RENDERER_PREMUL_COORDINATES
   theCam.get()->setPQ(oldCoord);
 #endif
@@ -224,6 +236,7 @@ void Renderer::renderCamera(CameraEntry& camera)
   std::cout << "[RENDERER] got chunk" << std::endl;
 #endif
 
+      //render all tilesets of current chunk
       for(Tileset ts: c.m_Data.m_Tilesets)
       {
 #ifdef DEBUG_RENDERER_VERBOSE
@@ -238,6 +251,16 @@ void Renderer::renderCamera(CameraEntry& camera)
         );
 
         camcast.get()->renderTileset(ts, testImg, 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
+      }
+
+      //now same for entities of that chunk
+      std::cout << "#entities@" << j << "|" << i << ": " << c.m_Data.m_Entities.size() << std::endl;
+      for(auto entity: c.m_Data.m_Entities)
+      {
+#ifdef DEBUG_RENDERER_VERBOSE
+  std::cout << "[RENDERER] iterating over entities" << std::endl;
+#endif
+        camcast.get()->renderEntity(entity);
       }
     }
   }

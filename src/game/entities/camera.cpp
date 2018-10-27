@@ -15,9 +15,7 @@
  *
  */
 
-#ifdef DEBUG_CAMERA_VERBOSE
-    #include <iostream>
-#endif
+#include <iostream>
 
 #include "game/entities/camera.h"
 
@@ -100,7 +98,7 @@ GPU_Rect Camera::getTile(GPU_Image* img, unsigned char index)
   char x = index % 16;
   char y = index / 16;
 
-  GPU_Rect r = GPU_MakeRect((img->w/16)*x, (img->h/16)*y, (img->w/16), (img->h/16));
+  GPU_Rect r = GPU_MakeRect((img->w/16.f)*x, (img->h/16.f)*y, (img->w/16.f), (img->h/16.f));
   return r;
 }
 
@@ -168,6 +166,45 @@ void Camera::render2dMap(int* data, SDL_Color (*conversion)(int), size_t w, size
       GPU_RectangleFilled(image->target, j*width, i*height, (j+1)*width, (i+1)*height, col);
     }
   }
+}
+
+//rendering entities does not support anchor at the time (will be ignored)
+void Camera::renderEntity(RenderEntity e)
+{
+#ifdef DEBUG_CAMERA_VERBOSE
+  std::cout << "[CAMERA] rendering a RenderEntity." << std::endl;
+#endif
+
+  float entityX = (getSize()[0]/2) - (getXY()[0] - e.getXY()[0]) * pixelsInUnit();
+  float entityY = (getSize()[1]/2) - (getXY()[1] - e.getXY()[1]) * pixelsInUnit();
+
+  GPU_Rect entityRect = GPU_MakeRect(
+    entityX,                                   // x1
+    entityY,                                   // y1
+    e.getSize()[0] * pixelsInUnit(),           // w
+    e.getSize()[1] * pixelsInUnit()            // h
+  );
+
+  auto anim = e.getCurrentAnimation().get();
+
+  GPU_Rect animRect = anim->getFrame(e.getStage());
+
+  GPU_BlitRect(anim->image, &animRect, image->target, &entityRect);
+}
+
+void Camera::renderEntity(Entity e)
+{
+  float entityX = (getSize()[0]/2) - (getXY()[0] - e.getXY()[0]) * pixelsInUnit();
+  float entityY = (getSize()[1]/2) - (getXY()[1] - e.getXY()[1]) * pixelsInUnit();
+
+  GPU_RectangleFilled(
+    image->target,                             // render target
+    entityX,                                   // x1
+    entityY,                                   // y1
+    entityX + (e.getSize()[0] * pixelsInUnit()), // x2
+    entityY + (e.getSize()[1] * pixelsInUnit()), // y2
+    {255,255,0,255}                            // color for generic entity
+  );
 }
 
 void Camera::addOverlay(const Overlay* const o)
