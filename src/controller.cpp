@@ -31,7 +31,7 @@ void Controller::init()
   m_Renderer = new Renderer(args.windowWidth, args.windowHeight, args.fullscreen, m_Model->getMap());
   m_Quit = false;
   
-  m_Renderer->addCamera(0, 0, 1, 1, 25);
+  m_Renderer->addCamera(0, 0, 1, 1, 14);
   
   SDL_SetRelativeMouseMode(SDL_TRUE);
 }
@@ -60,17 +60,18 @@ void Controller::handleSDLEvents()
 void Controller::handleInput()
 {
   const auto* keystate = SDL_GetKeyboardState(NULL);
+  static float camSpeed = 0.01;
   
-  if (keystate[SDL_SCANCODE_W]) m_Renderer->moveCamera(0, 0.0, -0.002 * m_Renderer->getCameraScale(0));
-  if (keystate[SDL_SCANCODE_A]) m_Renderer->moveCamera(0, -0.002 * m_Renderer->getCameraScale(0), 0.0);
-  if (keystate[SDL_SCANCODE_S]) m_Renderer->moveCamera(0, 0.0, 0.002 * m_Renderer->getCameraScale(0));
-  if (keystate[SDL_SCANCODE_D]) m_Renderer->moveCamera(0, 0.002 * m_Renderer->getCameraScale(0), 0.0);
+  if (keystate[SDL_SCANCODE_W]) m_Renderer->moveCamera(0, 0.0, -camSpeed * m_Renderer->getCameraScale(0));
+  if (keystate[SDL_SCANCODE_A]) m_Renderer->moveCamera(0, -camSpeed * m_Renderer->getCameraScale(0), 0.0);
+  if (keystate[SDL_SCANCODE_S]) m_Renderer->moveCamera(0, 0.0, camSpeed * m_Renderer->getCameraScale(0));
+  if (keystate[SDL_SCANCODE_D]) m_Renderer->moveCamera(0, camSpeed * m_Renderer->getCameraScale(0), 0.0);
   if (keystate[SDL_SCANCODE_E]) m_Renderer->toggleFullscreen();
   if (keystate[SDL_SCANCODE_Q]) m_Quit = true;
   if (keystate[SDL_SCANCODE_R]) m_Renderer->zoomCamera(0, 0.9);
   if (keystate[SDL_SCANCODE_F]) m_Renderer->zoomCamera(0, 1.111111111111111);
   
-  m_Renderer->moveCamera(0, m_MouseMotion.xrel * 0.002 * m_Renderer->getCameraScale(0), m_MouseMotion.yrel * 0.002 * m_Renderer->getCameraScale(0));
+  m_Renderer->moveCamera(0, m_MouseMotion.xrel * camSpeed * m_Renderer->getCameraScale(0), m_MouseMotion.yrel * camSpeed * m_Renderer->getCameraScale(0));
 }
 
 bool Controller::tick()
