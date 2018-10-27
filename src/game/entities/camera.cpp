@@ -87,7 +87,7 @@ float Camera::unitsY() const
 
 void Camera::clearRender()
 {
-  GPU_ClearRGB(image->target, 100, 100, 100);
+  GPU_ClearRGB(image->target, 127, 127, 127);
 }
 
 GPU_Image* Camera::getRender() const
@@ -109,8 +109,8 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
   float logicalWidth  = game::math::hexWidth                                * ts.scale * pixelsInUnit();
   float logicalHeight = (game::math::hexHeight - game::math::hexPointInset) * ts.scale * pixelsInUnit();
 
-  float realHeight    = ts.scale * pixelsInUnit();
-  float realWidth     = realHeight * ((float)img->w / (float)img->h);
+  float realHeight    = ts.scale * pixelsInUnit() * (1+2*pad_y);
+  float realWidth     = realHeight * ((float)img->w / (float)img->h) * (1+2*pad_x);
 
   float initX = (getSize()[0]/2) - (getXY()[0] - x_offset - pad_x) * pixelsInUnit() * ts.scale;
   float initY = (getSize()[1]/2) - (getXY()[1] - y_offset - pad_y) * pixelsInUnit() * ts.scale;
@@ -118,8 +118,8 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
   GPU_Rect targetRect = GPU_MakeRect(
       initX,
       initY,
-      realWidth + (2 * pad_x * pixelsInUnit() * ts.scale),
-      realHeight + (2 * pad_y * pixelsInUnit() * ts.scale)
+      realWidth,
+      realHeight
   );
 
   for(int i=0; i<ts.tileData.size(); i++)
