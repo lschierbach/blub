@@ -30,7 +30,14 @@ namespace generator
     {
       for (auto q = 0u; q < SIZE; q++)
       {
-        arr[p][q] = SimplexNoise::noise(p, q) > 0.1;
+        if(p == 0 || p == SIZE - 1 || q == 0 || q == SIZE - 1)
+        {
+          arr[p][q] = false;
+        }
+        else
+        {
+          arr[p][q] = SimplexNoise::noise(p, q) > 0.1;
+        }
       }
     }
   }
