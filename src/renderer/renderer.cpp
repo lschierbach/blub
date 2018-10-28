@@ -205,7 +205,7 @@ void Renderer::renderCamera(CameraEntry& camera)
 #endif
 
   static GPU_Image* testImg = LoadImageWithMipmaps("data/img/defaultTileset.png");
-  //GPU_SetImageFilter(testImg, GPU_FILTER_NEAREST);
+  GPU_SetImageFilter(testImg, GPU_FILTER_NEAREST);
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 
@@ -250,7 +250,7 @@ void Renderer::renderCamera(CameraEntry& camera)
           }
         );
 
-        camcast.get()->renderTileset(ts, testImg, 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
+        camcast.get()->renderTileset(ts, testImg, 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
       }
 
       //now same for entities of that chunk

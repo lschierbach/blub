@@ -85,7 +85,7 @@ float Camera::unitsY() const
 
 void Camera::clearRender()
 {
-  GPU_ClearRGB(image->target, 100, 100, 100);
+  GPU_ClearRGB(image->target, 0, 0, 0);
 }
 
 GPU_Image* Camera::getRender() const
@@ -93,12 +93,12 @@ GPU_Image* Camera::getRender() const
   return image;
 }
 
-GPU_Rect Camera::getTile(GPU_Image* img, unsigned char index)
+GPU_Rect Camera::getTile(GPU_Image* img, unsigned char index, unsigned char inset)
 {
   char x = index % 16;
   char y = index / 16;
 
-  GPU_Rect r = GPU_MakeRect((img->w/16.f)*x, (img->h/16.f)*y, (img->w/16.f), (img->h/16.f));
+  GPU_Rect r = GPU_MakeRect((img->w/16.f)*x + inset, (img->h/16.f)*y + inset, (img->w/16.f) - inset, (img->h/16.f) - inset);
   return r;
 }
 
@@ -129,8 +129,8 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
          && (targetRect.x+targetRect.w > 0 && targetRect.y+targetRect.h > 0)
          && (targetRect.x < image->w && targetRect.y < image ->h) ) 
       {
-        GPU_Rect sourceRect = getTile(img, c);
-        GPU_BlitRectX(img, &sourceRect, image->target, &targetRect, ts.tileData[i][j].rot, sourceRect.w/2.0f, sourceRect.h/2.0f, GPU_FLIP_NONE); //render from tile on given image to this cam's render image
+        GPU_Rect sourceRect = getTile(img, c, 1);
+        GPU_BlitRect(img, &sourceRect, image->target, &targetRect); //render from tile on given image to this cam's render image
 
 #ifdef DEBUG_CAMERA_BOUNDING_BOXES
   GPU_Rectangle2(image->target, targetRect, SDL_Color{255,0,255,255});

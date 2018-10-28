@@ -38,7 +38,7 @@ class Camera: public Entity
 
         std::list<const Overlay*> overlays;
 
-        GPU_Rect getTile(GPU_Image* img, unsigned char index);
+        GPU_Rect getTile(GPU_Image* img, unsigned char index, unsigned char inset);
 
   public:
         Camera();
