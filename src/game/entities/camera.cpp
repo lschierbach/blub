@@ -130,7 +130,13 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
          && (targetRect.x < image->w && targetRect.y < image ->h) ) 
       {
         GPU_Rect sourceRect = getTile(img, c, 1);
-        GPU_BlitRect(img, &sourceRect, image->target, &targetRect); //render from tile on given image to this cam's render image
+        GPU_Rect roundedTarget = GPU_MakeRect(
+          floor(targetRect.x)-overlap,
+          floor(targetRect.y)-overlap,
+          ceil(targetRect.w)+overlap,
+          ceil(targetRect.h)+overlap
+        );
+        GPU_BlitRect(img, &sourceRect, image->target, &roundedTarget); //render from tile on given image to this cam's render image
 
 #ifdef DEBUG_CAMERA_BOUNDING_BOXES
   GPU_Rectangle2(image->target, targetRect, SDL_Color{255,0,255,255});

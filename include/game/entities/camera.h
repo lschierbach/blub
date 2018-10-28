@@ -40,6 +40,8 @@ class Camera: public Entity
 
         GPU_Rect getTile(GPU_Image* img, unsigned char index, unsigned char inset);
 
+        static constexpr float overlap = 1.f;
+
   public:
         Camera();
         Camera(float x, float y, float w, float h, float scale);
