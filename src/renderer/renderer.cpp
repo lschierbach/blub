@@ -254,7 +254,6 @@ void Renderer::renderCamera(CameraEntry& camera)
       }
 
       //now same for entities of that chunk
-      std::cout << "#entities@" << j << "|" << i << ": " << c.m_Data.m_Entities.size() << std::endl;
       for(auto entity: c.m_Data.m_Entities)
       {
 #ifdef DEBUG_RENDERER_VERBOSE
