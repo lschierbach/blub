@@ -185,10 +185,10 @@ void Camera::renderEntity(RenderEntity e)
   float entityY = (getSize()[1]/2) - (getXY()[1] - e.getXY()[1]) * pixelsInUnit();
 
   GPU_Rect entityRect = GPU_MakeRect(
-    entityX,                                   // x1
-    entityY,                                   // y1
-    e.getSize()[0] * pixelsInUnit(),           // w
-    e.getSize()[1] * pixelsInUnit()            // h
+    entityX,                         // x1
+    entityY,                         // y1
+    e.getSize()[0] * pixelsInUnit(), // w
+    e.getSize()[1] * pixelsInUnit()  // h
   );
 
   auto anim = e.getCurrentAnimation().get();
@@ -212,12 +212,12 @@ void Camera::renderEntity(Entity e)
 #endif
 
   GPU_RectangleFilled(
-    image->target,                             // render target
-    entityX,                                   // x1
-    entityY,                                   // y1
+    image->target,                               // render target
+    entityX,                                     // x1
+    entityY,                                     // y1
     entityX + (e.getSize()[0] * pixelsInUnit()), // x2
     entityY + (e.getSize()[1] * pixelsInUnit()), // y2
-    {255,255,0,255}                            // color for generic entity
+    {255,255,0,255}                              // color for generic entity
   );
 }
 
