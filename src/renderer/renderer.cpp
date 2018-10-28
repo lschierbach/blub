@@ -162,6 +162,11 @@ void Renderer::renderFrame()
     renderCamera(camera);
   }
 
+  for(CameraEntry camera: cameras)
+  {
+    renderCameraEntities(camera);
+  }
+
   //overlays
   for(CameraEntry camera: cameras)
   {
@@ -253,7 +258,23 @@ void Renderer::renderCamera(CameraEntry& camera)
         camcast.get()->renderTileset(ts, testImg, 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
       }
 
-      //now same for entities of that chunk
+    }
+  }
+}
+
+void Renderer::renderCameraEntities(CameraEntry& camera)
+{
+  Map::SharedEntityPtr theCam = camera.camera;
+  std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
+
+  for(int i=0-(int)Map::getLoadingDistance(); i<=(int)Map::getLoadingDistance(); i++)
+  { //q
+    for(int j=0-(int)Map::getLoadingDistance(); j<=(int)Map::getLoadingDistance(); j++)
+    { //p
+
+      Chunk c = map->getChunk(j, i, theCam);
+
+      //render all entities in that chunk
       for(auto entity: c.m_Data.m_Entities)
       {
 #ifdef DEBUG_RENDERER_VERBOSE

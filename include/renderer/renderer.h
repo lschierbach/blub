@@ -51,6 +51,7 @@ class Renderer
     bool isFullscreen;
     void resizeCameras();
     void renderCamera(CameraEntry& camera);
+    void renderCameraEntities(CameraEntry& camera);
     size_t getCameraId() const;
     CameraEntry getCamera(size_t index);
 
