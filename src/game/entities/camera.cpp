@@ -203,6 +203,14 @@ void Camera::renderEntity(Entity e)
   float entityX = (getSize()[0]/2) - (getXY()[0] - e.getXY()[0]) * pixelsInUnit();
   float entityY = (getSize()[1]/2) - (getXY()[1] - e.getXY()[1]) * pixelsInUnit();
 
+#ifdef DEBUG_CAMERA_VERBOSE
+  std::cout << "[CAMERA] Entity screen pos:"
+  "( size:" << getSize()[0] << "|" << getSize()[1] << " - " <<
+  "camera:" << getXY()[0] << "|" << getXY()[1] << " - " <<
+  "entity:" << e.getXY()[0] << "|" << e.getXY()[1] << " ) * " <<
+  "p_unit:" << pixelsInUnit() << " = " << entityX << "|" << entityY << std::endl;
+#endif
+
   GPU_RectangleFilled(
     image->target,                             // render target
     entityX,                                   // x1
