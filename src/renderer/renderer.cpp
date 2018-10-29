@@ -198,7 +198,7 @@ GPU_Image* Renderer::LoadImageWithMipmaps(const char* filename)
     GPU_Image* img = NULL;
     if((img = GPU_LoadImage(filename)) != NULL) {
         GPU_GenerateMipmaps(img);
-        GPU_SetImageFilter(img, GPU_FILTER_LINEAR_MIPMAP);
+        GPU_SetImageFilter(img, GPU_FILTER_NEAREST);
     }
     return img;
 }
@@ -210,7 +210,6 @@ void Renderer::renderCamera(CameraEntry& camera)
 #endif
 
   static GPU_Image* testImg = LoadImageWithMipmaps("data/img/defaultTileset.png");
-  GPU_SetImageFilter(testImg, GPU_FILTER_NEAREST);
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 
