@@ -193,6 +193,25 @@ void Renderer::renderFrame()
   }
 }
 
+bool chunkInBounds(Chunk chunk, CameraEntry& camera)
+{
+  Camera* camptr = std::static_pointer_cast<Camera>(camera.camera).get();
+
+  vec2<> chunkUpperLeft = Entity::axialToCartesian(vec2<>((Chunk::size*chunk.getP())-0.5f,
+                                                          (Chunk::size*chunk.getQ())-0.5f));
+
+  vec2<> chunkLowerRight = Entity::axialToCartesian(vec2<>((Chunk::size*chunk.getP())+Chunk::size+0.5f,
+                                                           (Chunk::size*chunk.getQ())+Chunk::size+0.5f));
+
+  vec2<> camUpperLeft(camptr->getXY() - 0.5f*camptr->unitsInPixel()*camptr->getSize());
+  vec2<> camLowerRight(camptr->getXY() + 0.5f*camptr->unitsInPixel()*camptr->getSize());
+
+  return (chunkUpperLeft[0] <= camLowerRight[0] &&
+          chunkUpperLeft[1] <= camLowerRight[1] &&
+          chunkLowerRight[0] >= camUpperLeft[0] &&
+          chunkLowerRight[0] >= camUpperLeft[0]);
+}
+
 GPU_Image* Renderer::LoadImageWithMipmaps(const char* filename)
 {
     GPU_Image* img = NULL;
@@ -240,21 +259,24 @@ void Renderer::renderCamera(CameraEntry& camera)
   std::cout << "[RENDERER] got chunk" << std::endl;
 #endif
 
-      //render all tilesets of current chunk
-      for(Tileset ts: c.m_Data.m_Tilesets)
+      if(chunkInBounds(c, camera))
       {
-#ifdef DEBUG_RENDERER_VERBOSE
-  std::cout << "[RENDERER] iterating over tilesets" << std::endl;
-#endif
+  #ifdef DEBUG_RENDERER_VERBOSE
+    std::cout << "[RENDERER] tilesets for chunk relative " << j << "|" << i << std::endl;
+  #endif
+        //render all tilesets of current chunk
+        for(Tileset ts: c.m_Data.m_Tilesets)
+        {
 
-        vec2<float> chunkOffset = Entity::axialToCartesian(
-          vec2<float>{
-            (float)((c.getP() * Chunk::size) + ts.offsetX),
-            (float)((c.getQ() * Chunk::size) + ts.offsetY)
-          }
-        );
+          vec2<float> chunkOffset = Entity::axialToCartesian(
+            vec2<float>{
+              (float)((c.getP() * Chunk::size) + ts.offsetX),
+              (float)((c.getQ() * Chunk::size) + ts.offsetY)
+            }
+          );
 
-        camcast.get()->renderTileset(ts, testImg, 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
+          camcast.get()->renderTileset(ts, testImg, 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
+        }
       }
 
     }
