@@ -54,7 +54,7 @@ class Renderer
     void renderCameraEntities(CameraEntry& camera);
     size_t getCameraId() const;
     CameraEntry getCamera(size_t index);
-    bool chunkInBounds(Chunk chunk, CameraEntry& camera);
+    bool chunkInBounds(const Chunk& chunk, const CameraEntry& camera);
 
     GPU_Image* LoadImageWithMipmaps(const char* filename);
 
