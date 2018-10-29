@@ -176,7 +176,7 @@ void Chunk::generate()
   // dummy m_Data
   std::lock_guard<std::mutex> lock(m_DataMutex);
 
-  generator::generateChunk(m_Data, m_pos[0], m_pos[1], size);
+  generator::generateChunk<size>(m_Data, m_pos[0], m_pos[1], size);
   
   #ifdef DEBUG_CHUNK_RELOAD
     printf("[CHUNK]GENERATE\n");
