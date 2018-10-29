@@ -193,7 +193,7 @@ void Renderer::renderFrame()
   }
 }
 
-bool chunkInBounds(Chunk chunk, CameraEntry& camera)
+bool Renderer::chunkInBounds(Chunk chunk, CameraEntry& camera)
 {
   Camera* camptr = std::static_pointer_cast<Camera>(camera.camera).get();
 
