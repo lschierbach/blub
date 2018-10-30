@@ -335,10 +335,10 @@ void Map::print()
   printf("[MAP]\tEND_PRINT\n");
 }
 
-Chunk Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
+Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
 {
   auto& chunks = m_Chunks.find(entity)->second;
-  return *(chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get());
+  return (chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get());
 }
 
 size_t Map::getLoadingDistance()

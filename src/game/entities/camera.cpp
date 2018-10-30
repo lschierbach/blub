@@ -142,7 +142,7 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
   GPU_Rectangle2(image->target, targetRect, SDL_Color{255,0,255,255});
 #endif
       }
-    targetRect.x += logicalWidth;
+      targetRect.x += logicalWidth;
     }
     targetRect.y += logicalHeight;
     targetRect.x = initX + (1+i)*(logicalWidth)/2; //initial x plus width/2 hex offset

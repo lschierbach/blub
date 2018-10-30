@@ -250,7 +250,7 @@ void Renderer::renderCamera(CameraEntry& camera)
   theCam.get()->setPQ(oldCoord/(float)Chunk::size);
 #endif
 
-      Chunk c = map->getChunk(j, i, theCam);
+      auto* c = map->getChunk(j, i, theCam);
 
 #ifdef DEBUG_RENDERER_PREMUL_COORDINATES
   theCam.get()->setPQ(oldCoord);
@@ -260,19 +260,19 @@ void Renderer::renderCamera(CameraEntry& camera)
   std::cout << "[RENDERER] got chunk" << std::endl;
 #endif
 
-      if(chunkInBounds(c, camera))
+      if(chunkInBounds(*c, camera))
       {
   #ifdef DEBUG_RENDERER_VERBOSE
     std::cout << "[RENDERER] tilesets for chunk relative " << j << "|" << i << std::endl;
   #endif
         //render all tilesets of current chunk
-        for(Tileset ts: c.m_Data.m_Tilesets)
+        for(Tileset ts: c->m_Data.m_Tilesets)
         {
 
           vec2<float> chunkOffset = Entity::axialToCartesian(
             vec2<float>{
-              (float)((c.getP() * Chunk::size) + ts.offsetX),
-              (float)((c.getQ() * Chunk::size) + ts.offsetY)
+              (float)((c->getP() * Chunk::size) + ts.offsetX),
+              (float)((c->getQ() * Chunk::size) + ts.offsetY)
             }
           );
 
@@ -294,10 +294,10 @@ void Renderer::renderCameraEntities(CameraEntry& camera)
     for(int j=0-(int)Map::getLoadingDistance(); j<=(int)Map::getLoadingDistance(); j++)
     { //p
 
-      Chunk c = map->getChunk(j, i, theCam);
+      auto* c = map->getChunk(j, i, theCam);
 
       //render all entities in that chunk
-      for(auto entity: c.m_Data.m_Entities)
+      for(auto entity: c->m_Data.m_Entities)
       {
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] iterating over entities" << std::endl;

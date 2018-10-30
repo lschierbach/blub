@@ -73,7 +73,7 @@ class Map
     void addEntity(SharedEntityPtr entity);
     void removeEntity(SharedEntityPtr entity);
 
-    Chunk getChunk(int relativeP, int relativeQ, SharedEntityPtr entity);
+    Chunk* getChunk(int relativeP, int relativeQ, SharedEntityPtr entity);
     static size_t getLoadingDistance();
 };
 
