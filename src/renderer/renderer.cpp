@@ -18,6 +18,7 @@
 #include <cmath>
 
 #include "renderer/renderer.h"
+#include "renderer/lodimage.hpp"
 #include "game/entity.h"
 
 Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
@@ -217,7 +218,7 @@ GPU_Image* Renderer::LoadImageWithMipmaps(const char* filename)
     GPU_Image* img = NULL;
     if((img = GPU_LoadImage(filename)) != NULL) {
         GPU_GenerateMipmaps(img);
-        GPU_SetImageFilter(img, GPU_FILTER_NEAREST);
+        GPU_SetImageFilter(img, GPU_FILTER_LINEAR_MIPMAP);
     }
     return img;
 }
@@ -228,7 +229,7 @@ void Renderer::renderCamera(CameraEntry& camera)
   std::cout << "[RENDERER] Rendering camera frames" << std::endl;
 #endif
 
-  static GPU_Image* testImg = LoadImageWithMipmaps("data/img/defaultTileset.png");
+  static LODImage testImg("data/img/defaultTileset.png", 64);
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 
@@ -275,7 +276,7 @@ void Renderer::renderCamera(CameraEntry& camera)
             }
           );
 
-          camcast.get()->renderTileset(ts, testImg, 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
+          camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
         }
       }
 
