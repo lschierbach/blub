@@ -1,3 +1,6 @@
+#ifndef ANIMATION_HPP
+#define ANIMATION_HPP
+
 #include <memory>
 
 struct Animation {
@@ -36,3 +39,5 @@ namespace game
 {
   using SharedAnimPtr = std::shared_ptr<Animation>;
 }
+
+#endif /* ANIMATION_HPP */
