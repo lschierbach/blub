@@ -68,10 +68,11 @@ class LODImage {
       // if not, update for next time
       lastScale = camera->getScale();
 
-      float optimalW = camera->getSize()[0]/camera->getScale()*16.f;
+      float optimalW = camera->pixelsInUnit()*16.f;
 
       for(size_t i=0; i<images.size(); ++i) {
         if(images[i]->w <= optimalW) {
+        	if(i>0)--i;
           // keep track of index for next time
           lastIndex = i;
           return images[i];
