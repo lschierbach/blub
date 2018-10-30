@@ -266,7 +266,7 @@ void Renderer::renderCamera(CameraEntry& camera)
     std::cout << "[RENDERER] tilesets for chunk relative " << j << "|" << i << std::endl;
   #endif
         //render all tilesets of current chunk
-        for(Tileset ts: c->m_Data.m_Tilesets)
+        for(const auto& ts: c->m_Data.m_Tilesets)
         {
 
           vec2<float> chunkOffset = Entity::axialToCartesian(
