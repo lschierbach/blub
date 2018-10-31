@@ -16,6 +16,7 @@
 #include <iostream>
 #include <utility>
 #include <cmath>
+#include <string>
 
 #include "renderer/renderer.h"
 #include "renderer/lodimage.hpp"
@@ -223,13 +224,24 @@ GPU_Image* Renderer::LoadImageWithMipmaps(const char* filename)
     return img;
 }
 
+LODImage testLoadLOD()
+{
+  std::string filestrings[3];
+  filestrings[0] = std::string("data/img/defaultTileset.png");
+  filestrings[1] = std::string("data/img/defaultTileset_2064.png");
+  filestrings[2] = std::string("data/img/defaultTileset_1032.png");
+
+  LODImage theImage(filestrings, 3, 1032);
+  return theImage;
+}
+
 void Renderer::renderCamera(CameraEntry& camera)
 {
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] Rendering camera frames" << std::endl;
 #endif
 
-  static LODImage testImg("data/img/defaultTileset.png", 64);
+  static LODImage testImg = testLoadLOD();
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 

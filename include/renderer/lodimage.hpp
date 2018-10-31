@@ -11,7 +11,7 @@ class LODImage {
     std::vector<GPU_Image*> images;
 
     // save last request's data for fast repeated acces
-    float lastScale = 0.f;
+    float lastUnit = -1.f;
     size_t lastIndex = 0;
 
   public:
@@ -62,20 +62,20 @@ class LODImage {
 
     GPU_Image* bestImage(Camera* camera) {
       // already requested last time?
-      if(camera->getScale() == lastScale) {
+      if(camera->pixelsInUnit() == lastUnit) {
+        lastUnit = camera->pixelsInUnit();
         return images[lastIndex];
       }
       // if not, update for next time
-      lastScale = camera->getScale();
+      lastUnit = camera->pixelsInUnit();
 
       float optimalW = camera->pixelsInUnit()*16.f;
 
-      for(size_t i=0; i<images.size(); ++i) {
-        if(images[i]->w <= optimalW) {
-        	if(i>0)--i;
+      for(size_t i=images.size(); i>0; --i) {
+        if(images[i-1]->w >= optimalW) {
           // keep track of index for next time
-          lastIndex = i;
-          return images[i];
+          lastIndex = i-1;
+          return images[i-1];
         }
       }
 
