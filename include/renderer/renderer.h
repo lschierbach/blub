@@ -43,7 +43,7 @@ class Renderer
     * 2. the x and y, w and h *relative* to complete renderer's target, as fraction of 1.
     *   -> i.e. 0.5 0 0.5 1 means "camera starts at half the window's width (from the left), top of the window, half as wide as window and as tall as window".
     */
-    std::list<CameraEntry> cameras;
+    std::vector<CameraEntry> cameras;
 
     GPU_Target* renderTarget;
     const static GPU_InitFlagEnum RENDERER_INIT_FLAGS = GPU_DEFAULT_INIT_FLAGS;

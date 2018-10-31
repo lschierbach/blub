@@ -79,7 +79,7 @@ size_t Renderer::addCamera(float x, float y, float w, float h, float scale)
 
 CameraEntry Renderer::getCamera(size_t id)
 {
-  for(std::list<CameraEntry>::iterator camIt = cameras.begin(); camIt != cameras.end(); ++camIt)
+  for(auto camIt = cameras.begin(); camIt != cameras.end(); ++camIt)
   {
     if(camIt->id == id)
     {
