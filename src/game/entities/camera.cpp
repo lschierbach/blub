@@ -41,7 +41,7 @@ Camera::Camera(float x, float y, float w, float h, float scale)
   setScale(scale);
 }
 
-void Camera::setSize(const vec2<float> s)
+void Camera::setSize(vec2<float> s)
 {
   GPU_FreeImage(image);
   image = GPU_CreateImage(s[0], s[1], GPU_FORMAT_RGB);
@@ -53,7 +53,7 @@ void Camera::setSize(const vec2<float> s)
 #endif
 }
 
-void Camera::setScale(const float s)
+void Camera::setScale(float s)
 {
   scale = s;
 }
@@ -276,7 +276,7 @@ void Camera::track(Map::SharedEntityPtr entity)
   tracked = entity;
 }
 
-void Camera::tick(const float tickTime) {
+void Camera::tick(float tickTime) {
   if(tracked.get() != NULL) 
   {
     setXY(tracked.get()->getXY());
