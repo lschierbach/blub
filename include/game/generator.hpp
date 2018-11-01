@@ -7,6 +7,7 @@
 #include "structs/tile.h"
 #include "structs/tileset.h"
 #include "game/simplexnoise.h"
+#include "game/entities/physicsEntity.h"
 
 namespace generator
 {
@@ -90,10 +91,8 @@ namespace generator
     
     for (auto i = 0u; i < 5; i++)
     {
-      auto p = vec2<float>(static_cast<float>(chunkP * Chunk::size + i + 1 + rand() % 10), static_cast<float>(chunkQ * Chunk::size + i + 1 + rand() % 10));
-      auto s = vec2<float>(1.f, .5f);
-      auto a = vec2<float>(rand() / 1.f, .5f);
-      Entity e(p, s, a);
+      auto p = vec2<float>(static_cast<float>(chunkP * Chunk::size + (rand() % Chunk::size)), static_cast<float>(chunkQ * Chunk::size + (rand() % Chunk::size)));
+      PhysicsEntity e(p[0], p[1]);
       chunkData.m_Entities.push_back(e);
     }
   }

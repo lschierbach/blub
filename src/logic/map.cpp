@@ -361,6 +361,14 @@ Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
   return (chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get());
 }
 
+std::vector<Entity> Map::getEntitiesAt(game::vec2<float> pos) 
+{
+  auto entityVector = std::vector<Entity> {};
+  
+  return entityVector;
+}
+
+
 size_t Map::getLoadingDistance()
 {
     return loadingDistance;

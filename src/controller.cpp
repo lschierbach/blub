@@ -37,7 +37,7 @@ void Controller::init()
   
   m_Renderer->addCamera(0, 0, 1, 1, 14);
   
-  SDL_SetRelativeMouseMode(SDL_TRUE);
+  SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
 void Controller::handleSDLEvents()
@@ -57,6 +57,12 @@ void Controller::handleSDLEvents()
       case SDL_MOUSEMOTION:
         m_MouseMotion = evt.motion;
         break;
+      case SDL_MOUSEBUTTONDOWN:
+        if (evt.button.clicks == 1)
+        {
+          printf("click at %d, %d\n", evt.button.x, evt.button.y);
+        }
+        break;
     }
   }
 }
@@ -75,7 +81,7 @@ void Controller::handleInput()
   if (keystate[SDL_SCANCODE_R]) m_Renderer->zoomCamera(0, 0.9);
   if (keystate[SDL_SCANCODE_F]) m_Renderer->zoomCamera(0, 1.111111111111111);
   
-  m_Renderer->moveCamera(0, m_MouseMotion.xrel * camSpeed * m_Renderer->getCameraScale(0), m_MouseMotion.yrel * camSpeed * m_Renderer->getCameraScale(0));
+  //m_Renderer->moveCamera(0, m_MouseMotion.xrel * camSpeed * m_Renderer->getCameraScale(0), m_MouseMotion.yrel * camSpeed * m_Renderer->getCameraScale(0));
 }
 
 // @todo: rewrite smarter
