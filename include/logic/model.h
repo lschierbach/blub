@@ -23,7 +23,7 @@ class Model
 {
   private:
     Map* m_Map;
-      
+    
   public:
     
     Model();

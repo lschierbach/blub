@@ -32,6 +32,7 @@
   #define DEBUG_MAP_UPDATE
 #endif
 
+#include "game/global.h"
 #include "logic/chunk.h"
 #include "structs/tileset.h"
 #include "game/entity.h"
@@ -60,9 +61,10 @@ class Map
     std::map<SharedEntityPtr, SharedChunkPtrArr> m_Chunks;
 
     void updateEntity(SharedEntityPtr entity, bool firstUpdate = false);
-
+    void tickChunks();
+    
     void print();
-
+    
 
   public:
     Map();

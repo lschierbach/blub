@@ -64,6 +64,8 @@ class Chunk
     game::Vector<2, int> m_pos;
 
     std::mutex    m_DataMutex;
+    
+    uint32_t m_LastTick;
  
   public:
  
@@ -99,8 +101,11 @@ class Chunk
 
     int getQ() const;
     int getP() const;
+    
+    uint32_t getLastTick() const;
 
     void setPos(game::Vector<2, int> pos);
+    void tick();
     
     Data m_Data;
     
