@@ -7,6 +7,7 @@
 /bin/*
 /data/chunks/*
 /CMakeFiles/*
+/nbproject/*
 CMakeCache.txt
 Makefile
 cmake_install.cmake
