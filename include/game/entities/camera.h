@@ -72,6 +72,9 @@ class Camera: public Entity
         void renderOverlays();
 
         void track(Map::SharedEntityPtr entity);
+
+        vec2<float> pixelToXY(vec2<float> pixel);
+        vec2<float> pixelToPQ(vec2<float> pixel);
 };
 
 #endif /* CAMERA_H */

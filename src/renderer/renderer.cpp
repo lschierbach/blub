@@ -376,3 +376,37 @@ void Renderer::clearOverlays(size_t cameraIndex)
 {
   std::static_pointer_cast<Camera>(getCamera(cameraIndex).camera).get()->clearOverlays();
 }
+
+vec2<float> Renderer::pixelToXYAuto(vec2<float> pixel)
+{
+  float ratioX = pixel[0]/renderTarget->w;
+  float ratioY = pixel[1]/renderTarget->h;
+
+  for(auto camIt = cameras.begin(); camIt != cameras.end(); ++camIt)
+  {
+    if(camIt->data[0] < ratioX && camIt->data[2]-camIt->data[0] > ratioX &&
+       camIt->data[1] < ratioY && camIt->data[3]-camIt->data[1] > ratioY)
+    {
+      return std::static_pointer_cast<Camera>(camIt->camera).get()->pixelToXY(vec2<float>(pixel[0]*camIt->data[2],pixel[1]*camIt->data[3]));
+    }
+  }
+
+  return vec2<float>(NAN, NAN);
+}
+
+vec2<float> Renderer::pixelToPQAuto(vec2<float> pixel)
+{
+  float ratioX = pixel[0]/renderTarget->w;
+  float ratioY = pixel[1]/renderTarget->h;
+
+  for(auto camIt = cameras.begin(); camIt != cameras.end(); ++camIt)
+  {
+    if(camIt->data[0] < ratioX && camIt->data[2]-camIt->data[0] > ratioX &&
+       camIt->data[1] < ratioY && camIt->data[3]-camIt->data[1] > ratioY)
+    {
+      return std::static_pointer_cast<Camera>(camIt->camera).get()->pixelToPQ(vec2<float>(pixel[0]*camIt->data[2],pixel[1]*camIt->data[3]));
+    }
+  }
+
+  return vec2<float>(NAN, NAN);
+}

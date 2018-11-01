@@ -60,7 +60,8 @@ void Controller::handleSDLEvents()
       case SDL_MOUSEBUTTONDOWN:
         if (evt.button.clicks == 1)
         {
-          printf("click at %d, %d\n", evt.button.x, evt.button.y);
+          vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));
+          printf("click at %d, %d; units %f, %f\n", evt.button.x, evt.button.y, clickXY[0], clickXY[1]);
         }
         break;
     }

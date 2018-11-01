@@ -283,3 +283,13 @@ void Camera::tick(float tickTime) {
     setXY(tracked.get()->getXY());
   }
 }
+
+vec2<float> Camera::pixelToXY(vec2<float> pixel)
+{
+  return ((pixel - (getSize()/2.f)) * unitsInPixel()) + getXY();
+}
+
+vec2<float> Camera::pixelToPQ(vec2<float> pixel)
+{
+  return game::math::cartesianToAxial(pixelToXY(pixel));
+}
