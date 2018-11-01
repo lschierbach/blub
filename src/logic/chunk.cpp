@@ -17,6 +17,7 @@
 #include "logic/chunk.h"
 #include "game/filesystem.hpp"
 #include "game/generator.hpp"
+#include "game/gamemath.h"
 
 Chunk::Chunk(int p, int q) : m_pos({p, q})
 {
@@ -177,7 +178,7 @@ void Chunk::generate()
   // dummy m_Data
   std::lock_guard<std::mutex> lock(m_DataMutex);
 
-  generator::generateChunk<size>(m_Data, m_pos[0], m_pos[1], size);
+  generator::generateChunk<game::math::chunkSize>(m_Data, m_pos[0], m_pos[1], game::math::chunkSize);
   
   #ifdef DEBUG_CHUNK_RELOAD
     printf("[CHUNK]GENERATE\n");

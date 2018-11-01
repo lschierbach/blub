@@ -24,23 +24,6 @@
 #include "game/filesystem.hpp"
 #include "game/saveable.h"
 
-namespace game::math {
-  const static float hexWidth = 0.86602540378f;
-  const static float hexHeight = 1.f;
-  const static float hexPointInset = 0.25f;
-
-  /*
-   * xVector: width of hex, 0
-   * yVector: width / 2, height - point inset
-   * pVector/qVector: inverse matrix of p&q
-   */
-  const static vec2<float> pVector{1.154700538f, 0.f};              // x -> p
-  const static vec2<float> qVector{-0.666666666f, 1.33333333333f}; // y -> q
-  const static vec2<float> xVector{0.86602540378f, 0.f};            // p -> x
-  const static vec2<float> yVector{0.433012702f, 0.75f};           // q -> y
-
-}
-
 using game::vec2;
 
 class Entity : public Saveable {
@@ -57,9 +40,6 @@ class Entity : public Saveable {
     Entity(vec2<float> p, vec2<float> s, vec2<float> a);
     Entity(int p, int q);
     ~Entity();
-
-    static vec2<float> axialToCartesian(const vec2<float>& axial);
-    static vec2<float> cartesianToAxial(const vec2<float>& cartesian);
 
     void tick(float tickTime);
     void setPQ(const vec2<float>& pq);

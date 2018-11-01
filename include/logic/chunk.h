@@ -61,7 +61,7 @@ class Chunk
     void load();
     void generate();
 
-    game::Vector<2, int> m_pos;
+    game::vec2<int> m_pos;
 
     std::mutex    m_DataMutex;
     
@@ -93,8 +93,6 @@ class Chunk
   
   public:
 
-    static const int size = 32;
-    
     Chunk(int p, int q);
     Chunk(Chunk& cpy);
     ~Chunk();
@@ -104,12 +102,12 @@ class Chunk
     
     uint32_t getLastTick() const;
 
-    void setPos(game::Vector<2, int> pos);
+    void setPos(game::vec2<int> pos);
     void tick();
     
     Data m_Data;
     
-    game::Vector<2, int> getPos() const;
+    game::vec2<int> getPos() const;
 };
 
 #endif /* CHUNK_H */

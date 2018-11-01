@@ -22,8 +22,9 @@
 #include <cmath>
 
 #include "game/entity.h"
-#include "logic/chunk.h"
 #include "game/global.h"
+#include "game/gamemath.h"
+#include "logic/chunk.h"
 
 Entity::Entity(vec2<float> p, vec2<float> s, vec2<float> a)
 {
@@ -33,7 +34,8 @@ Entity::Entity(vec2<float> p, vec2<float> s, vec2<float> a)
     anchor = a;
 }
 
-Entity::Entity(int p, int q) {
+Entity::Entity(int p, int q)
+{
     this->p = (float)p;
     this->q = (float)q;
 }
@@ -67,17 +69,17 @@ void Entity::setQ(float q)
 
 void Entity::setXY(const vec2<float>& xy)
 {
-    setPQ(cartesianToAxial(xy));
+    setPQ(game::math::cartesianToAxial(xy));
 }
 
 void Entity::setX(float x)
 {
-    setPQ(cartesianToAxial(vec2<float>(x, getXY()[1])));
+    setPQ(game::math::cartesianToAxial(vec2<float>(x, getXY()[1])));
 }
 
 void Entity::setY(float y)
 {
-    setPQ(cartesianToAxial(vec2<float>(getXY()[0], y)));
+    setPQ(game::math::cartesianToAxial(vec2<float>(getXY()[0], y)));
 }
 
 void Entity::setSize(const vec2<float>& s)
@@ -105,19 +107,6 @@ void Entity::tick(float tickTime)
   //printf("tick %lu\n", global::tickCount);
 }
 
-vec2<float> Entity::cartesianToAxial(const vec2<float>& cartesian)
-{
-    #ifdef DEBUG_ENTITY_VERBOSE
-        std::cout << "[ENTITY] making axial from cartesian " << cartesian[0] << "|" << cartesian[1] << std::endl;
-    #endif
-    return (cartesian[0] * game::math::pVector + cartesian[1] * game::math::qVector);
-}
-
-vec2<float> Entity::axialToCartesian(const vec2<float>& axial)
-{
-    return (axial[0] * game::math::xVector + axial[1] * game::math::yVector);
-}
-
 vec2<float> Entity::getPQ() const
 {
     return {p, q};
@@ -125,11 +114,11 @@ vec2<float> Entity::getPQ() const
 
 vec2<float> Entity::getXY() const
 {
-    return axialToCartesian(vec2<float>(p,q));
+    return game::math::axialToCartesian(vec2<float>(p,q));
 }
 
 vec2<int> Entity::getChunkPQ() const {
-    return game::Vector<2, int>(static_cast<int>((p/Chunk::size)), static_cast<int>(q/Chunk::size));
+    return vec2<int>(static_cast<int>((p/game::math::chunkSize)), static_cast<int>(q/game::math::chunkSize));
 }
 
 void Entity::modXY(const vec2<float>& xy)

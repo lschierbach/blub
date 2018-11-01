@@ -21,6 +21,7 @@
 #include "renderer/renderer.h"
 #include "renderer/lodimage.hpp"
 #include "game/entity.h"
+#include "game/gamemath.h"
 
 Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
 {
@@ -202,11 +203,11 @@ bool Renderer::chunkInBounds(const Chunk& chunk, const CameraEntry& camera)
 {
   Camera* camptr = std::static_pointer_cast<Camera>(camera.camera).get();
 
-  vec2<> chunkUpperLeft = Entity::axialToCartesian(vec2<>((Chunk::size*chunk.getP())-0.5f,
-                                                          (Chunk::size*chunk.getQ())-0.5f));
+  vec2<> chunkUpperLeft = game::math::axialToCartesian(vec2<>(game::math::chunkToAxialP(chunk.getP())-0.5f,
+                                                              game::math::chunkToAxialQ(chunk.getQ())-0.5f));
 
-  vec2<> chunkLowerRight = Entity::axialToCartesian(vec2<>((Chunk::size*chunk.getP())+Chunk::size+0.5f,
-                                                           (Chunk::size*chunk.getQ())+Chunk::size+0.5f));
+  vec2<> chunkLowerRight = game::math::axialToCartesian(vec2<>(game::math::chunkToAxialP(chunk.getP())+game::math::chunkSize+0.5f,
+                                                               game::math::chunkToAxialQ(chunk.getQ())+game::math::chunkSize+0.5f));
 
   vec2<> camUpperLeft(camptr->getXY() - 0.5f*camptr->unitsInPixel()*camptr->getSize());
   vec2<> camLowerRight(camptr->getXY() + 0.5f*camptr->unitsInPixel()*camptr->getSize());
@@ -284,11 +285,12 @@ void Renderer::renderCamera(CameraEntry& camera)
         for(const auto& ts: c->m_Data.m_Tilesets)
         {
 
-          vec2<float> chunkOffset = Entity::axialToCartesian(
-            vec2<float>{
+          vec2<float> chunkOffset = game::math::axialToCartesian(
+            /*vec2<float>{
               (float)((c->getP() * Chunk::size) + ts.offsetX),
               (float)((c->getQ() * Chunk::size) + ts.offsetY)
-            }
+            }*/
+            game::math::chunkToAxial(c->getPos()) + vec2<float>(ts.offsetX,ts.offsetY)
           );
 
           camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
