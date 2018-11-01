@@ -46,7 +46,7 @@ class Renderer
     std::vector<CameraEntry> cameras;
 
     GPU_Target* renderTarget;
-    const static GPU_InitFlagEnum RENDERER_INIT_FLAGS = GPU_DEFAULT_INIT_FLAGS;
+    const static GPU_InitFlagEnum RENDERER_INIT_FLAGS = GPU_INIT_ENABLE_VSYNC;
     Map* map;
     bool isFullscreen;
     void resizeCameras();
