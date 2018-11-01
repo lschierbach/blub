@@ -16,6 +16,7 @@
 #include <iostream>
 #include <utility>
 #include <cmath>
+#include <string>
 
 #include "renderer/renderer.h"
 #include "renderer/lodimage.hpp"
@@ -35,6 +36,9 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
 
 Renderer::~Renderer()
 {
+  for(auto camIt = cameras.begin(); camIt != cameras.end(); ++camIt) {
+    std::static_pointer_cast<Camera>(camIt->camera).get()->~Camera();
+  }
   GPU_FreeTarget(renderTarget);
 }
 
@@ -78,7 +82,7 @@ size_t Renderer::addCamera(float x, float y, float w, float h, float scale)
 
 CameraEntry Renderer::getCamera(size_t id)
 {
-  for(std::list<CameraEntry>::iterator camIt = cameras.begin(); camIt != cameras.end(); ++camIt)
+  for(auto camIt = cameras.begin(); camIt != cameras.end(); ++camIt)
   {
     if(camIt->id == id)
     {
@@ -138,7 +142,7 @@ void Renderer::resizeCameras() {
   float w = getWidth();
   float h = getHeight();
   
-  for(CameraEntry camera: cameras)
+  for(CameraEntry& camera: cameras)
   {
 #ifdef DEBUG_RENDERER_RESIZE
   std::cout << "[RENDERER] camera resize to " << w << " x " << h << std::endl;
@@ -158,18 +162,18 @@ void Renderer::renderFrame()
   GPU_ClearRGB(renderTarget, 50, 50, 50);
   
   //tiles & entities
-  for(CameraEntry camera: cameras)
+  for(CameraEntry& camera: cameras)
   {
     renderCamera(camera);
   }
 
-  for(CameraEntry camera: cameras)
+  for(CameraEntry& camera: cameras)
   {
     renderCameraEntities(camera);
   }
 
   //overlays
-  for(CameraEntry camera: cameras)
+  for(CameraEntry& camera: cameras)
   {
     std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
 
@@ -177,7 +181,7 @@ void Renderer::renderFrame()
   }
 
   //final blitting
-  for(CameraEntry camera: cameras)
+  for(CameraEntry& camera: cameras)
   {
     std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
 
@@ -223,13 +227,24 @@ GPU_Image* Renderer::LoadImageWithMipmaps(const char* filename)
     return img;
 }
 
+LODImage testLoadLOD()
+{
+  std::string filestrings[3];
+  filestrings[0] = std::string("data/img/defaultTileset.png");
+  filestrings[1] = std::string("data/img/defaultTileset_2064.png");
+  filestrings[2] = std::string("data/img/defaultTileset_1032.png");
+
+  LODImage theImage(filestrings, 3, 1032);
+  return theImage;
+}
+
 void Renderer::renderCamera(CameraEntry& camera)
 {
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] Rendering camera frames" << std::endl;
 #endif
 
-  static LODImage testImg("data/img/defaultTileset.png", 64);
+  static LODImage testImg = testLoadLOD();
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 
@@ -297,7 +312,7 @@ void Renderer::renderCameraEntities(CameraEntry& camera)
       auto* c = map->getChunk(j, i, theCam);
 
       //render all entities in that chunk
-      for(auto entity: c->m_Data.m_Entities)
+      for(auto& entity: c->m_Data.m_Entities)
       {
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] iterating over entities" << std::endl;
@@ -329,7 +344,7 @@ void Renderer::zoomCamera(size_t cameraId, float factor)
   cam->setScale(cam->getScale()*factor);
 }
 
-void Renderer::tick(const float tickTime)
+void Renderer::tick(float tickTime)
 {
   for(CameraEntry entry: cameras)
   {

@@ -47,11 +47,10 @@ class Camera: public Entity
         Camera(float x, float y, float w, float h, float scale);
         ~Camera();
 
-        void tick(const float tickTime);
+        void tick(float tickTime);
 
-        void setSize(const vec2<float> s); //Override to recreate image
-        void setSize(const float w, const float h);
-        void setScale(const float s);
+        void setSize(vec2<float> s); //Override to recreate image
+        void setScale(float s);
 
         void addOverlay(const Overlay* const o);
         void removeOverlay(const Overlay* const element);
