@@ -17,7 +17,7 @@
 #include "logic/chunk.h"
 #include "game/filesystem.hpp"
 #include "game/generator.hpp"
-#include "game/gamemath.h"
+#include "game/gamemath.hpp"
 
 Chunk::Chunk(int p, int q) : m_pos({p, q})
 {

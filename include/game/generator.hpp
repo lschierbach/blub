@@ -8,7 +8,7 @@
 #include "structs/tileset.h"
 #include "game/simplexnoise.h"
 #include "game/entities/physicsEntity.h"
-#include "game/gamemath.h"
+#include "game/gamemath.hpp"
 
 namespace generator
 {

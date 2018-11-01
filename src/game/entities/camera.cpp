@@ -18,7 +18,7 @@
 #include <iostream>
 
 #include "game/entities/camera.h"
-#include "game/gamemath.h"
+#include "game/gamemath.hpp"
 
 Camera::Camera()
 {

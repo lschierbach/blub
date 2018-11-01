@@ -21,7 +21,7 @@
 #include "renderer/renderer.h"
 #include "renderer/lodimage.hpp"
 #include "game/entity.h"
-#include "game/gamemath.h"
+#include "game/gamemath.hpp"
 
 Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
 {

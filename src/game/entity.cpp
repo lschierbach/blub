@@ -23,7 +23,7 @@
 
 #include "game/entity.h"
 #include "game/global.h"
-#include "game/gamemath.h"
+#include "game/gamemath.hpp"
 #include "logic/chunk.h"
 
 Entity::Entity(vec2<float> p, vec2<float> s, vec2<float> a)
