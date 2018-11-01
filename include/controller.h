@@ -16,6 +16,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include "game/global.h"
 #include "logic/model.h"
 #include "renderer/renderer.h"
 

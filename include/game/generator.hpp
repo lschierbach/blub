@@ -90,7 +90,7 @@ namespace generator
     
     for (auto i = 0u; i < 5; i++)
     {
-      auto p = vec2<float>(chunkP * Chunk::size + i + 1 + rand() % 10, chunkQ * Chunk::size + i + 1 + rand() % 10);
+      auto p = vec2<float>(static_cast<float>(chunkP * Chunk::size + i + 1 + rand() % 10), static_cast<float>(chunkQ * Chunk::size + i + 1 + rand() % 10));
       auto s = vec2<float>(1.f, .5f);
       auto a = vec2<float>(rand() / 1.f, .5f);
       Entity e(p, s, a);

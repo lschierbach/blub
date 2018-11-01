@@ -27,6 +27,9 @@ void Controller::init()
     bool fullscreen;
   } args = {1600, 900, false};
   
+  global::tickCount = 0;
+  global::lastTickDuration = .0f;
+  
   m_Model = new Model();
   m_Renderer = new Renderer(args.windowWidth, args.windowHeight, args.fullscreen, m_Model->getMap());
   m_Quit = false;
@@ -74,8 +77,20 @@ void Controller::handleInput()
   m_Renderer->moveCamera(0, m_MouseMotion.xrel * camSpeed * m_Renderer->getCameraScale(0), m_MouseMotion.yrel * camSpeed * m_Renderer->getCameraScale(0));
 }
 
+// @todo: rewrite smarter
+float FPSSum = 0.f;
+
 bool Controller::tick()
 {
+  auto time1 = SDL_GetTicks();
+  FPSSum += global::lastTickDuration;
+  
+  if (global::tickCount != 0 && global::tickCount % 100 == 0)
+  {
+    printf("FPS:\t%.1f\n", 1.f / (FPSSum / 100.f));
+    FPSSum = 0.f;
+  }
+  
   handleSDLEvents();
   handleInput();
   
@@ -83,6 +98,9 @@ bool Controller::tick()
   m_Renderer->tick(0.01);
   
   m_Renderer->show();
+  
+  global::tickCount++;
+  global::lastTickDuration = (SDL_GetTicks() - time1) / 1000.f;
   
   return !m_Quit;
 }

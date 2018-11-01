@@ -62,10 +62,30 @@ void Map::tick()
     removeEntity(unusedEntites.top());
     unusedEntites.pop();
   }
+  
+  tickChunks();
 
   #ifdef DEBUG_MAP_PRINT
     print();
   #endif /* DEBUG_MAP_PRINT */
+}
+
+void Map::tickChunks()
+{
+  for (auto& chunkEntry : m_Chunks)
+  {
+    auto& chunkPtrArray = chunkEntry.second;
+    for (auto p = 0u; p < containerLength; p++)
+    {
+      for (auto q = 0u; q < containerLength; q++)
+      {
+        if (chunkPtrArray[p][q].get()->getLastTick() != global::tickCount)
+        {
+          chunkPtrArray[p][q].get()->tick();
+        }
+      }
+    }
+  }
 }
 
 /**

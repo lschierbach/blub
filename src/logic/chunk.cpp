@@ -13,6 +13,7 @@
 #include <vector>
 #include <iostream>
 
+#include "game/global.h"
 #include "logic/chunk.h"
 #include "game/filesystem.hpp"
 #include "game/generator.hpp"
@@ -225,6 +226,22 @@ void Chunk::joinThreads()
   }
 }
 
+void Chunk::tick()
+{
+  // @todo: don't lock if chunk is saving/loading, instead skip tick
+  std::lock_guard<std::mutex> lock(m_DataMutex);
+  for (auto& entity : m_Data.m_Entities)
+  {
+    entity.tick(0.f);
+  }
+  
+  m_LastTick = global::tickCount;
+}
+
+uint32_t Chunk::getLastTick() const
+{
+  return m_LastTick;
+}
 Chunk::Chunk(Chunk& cpy)
 {
   this->m_pos = cpy.m_pos;

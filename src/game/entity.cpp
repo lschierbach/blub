@@ -23,7 +23,7 @@
 
 #include "game/entity.h"
 #include "logic/chunk.h"
-
+#include "game/global.h"
 
 Entity::Entity(vec2<float> p, vec2<float> s, vec2<float> a)
 {
@@ -102,7 +102,7 @@ vec2<float> Entity::getAnchor() const
 
 void Entity::tick(float tickTime)
 {
-
+  //printf("tick %lu\n", global::tickCount);
 }
 
 vec2<float> Entity::cartesianToAxial(const vec2<float>& cartesian)
