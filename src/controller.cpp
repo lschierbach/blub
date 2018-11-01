@@ -17,6 +17,7 @@
  *
  */
 
+#include <chrono>
 #include "controller.h"
 
 void Controller::init()
@@ -99,8 +100,16 @@ bool Controller::tick()
   
   m_Renderer->show();
   
-  global::tickCount++;
+  auto time2 = SDL_GetTicks();
+  
+  
+  if (time2 - time1 < m_IdealFrameTime)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(m_IdealFrameTime - (time2 - time1)));
+  }
+  
   global::lastTickDuration = (SDL_GetTicks() - time1) / 1000.f;
   
+  global::tickCount++;
   return !m_Quit;
 }

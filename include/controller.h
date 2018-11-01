@@ -30,6 +30,9 @@ class Controller
     
     SDL_MouseMotionEvent m_MouseMotion;
     
+    // at 60fps one fram is about 16ms
+    static constexpr int m_IdealFrameTime = 16;
+    
   public:
     void init();
       
