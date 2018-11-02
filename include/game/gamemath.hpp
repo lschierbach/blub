@@ -73,11 +73,11 @@ namespace game::math {
   }
 
   static int axialToChunkP(float axialP) {
-  	return axialP/chunkSize;
+  	return static_cast<int>(floor(axialP/chunkSize));
   }
 
   static int axialToChunkQ(float axialQ) {
-  	return axialQ/chunkSize;
+  	return static_cast<int>(floor(axialQ/chunkSize));
   }
 }
 
