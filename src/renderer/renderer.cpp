@@ -235,7 +235,7 @@ LODImage testLoadLOD()
   filestrings[1] = std::string("data/img/defaultTileset_2064.png");
   filestrings[2] = std::string("data/img/defaultTileset_1032.png");
 
-  LODImage theImage(filestrings, 3, 1032);
+  LODImage theImage(filestrings, 3, 64);
   return theImage;
 }
 

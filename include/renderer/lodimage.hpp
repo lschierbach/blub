@@ -18,13 +18,13 @@ class LODImage {
     LODImage(const std::string* paths, size_t  numImages, unsigned int minWidth) {
       // initial images
       GPU_Image* img = NULL;
-      for(int i=0; i<numImages; i++){
+      for(size_t i=0; i<numImages; i++){
         img = GPU_LoadImage(paths[i].c_str());
         GPU_SetImageFilter(img, GPU_FILTER_NEAREST);
         images.push_back(img);
       }
 
-      for(size_t i=0; img->w/2 >= minWidth; i++) {
+      for(size_t i=numImages-1; img->w/2 >= minWidth; i++) {
         // create next smaller image
         img = GPU_CreateImage(img->w/2, img->h/2, GPU_FORMAT_RGBA);
         GPU_SetImageFilter(img, GPU_FILTER_NEAREST);
