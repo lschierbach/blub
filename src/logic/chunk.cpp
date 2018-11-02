@@ -249,3 +249,7 @@ Chunk::Chunk(Chunk& cpy)
   this->m_Data = cpy.getData();
 }
 
+void Chunk::lockData()
+{
+  std::lock_guard<std::mutex> lock(m_DataMutex);
+}

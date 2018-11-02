@@ -62,13 +62,13 @@ class Chunk
     void generate();
 
     game::vec2<int> m_pos;
+    
+    std::mutex    m_DataMutex;
 
     
     uint32_t m_LastTick;
  
   public:
-    
-    std::mutex    m_DataMutex;
  
     struct Data : public Saveable
     {
@@ -109,6 +109,8 @@ class Chunk
     Data m_Data;
     
     game::vec2<int> getPos() const;
+    
+    void lockData();
 };
 
 #endif /* CHUNK_H */

@@ -361,7 +361,7 @@ Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
   auto& chunks = m_Chunks.find(entity)->second;
   auto chunkPtr = chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get();
   
-  std::lock_guard<std::mutex> lock(chunkPtr->m_DataMutex);
+  chunkPtr->lockData();
   
   return (chunkPtr);
 }
