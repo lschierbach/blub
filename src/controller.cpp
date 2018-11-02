@@ -19,6 +19,7 @@
 
 #include <chrono>
 #include "controller.h"
+#include "game/force.hpp"
 
 void Controller::init()
 {
@@ -36,7 +37,7 @@ void Controller::init()
   m_Quit = false;
   
   m_Renderer->addCamera(0, 0, 1, 1, 14);
-  
+
   SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
@@ -61,7 +62,15 @@ void Controller::handleSDLEvents()
         if (evt.button.clicks == 1)
         {
           vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));
-          printf("click at %d, %d; units %f, %f\n", evt.button.x, evt.button.y, clickXY[0], clickXY[1]);
+          
+          auto entities = m_Model->getMap()->getEntitiesAt(clickXY, 5.f);
+          
+          for (auto& entity : entities)
+          {
+            auto diff = (entity->getXY() - clickXY);
+            auto forcedir = game::math::norm(diff);
+            entity->addForce(game::Force( 100.f * forcedir * ( 1 / forcedir.abs()), .0f));
+          }
         }
         break;
     }

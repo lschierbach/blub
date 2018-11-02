@@ -53,8 +53,8 @@ namespace game::math {
   static vec2<int> axialToChunk(const vec2<float>& axial)
   {
     vec2<int> newvec(
-      static_cast<int>(axial[0]/chunkSize),
-      static_cast<int>(axial[1]/chunkSize)
+      static_cast<int>(floor(axial[0]/chunkSize)),
+      static_cast<int>(floor(axial[1]/chunkSize))
     );
 		return newvec;
   }

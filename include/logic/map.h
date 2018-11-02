@@ -75,7 +75,7 @@ class Map
     void addEntity(SharedEntityPtr entity);
     void removeEntity(SharedEntityPtr entity);
 
-    std::vector<Entity> getEntitiesAt(game::vec2<float> pos);
+    std::vector<PhysicsEntity*> getEntitiesAt(game::vec2<float> pos, float radius);
     
     Chunk* getChunk(int relativeP, int relativeQ, SharedEntityPtr entity);
     static size_t getLoadingDistance();

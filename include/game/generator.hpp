@@ -90,13 +90,14 @@ namespace generator
 
     chunkData.m_Tilesets.push_back(Tileset(0.5f, 1.0f, 1.0f, imgName, tileData));
     
-    for (auto i = 0u; i < 5; i++)
+    for (auto i = 0u; i < 20 + rand() % 10; i++)
     {
-      auto p = vec2<float>(
-        static_cast<float>(game::math::chunkToAxialP(chunkP) + (rand() % game::math::chunkSize)),
-        static_cast<float>(game::math::chunkToAxialQ(chunkQ) + (rand() % game::math::chunkSize))
-      );
-      PhysicsEntity e(p[0], p[1]);
+      auto chunkPos = game::math::chunkToAxial( {chunkP, chunkQ} );
+      auto p = chunkPos + vec2<float> { static_cast<float>(rand() % game::math::chunkSize), static_cast<float>(rand() % game::math::chunkSize) };
+      
+      auto width = rand() / float(RAND_MAX);
+      width += 0.2f;
+      PhysicsEntity e(p, { width, width }, { .5f, .5f });
       chunkData.m_Entities.push_back(e);
     }
   }

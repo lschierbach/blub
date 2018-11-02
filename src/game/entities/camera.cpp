@@ -218,7 +218,7 @@ void Camera::renderEntity(Entity e)
     entityY,                                     // y1
     entityX + (e.getSize()[0] * pixelsInUnit()), // x2
     entityY + (e.getSize()[1] * pixelsInUnit()), // y2
-    {255,255,0,255}                              // color for generic entity
+    {0,0,0,255}                              // color for generic entity
   );
 }
 

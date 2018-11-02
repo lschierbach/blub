@@ -233,7 +233,7 @@ void Chunk::tick()
   std::lock_guard<std::mutex> lock(m_DataMutex);
   for (auto& entity : m_Data.m_Entities)
   {
-    entity.tick(0.f);
+    entity.tick();
   }
   
   m_LastTick = global::tickCount;

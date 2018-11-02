@@ -16,12 +16,27 @@ class PhysicsEntity : public Entity
     forceVector m_Forces;
     
   public:
-    PhysicsEntity(int p, int q);;
+    PhysicsEntity() {};
+    PhysicsEntity(vec2<float> p, vec2<float> s, vec2<float> a);
     
     void tick();
     void physicsTick();
     
     void addForce(game::Force force);
+    
+    void write(std::ofstream& out) override
+    {
+      filesystem::writeStruct(out, m_Position);
+      filesystem::writeStruct(out, size);
+      filesystem::writeStruct(out, anchor);
+    }
+    
+    void read(std::ifstream& in) override
+    {
+      filesystem::readStruct(in, m_Position);
+      filesystem::readStruct(in, size);
+      filesystem::readStruct(in, anchor);
+    }
 };
 
 #endif /* PHYSICSENTITY_H */

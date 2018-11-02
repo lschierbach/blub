@@ -39,7 +39,7 @@
 
 #include "structs/tileset.h"
 #include "game/vector.hpp"
-#include "game/entity.h"
+#include "game/entities/physicsEntity.h"
 
 class Chunk
 {
@@ -53,7 +53,7 @@ class Chunk
     void joinThreads();
 
     using tilesetVector = std::vector<Tileset>;
-    using entityVector = std::vector<Entity>;
+    using entityVector = std::vector<PhysicsEntity>;
 
     void reload();
 

@@ -29,10 +29,10 @@ using game::vec2;
 class Entity : public Saveable {
 
   private:
-    vec2<float> size; // w h
-    vec2<float> anchor; //fraction of size
 
   public:
+    vec2<float> size; // w h
+    vec2<float> anchor; //fraction of size
     float p;
     float q;
 

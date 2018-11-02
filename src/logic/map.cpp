@@ -12,6 +12,7 @@
  */
 
 #include "logic/map.h"
+#include "game/gamemath.hpp"
 
 #include <memory> //std::shared_ptr, std::make_shared
 #include <array>  //std::array, std::make_pair
@@ -361,13 +362,40 @@ Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
   return (chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get());
 }
 
-std::vector<Entity> Map::getEntitiesAt(game::vec2<float> pos) 
+std::vector<PhysicsEntity*> Map::getEntitiesAt(game::vec2<float> pos, float radius) 
 {
-  auto entityVector = std::vector<Entity> {};
+  auto entityVector = std::vector<PhysicsEntity*> {};
+  vec2<int> targetChunkPos = game::math::cartesianToChunk(pos);
+  
+  for (auto& chunkEntry : m_Chunks)
+  {
+    const auto& chunk = chunkEntry.second;
+    
+    auto diff = chunk[loadingDistance][loadingDistance].get()->getPos() - targetChunkPos;
+    
+    // @todo: optimization... very stupid way atm
+    if (abs(diff[0]) <= loadingDistance && abs(diff[1]) <= loadingDistance)
+    {
+      for (size_t p = 0; p < containerLength; p++)
+      {
+        for (size_t q = 0; q < containerLength; q++)
+        {
+          for (auto& entity : chunk[p][q].get()->m_Data.m_Entities)
+          {
+            auto diff = pos - entity.getXY(); 
+            if(game::math::abs(diff) <= radius)
+            {
+              entityVector.push_back(&entity);
+            }
+          }
+        }
+      }
+      return entityVector;
+    }
+  }
   
   return entityVector;
 }
-
 
 size_t Map::getLoadingDistance()
 {
