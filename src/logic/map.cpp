@@ -359,7 +359,11 @@ void Map::print()
 Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
 {
   auto& chunks = m_Chunks.find(entity)->second;
-  return (chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get());
+  auto chunkPtr = chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get();
+  
+  std::lock_guard<std::mutex> lock(chunkPtr->m_DataMutex);
+  
+  return (chunkPtr);
 }
 
 std::vector<PhysicsEntity*> Map::getEntitiesAt(game::vec2<float> pos, float radius) 

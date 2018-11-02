@@ -63,11 +63,12 @@ class Chunk
 
     game::vec2<int> m_pos;
 
-    std::mutex    m_DataMutex;
     
     uint32_t m_LastTick;
  
   public:
+    
+    std::mutex    m_DataMutex;
  
     struct Data : public Saveable
     {
