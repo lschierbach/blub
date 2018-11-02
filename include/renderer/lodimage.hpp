@@ -5,6 +5,7 @@
 #include "SDL_gpu.h"
 
 #include "game/entities/camera.h"
+#include "game/gamemath.hpp"
 
 class LODImage {
   private:
@@ -69,7 +70,7 @@ class LODImage {
       // if not, update for next time
       lastUnit = camera->pixelsInUnit();
 
-      float optimalW = camera->pixelsInUnit()*16.f;
+      float optimalW = camera->pixelsInUnit()*16.f*game::math::hexWidth;
 
       for(size_t i=images.size(); i>0; --i) {
         if(images[i-1]->w >= optimalW) {
