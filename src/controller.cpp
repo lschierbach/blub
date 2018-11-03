@@ -79,7 +79,6 @@ void Controller::handleSDLEvents()
 
 void Controller::quit() 
 {
-  m_Quit = true;
   delete m_Model;
   delete m_Renderer;
 }
@@ -95,7 +94,7 @@ void Controller::handleInput()
   if (keystate[SDL_SCANCODE_S]) m_Renderer->moveCamera(0, 0.0, camSpeed * m_Renderer->getCameraScale(0));
   if (keystate[SDL_SCANCODE_D]) m_Renderer->moveCamera(0, camSpeed * m_Renderer->getCameraScale(0), 0.0);
   if (keystate[SDL_SCANCODE_E]) m_Renderer->toggleFullscreen();
-  if (keystate[SDL_SCANCODE_Q]) quit();
+  if (keystate[SDL_SCANCODE_Q]) m_Quit = true;
   if (keystate[SDL_SCANCODE_R]) m_Renderer->zoomCamera(0, 0.9);
   if (keystate[SDL_SCANCODE_F]) m_Renderer->zoomCamera(0, 1.111111111111111);
   
@@ -119,6 +118,12 @@ bool Controller::tick()
   handleSDLEvents();
   handleInput();
   
+  if (m_Quit)
+  {
+    quit();
+    return false;
+  }
+  
   m_Model->tick();
   m_Renderer->tick(0.01);
   
@@ -135,5 +140,5 @@ bool Controller::tick()
   global::lastTickDuration = (SDL_GetTicks() - time1) / 1000.f;
   
   global::tickCount++;
-  return !m_Quit;
+  return true;
 }
