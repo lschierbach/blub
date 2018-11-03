@@ -80,7 +80,7 @@ void Controller::handleSDLEvents()
 void Controller::handleInput()
 {
   const auto* keystate = SDL_GetKeyboardState(NULL);
-  static float camSpeed = 0.01;
+  auto camSpeed = 0.5 * global::lastTickDuration;
   
   if (keystate[SDL_SCANCODE_W]) m_Renderer->moveCamera(0, 0.0, -camSpeed * m_Renderer->getCameraScale(0));
   if (keystate[SDL_SCANCODE_A]) m_Renderer->moveCamera(0, -camSpeed * m_Renderer->getCameraScale(0), 0.0);

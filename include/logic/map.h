@@ -27,11 +27,6 @@
 #ifndef MAP_H
 #define MAP_H
 
-#ifdef DEBUG_MAP
-  #define DEBUG_MAP_PRINT
-  #define DEBUG_MAP_UPDATE
-#endif
-
 #include "game/global.h"
 #include "logic/chunk.h"
 #include "structs/tileset.h"
@@ -54,6 +49,8 @@ class Map
     using SharedEntityPtr = std::shared_ptr<Entity>;
     using SharedChunkPtr = std::shared_ptr<Chunk>;
     using SharedChunkPtrArr = std::array<std::array<SharedChunkPtr, containerLength>, containerLength>;
+    
+    static size_t getLoadingDistance();
 
   private:
     std::stack<SharedChunkPtr> m_unusedChunks;
@@ -67,9 +64,6 @@ class Map
     
 
   public:
-    Map();
-    ~Map();
-
     void tick();
 
     void addEntity(SharedEntityPtr entity);
@@ -78,7 +72,6 @@ class Map
     std::vector<PhysicsEntity*> getEntitiesAt(game::vec2<float> pos, float radius);
     
     Chunk* getChunk(int relativeP, int relativeQ, SharedEntityPtr entity);
-    static size_t getLoadingDistance();
 };
 
 #endif /* MAP_H */

@@ -202,13 +202,10 @@ void Renderer::renderFrame()
 bool Renderer::chunkInBounds(const Chunk& chunk, const CameraEntry& camera)
 {
   Camera* camptr = std::static_pointer_cast<Camera>(camera.camera).get();
-
-  vec2<> chunkUpperLeft = vec2<>(game::math::chunkToEntityX(chunk.getX())-0.5f,
-                                 game::math::chunkToEntityY(chunk.getY())-0.5f);
-
-  vec2<> chunkLowerRight = vec2<>(game::math::chunkToEntityX(chunk.getX())+game::math::chunkSize+0.5f,
-                                  game::math::chunkToEntityY(chunk.getY())+game::math::chunkSize+0.5f);
-
+  
+  auto chunkUpperLeft  = game::math::chunkToEntityPos(chunk.getPos()) - vec2<float>{ .5f, .5f };
+  auto chunkLowerRight = game::math::chunkToEntityPos(chunk.getPos()) + ((game::math::chunkSize + .5f) * vec2<float>{ 1.f, 1.f });
+  
   vec2<> camUpperLeft(camptr->getXY() - 0.5f*camptr->unitsInPixel()*camptr->getSize());
   vec2<> camLowerRight(camptr->getXY() + 0.5f*camptr->unitsInPixel()*camptr->getSize());
 

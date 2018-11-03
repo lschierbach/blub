@@ -9,13 +9,8 @@
  *
  */
 
-#include <string>
-#include <vector>
-#include <iostream>
-
 #include "game/global.h"
 #include "logic/chunk.h"
-#include "game/filesystem.hpp"
 #include "game/generator.hpp"
 #include "game/gamemath.hpp"
 
@@ -29,52 +24,19 @@ Chunk::~Chunk()
   joinThreads();
 }
 
-/**
-    returns p
-*/
-int Chunk::getX() const
-{
-  return m_pos[0];
-}
-
-/**
-    returns q
-*/
-int Chunk::getY() const
-{
-  return m_pos[1];
-}
-
-game::Vector<2, int> Chunk::getPos() const
+game::vec2<int> Chunk::getPos() const
 {
   return m_pos;
 }
 
-/**
-    returns m_tilesets threadsafe
-*/
-Chunk::Data Chunk::getData()
+void Chunk::setPos(game::vec2<int> pos)
 {
-  std::lock_guard<std::mutex> lock(m_DataMutex);
-  return m_Data;
-}
-
-/**
-    Changes position of chunk on the world.
-    If the new position doesn't equal the old, the chunk will save its current m_Data and load/generate new.
-
-    @param p    p
-    @param q    q
-*/
-void Chunk::setPos(game::Vector<2, int> pos)
-{
-  // don't reload if position hasn't changed
   if(pos == this->m_pos)
   {
     return;
   }
 
-  // make sure no one is accessing tilesetm_Data at the moment
+  // make sure no one is accessing Data at the moment
   joinThreads();
 
   // on start no m_Data is in m_tilesets...
@@ -88,32 +50,8 @@ void Chunk::setPos(game::Vector<2, int> pos)
   m_reloadThread = std::thread(&Chunk::reload, this);
 }
 
-/**
-    Saves the m_Data of the tilesets on the disk
-*/
 void Chunk::save()
 {
-  #ifdef DEBUG_CHUNK_RELOAD
-    printf("[CHUNK]SAVE\n");
-  #endif /* DEBUG_CHUNK_RELOAD */
-
-  #ifdef DEBUG_CHUNK_TILESET
-    for(const auto& set : m_Data.m_Tilesets)
-    {
-      std::cout << "Tileset\t" << set.imgName << std::endl;
-      set.printTiles();
-    }
-  #endif /* DEBUG_CHUNK_TILESET */
-  #ifdef DEBUG_CHUNK_ENTITY
-  for (const auto& ent : m_Data.m_Entities)
-  {
-    printf("Entity with pos, anchor, size:\n");
-    ent.getPQ().print();
-    ent.getAnchor().print();
-    ent.getSize().print();
-  }
-  #endif /* DEBUG_CHUNK_ENTITY */
-
   // get unique path
   std::string path = chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]);
 
@@ -129,9 +67,6 @@ void Chunk::save()
   filesystem::writeStruct(path + ".tdat", temp);
 }
 
-/**
-    Loads m_Data from the disk, depenting on the position, into its tilesets
-*/
 void Chunk::load()
 {
   // get unique path
@@ -146,76 +81,35 @@ void Chunk::load()
     std::scoped_lock lock(m_DataMutex);
     m_Data = temp;
   }
-
-  #ifdef DEBUG_CHUNK_RELOAD
-    printf("[CHUNK]\tLOAD\n");
-  #endif /* DEBUG_CHUNK_RELOAD */
-
-  #ifdef DEBUG_CHUNK_TILESET
-  for (const auto& set : m_Data.m_Tilesets)
-  {
-    std::cout << "Tileset\t" << set.imgName << std::endl;
-    set.printTiles();
-  }
-  #endif /* DEBUG_CHUNK_TILESET */
-  #ifdef DEBUG_CHUNK_ENTITY
-  for (const auto& ent : m_Data.m_Entities)
-  {
-    printf("Entity with pos, anchor, size:\n");
-    ent.getPQ().print();
-    ent.getAnchor().print();
-    ent.getSize().print();
-  }
-  #endif /* DEBUG_CHUNK_ENTITY */
 }
 
-/**
-    Generates a new chunk
-*/
 void Chunk::generate()
 {
-  // dummy m_Data
   std::lock_guard<std::mutex> lock(m_DataMutex);
 
   generator::generateChunk<game::math::chunkSize>(m_Data, m_pos[0], m_pos[1], game::math::chunkSize);
-  
-  #ifdef DEBUG_CHUNK_RELOAD
-    printf("[CHUNK]GENERATE\n");
-  #endif /* DEBUG_CHUNK_RELOAD */
-
 }
 
-/**
-    clears tilesets and overwrites it
-*/
 void Chunk::reload()
 {
   {
     std::scoped_lock lock(m_DataMutex);
-    // remove old tileset m_Data
     m_Data.m_Tilesets.clear();
     m_Data.m_Entities.clear();
   }
   
-  // if chunk-m_Data exists
   if (filesystem::fileExists(chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]) + ".tdat"))
   {
-    // load it from disk
     load();
   }
   else
   {
-    // else generate chunk
     generate();
 
-    // and save it on disk
     m_saveThread = std::thread(&Chunk::save, this);
   }
 }
 
-/**
-    joins threads
-*/
 void Chunk::joinThreads()
 {
   // always reloadThread first, because he can spawn savethread!
@@ -247,11 +141,6 @@ void Chunk::tick()
 uint32_t Chunk::getLastTick() const
 {
   return m_LastTick;
-}
-Chunk::Chunk(Chunk& cpy)
-{
-  this->m_pos = cpy.m_pos;
-  this->m_Data = cpy.getData();
 }
 
 void Chunk::lockData()

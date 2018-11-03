@@ -69,19 +69,6 @@ namespace generator
       {
         char tileIndex = 65;
         
-        if(collisionMap[p][q])
-        {
-          if (q > 0)         open[0] = collisionMap.at(p).at(q-1);
-          if (q > 0 && p < size - 1)  open[1] = collisionMap.at(p+1).at(q-1);
-          if (p < size - 1)           open[2] = collisionMap.at(p+1).at(q);
-          if (q < size - 1)           open[3] = collisionMap.at(p).at(q+1);
-          if (p > 0 && q < size - 1)  open[4] = collisionMap.at(p-1).at(q+1);
-          if (p > 0)         open[5] = collisionMap.at(p-1).at(q);
-          
-          tileIndex = (open[0] + (2*open[1]) + (4*open[2]) + (8*open[3]) + (16*open[4]) + (32*open[5])) + 1; 
-          // TODO: rewrite smarter... sorry
-        }
-      
         temp.push_back(Tile(tileIndex, .0f));
       }
 

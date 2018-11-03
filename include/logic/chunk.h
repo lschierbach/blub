@@ -26,12 +26,6 @@
 #ifndef CHUNK_H
 #define CHUNK_H
 
-#ifdef DEBUG_CHUNK
-  #define DEBUG_CHUNK_TILESET
-  #define DEBUG_CHUNK_RELOAD
-  #define DEBUG_CHUNK_ENTITY
-#endif
-
 #include <thread>   //std::thread
 #include <mutex>    //std::mutex
 
@@ -40,20 +34,23 @@
 #include "structs/tileset.h"
 #include "game/vector.hpp"
 #include "game/entities/physicsEntity.h"
+#include "game/filesystem.hpp"
 
 class Chunk
 {
   private:
+    
+    using tilesetVector = std::vector<Tileset>;
+    using entityVector = std::vector<PhysicsEntity>;
+
   
     const std::string chunkFolder = "data/chunks/";
       
     std::thread m_saveThread;
     std::thread m_reloadThread;
+    std::mutex  m_DataMutex;
 
     void joinThreads();
-
-    using tilesetVector = std::vector<Tileset>;
-    using entityVector = std::vector<PhysicsEntity>;
 
     void reload();
 
@@ -62,9 +59,6 @@ class Chunk
     void generate();
 
     game::vec2<int> m_pos;
-    
-    std::mutex    m_DataMutex;
-
     
     uint32_t m_LastTick;
  
@@ -87,19 +81,9 @@ class Chunk
         filesystem::readRange(in, m_Entities);
       }
     };
-
-  private:
-
-    Data getData();
-  
-  public:
-
+    
     Chunk(int x, int y);
-    Chunk(Chunk& cpy);
     ~Chunk();
-
-    int getX() const;
-    int getY() const;
     
     uint32_t getLastTick() const;
 

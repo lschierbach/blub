@@ -25,19 +25,6 @@ int mod(int a, int b)
   return (b + (a % b)) % b;
 }
 
-Map::Map()
-{
-
-}
-
-Map::~Map()
-{
-
-}
-
-/**
-    watches for removed entities and adjusts chunks
-*/
 void Map::tick()
 {
   std::stack<SharedEntityPtr> unusedEntites;
@@ -65,10 +52,6 @@ void Map::tick()
   }
   
   tickChunks();
-
-  #ifdef DEBUG_MAP_PRINT
-    print();
-  #endif /* DEBUG_MAP_PRINT */
 }
 
 void Map::tickChunks()
@@ -76,28 +59,23 @@ void Map::tickChunks()
   for (auto& chunkEntry : m_Chunks)
   {
     auto& chunkPtrArray = chunkEntry.second;
-    for (auto p = 0u; p < containerLength; p++)
+    for (auto x = 0u; x < containerLength; x++)
     {
-      for (auto q = 0u; q < containerLength; q++)
+      for (auto y = 0u; y < containerLength; y++)
       {
-        if (chunkPtrArray[p][q].get()->getLastTick() != global::tickCount)
+        if (chunkPtrArray[x][y].get()->getLastTick() != global::tickCount)
         {
-          chunkPtrArray[p][q].get()->tick();
+          chunkPtrArray[x][y].get()->tick();
         }
       }
     }
   }
 }
 
-/**
-    Adds an entity to the map and allocates memory for its chunk
-
-    @param entity   the entity to be added to the map
-*/
 void Map::addEntity(SharedEntityPtr entity)
 {
 
-  game::Vector<2, int> entityPos = game::math::entityToChunkPos(entity.get()->getXY());
+  auto entityPos = game::math::entityToChunkPos(entity.get()->getXY());
 
   // don't add doubled element
   if (m_Chunks.count(entity) > 0)
@@ -106,11 +84,11 @@ void Map::addEntity(SharedEntityPtr entity)
   }
 
   SharedChunkPtrArr chunks;
-  for (size_t p = 0; p < containerLength; p++)
+  for (auto x = 0u; x < containerLength; x++)
   {
-    for (size_t q = 0; q < containerLength; q++)
+    for (auto y = 0u; y < containerLength; y++)
     {
-      chunks[p][q] = std::make_shared<Chunk>(entityPos[0] - loadingDistance + p, entityPos[1] - loadingDistance + q);
+      chunks[x][y] = std::make_shared<Chunk>(entityPos[0] - loadingDistance + x, entityPos[1] - loadingDistance + y);
     }
   }
   m_Chunks.insert(std::make_pair(entity, chunks));
@@ -121,16 +99,10 @@ void Map::addEntity(SharedEntityPtr entity)
   updateEntity(entity, true);
 }
 
-/**
-    Removes an entity and its chunk from the map
-
-    @param entity   the entity to be removed
-*/
 void Map::removeEntity(SharedEntityPtr entity)
 {
   auto it = m_Chunks.find(entity);
 
-  // don't try to remove entity which doesn't exist
   if (it == m_Chunks.end())
   {
     return;
@@ -138,11 +110,11 @@ void Map::removeEntity(SharedEntityPtr entity)
 
   const auto& chunks = it->second;
 
-  for (size_t p = 0; p < containerLength; p++)
+  for (auto x = 0u; x < containerLength; x++)
   {
-    for (size_t q = 0; q < containerLength; q++)
+    for (auto y = 0u; y < containerLength; y++)
     {
-      if (chunks[p][q].use_count() > 1)
+      if (chunks[x][y].use_count() > 1)
       {
         m_unusedChunks.pop();
       }
@@ -152,11 +124,6 @@ void Map::removeEntity(SharedEntityPtr entity)
   m_Chunks.erase(it);
 }
 
-/**
-    Updates the chunks which should be loaded for each entity and manages entities sharing chunks
-
-    @param  entity    the entity that should be updated
-*/
 void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
 {
   auto& chunks = m_Chunks.find(entity)->second;
@@ -166,74 +133,62 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
   auto entityPos = game::math::entityToChunkPos(entity.get()->getXY());
   auto centerChunkPos = chunks[loadingDistance][loadingDistance].get()->getPos();
   
-  // has entity moved? Or is it its first update?
   if (centerChunkPos != entityPos || firstUpdate)
   {
-    // get diff
     auto diff = entityPos - centerChunkPos;
     
-    // iterate over each coordinate
-    for (size_t p = 0; p < containerLength; p++)
+    for (auto x = 0u; x < containerLength; x++)
     {
-      for (size_t q = 0; q < containerLength; q++)
+      for (auto y = 0u; y < containerLength; y++)
       {
         // get new array-position
         
-        auto arrayPosition = game::Vector<2, int> {
-          mod(p - diff[0], containerLength),
-          mod(q - diff[1], containerLength)
+        auto newChunkArrayPosition = game::vec2<int> {
+          mod(x - diff[0], containerLength),
+          mod(y - diff[1], containerLength)
         };
 
-        #ifdef DEBUG_MAP_UPDATE
-          printf("[MAP]\tChunk %i, %i, arrayPos %i, %i -> %i, %i\n", centerChunkPos[0], centerChunkPos[1], p, q, arrayPosition[0], arrayPosition[1]);
-        #endif
-
-        // iterate over each entity
         for (const auto& it : m_Chunks)
         {
-          SharedEntityPtr otherEntity = it.first;
+          auto otherEntity = it.first;
+          
           if (otherEntity != entity)
           {
             auto& otherEntityChunks = m_Chunks.find(otherEntity)->second;
             auto otherEntityCenterPos = otherEntityChunks[loadingDistance][loadingDistance].get()->getPos();
             
             // get chunk position of other entity instead of entitypos, in case both player moved the same frame
-            auto otherEntityArrayPosition = arrayPosition + entityPos - otherEntityCenterPos;
+            auto otherEntityChunkArrayPosition = newChunkArrayPosition + entityPos - otherEntityCenterPos;
             
             
             // check for each dimension if arrayIndex is in bounds
-            if (otherEntityArrayPosition[0] > -1 && otherEntityArrayPosition[0] < containerLength &&
-                otherEntityArrayPosition[1] > -1 && otherEntityArrayPosition[1] < containerLength)
+            if (otherEntityChunkArrayPosition[0] > -1 && otherEntityChunkArrayPosition[0] < containerLength &&
+                otherEntityChunkArrayPosition[1] > -1 && otherEntityChunkArrayPosition[1] < containerLength)
             {
-              
-              tempChunks[arrayPosition[0]][arrayPosition[1]] = otherEntityChunks[otherEntityArrayPosition[0]][otherEntityArrayPosition[1]];
+              tempChunks[newChunkArrayPosition[0]][newChunkArrayPosition[1]] = otherEntityChunks[otherEntityChunkArrayPosition[0]][otherEntityChunkArrayPosition[1]];
 
-              #ifdef DEBUG_MAP_UPDATE
-                printf("[MAP]\tCopied chunkptr from other entity\n");
-              #endif
               break;
             }
           }
         }
 
-        // if chunk hasn't been found at other entity
-        if (tempChunks[arrayPosition[0]][arrayPosition[1]] == nullptr)
+        if (tempChunks[newChunkArrayPosition[0]][newChunkArrayPosition[1]] == nullptr)
         {
-          // if other entity uses current chunk, take one from stack
-          if (chunks[p][q].use_count() > 1)
+          // if no other entity uses current chunk, take one from stack
+          if (chunks[x][y].use_count() > 1)
           {
             // maybe chunk still lays on stack
-            bool foundChunk  = false;
+            bool foundInUnusedChunks  = false;
             std::stack<SharedChunkPtr> tempUnusedChunks;
 
             while(m_unusedChunks.size() > 0)
             {
               // move everything from main-stack to temp-stack
               // and check if chunk searched for lies on it
-              if (m_unusedChunks.top()->getPos() == entityPos + arrayPosition - game::Vector<2, int>{ static_cast<int>(loadingDistance), static_cast<int>(loadingDistance) })
+              if (m_unusedChunks.top()->getPos() == entityPos + newChunkArrayPosition - game::Vector<2, int>{ static_cast<int>(loadingDistance), static_cast<int>(loadingDistance) })
               {
-                foundChunk = true;
-                tempChunks[arrayPosition[0]][arrayPosition[1]] = m_unusedChunks.top();
+                foundInUnusedChunks = true;
+                tempChunks[newChunkArrayPosition[0]][newChunkArrayPosition[1]] = m_unusedChunks.top();
                 m_unusedChunks.pop();
                 break;
               }
@@ -251,55 +206,36 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
               tempUnusedChunks.pop();
             }
             // already found everything on stack!
-            if (foundChunk)
+            if (foundInUnusedChunks)
             {
-              #ifdef DEBUG_MAP_UPDATE
-                printf("[MAP]\tFound chunk on unused Chunk\n");
-              #endif
               continue;
             }
 
             // if not, take first element from stack and overrite it later..
-            chunks[p][q] = m_unusedChunks.top();
+            chunks[x][y] = m_unusedChunks.top();
             m_unusedChunks.pop();
-
-            #ifdef DEBUG_MAP_UPDATE
-              printf("[MAP]\tTook chunk from unused Chunk\n");
-            #endif
           }
 
           // check if arrayIndex is out of bounds
-          if (p - diff[0] >= containerLength || p - diff[0] < 0 ||
-              q - diff[1] >= containerLength || q - diff[1] < 0)
+          if (x - diff[0] >= containerLength || x - diff[0] < 0 ||
+              y - diff[1] >= containerLength || y - diff[1] < 0)
           {
             // override chunk
-            chunks[p][q]->setPos({
-              entityPos[0] + (arrayPosition[0] - static_cast<int>(loadingDistance)), 
-              entityPos[1] + (arrayPosition[1] - static_cast<int>(loadingDistance)) 
+            chunks[x][y]->setPos({
+              entityPos[0] + (newChunkArrayPosition[0] - static_cast<int>(loadingDistance)), 
+              entityPos[1] + (newChunkArrayPosition[1] - static_cast<int>(loadingDistance)) 
             });
-
-            #ifdef DEBUG_MAP_UPDATE
-              printf("[MAP]\tOverride Chunk\n");
-            #endif
           }
           // move its pointer
-          tempChunks[arrayPosition[0]][arrayPosition[1]] = chunks[p][q];
-
-          #ifdef DEBUG_MAP_UPDATE
-            printf("[MAP]\tMove Pointer\n");
-          #endif
+          tempChunks[newChunkArrayPosition[0]][newChunkArrayPosition[1]] = chunks[x][y];
         }
         // if it has been found, store old chunk
         else
         {
           // but only, if no other entity uses it
-          if (chunks[p][q].use_count() < 2)
+          if (chunks[x][y].use_count() < 2)
           {
-            m_unusedChunks.push(chunks[p][q]);
-
-            #ifdef DEBUG_MAP_UPDATE
-              printf("[MAP]\tPushed old Chunk on unused Chunk\n");
-            #endif
+            m_unusedChunks.push(chunks[x][y]);
           }
         }
       }
@@ -307,53 +243,6 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
 
     chunks = tempChunks;
   }
-}
-
-/**
-    Debug tool printing the number of entities referencing to a chunk
-*/
-void Map::print()
-{
-  printf("[MAP]\tBEGIN_PRINT\n");
-
-  std::array<std::array<int, 20>, 20> mapUsages;
-
-  for (size_t p = 0; p < 20; p++)
-  {
-    for (size_t q = 0; q < 20; q++)
-    {
-      mapUsages[p][q] = 0;
-    }
-  }
-
-  // iterate over each entity
-  for (auto& it : m_Chunks)
-  {
-    const SharedEntityPtr& entity = it.first;
-    SharedChunkPtrArr& chunks = it.second;
-
-    for (size_t p = 0; p < containerLength; p++)
-    {
-      for (size_t q = 0; q < containerLength; q++)
-      {
-        if (chunks[p][q]->getX() >= 0 && chunks[p][q]->getX() < 20 && chunks[p][q]->getY() >= 0 && chunks[p][q]->getY() < 20)
-          mapUsages[chunks[p][q]->getX()][chunks[p][q]->getY()] = chunks[p][q].use_count();
-      }
-    }
-  }
-
-  for (size_t p = 0; p < 20; p++)
-  {
-    for (size_t q = 0; q < 20; q++)
-    {
-      printf(" %u ", mapUsages[q][p]);
-    }
-    printf("\n");
-  }
-
-  printf("stackSize:%u\n", m_unusedChunks.size());
-
-  printf("[MAP]\tEND_PRINT\n");
 }
 
 Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
@@ -367,7 +256,7 @@ Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
 std::vector<PhysicsEntity*> Map::getEntitiesAt(game::vec2<float> pos, float radius) 
 {
   auto entityVector = std::vector<PhysicsEntity*> {};
-  vec2<int> targetChunkPos = game::math::entityToChunkPos(pos);
+  auto targetChunkPos = game::math::entityToChunkPos(pos);
   
   for (auto& chunkEntry : m_Chunks)
   {
@@ -378,11 +267,11 @@ std::vector<PhysicsEntity*> Map::getEntitiesAt(game::vec2<float> pos, float radi
     // @todo: optimization... very stupid way atm
     if (abs(diff[0]) <= loadingDistance && abs(diff[1]) <= loadingDistance)
     {
-      for (size_t p = 0; p < containerLength; p++)
+      for (auto x = 0u; x < containerLength; x++)
       {
-        for (size_t q = 0; q < containerLength; q++)
+        for (auto y = 0u; y < containerLength; y++)
         {
-          for (auto& entity : chunk[p][q].get()->m_Data.m_Entities)
+          for (auto& entity : chunk[x][y].get()->m_Data.m_Entities)
           {
             auto diff = pos - entity.getXY(); 
             if(game::math::abs(diff) <= radius)
