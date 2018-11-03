@@ -105,8 +105,8 @@ GPU_Rect Camera::getTile(GPU_Image* img, unsigned char index, unsigned char inse
 
 void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float pad_y, float x_offset, float y_offset)
 {
-  float logicalWidth  = game::math::hexWidth                                * ts.scale * pixelsInUnit();
-  float logicalHeight = (game::math::hexHeight - game::math::hexPointInset) * ts.scale * pixelsInUnit();
+  float logicalWidth  = game::math::tileWidth  * ts.scale * pixelsInUnit();
+  float logicalHeight = game::math::tileHeight * ts.scale * pixelsInUnit();
 
   float realHeight    = ts.scale * pixelsInUnit() * (1+2*pad_y);
   float realWidth     = realHeight * ((float)img->w / (float)img->h) * (1+2*pad_x);
@@ -146,7 +146,7 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
       targetRect.x += logicalWidth;
     }
     targetRect.y += logicalHeight;
-    targetRect.x = initX + (1+i)*(logicalWidth)/2; //initial x plus width/2 hex offset
+    targetRect.x = initX;
   }
 }
 
@@ -176,6 +176,7 @@ void Camera::render2dMap(int* data, SDL_Color (*conversion)(int), size_t w, size
 }
 
 //rendering entities does not support anchor at the time (will be ignored)
+/*
 void Camera::renderEntity(RenderEntity e)
 {
 #ifdef DEBUG_CAMERA_VERBOSE
@@ -198,6 +199,7 @@ void Camera::renderEntity(RenderEntity e)
 
   GPU_BlitRect(anim->image, &animRect, image->target, &entityRect);
 }
+*/
 
 void Camera::renderEntity(Entity e)
 {
@@ -287,9 +289,4 @@ void Camera::tick(float tickTime) {
 vec2<float> Camera::pixelToXY(vec2<float> pixel)
 {
   return ((pixel - (getSize()/2.f)) * unitsInPixel()) + getXY();
-}
-
-vec2<float> Camera::pixelToPQ(vec2<float> pixel)
-{
-  return game::math::cartesianToAxial(pixelToXY(pixel));
 }

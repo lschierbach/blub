@@ -31,10 +31,9 @@ class Entity : public Saveable {
   private:
 
   public:
+    vec2<float> pos; //x y
     vec2<float> size; // w h
     vec2<float> anchor; //fraction of size
-    float p;
-    float q;
 
     Entity();
     Entity(vec2<float> p, vec2<float> s, vec2<float> a);
@@ -42,34 +41,26 @@ class Entity : public Saveable {
     ~Entity();
 
     void tick(float tickTime);
-    void setPQ(const vec2<float>& pq);
-    void setP(float p);
-    void setQ(float q);
     void setXY(const vec2<float>& xy);
     void setX(float x);
     void setY(float y);
     void setSize(const vec2<float>& s);
     void setAnchor(const vec2<float>& a);
-    vec2<float> getPQ() const;
     vec2<float> getXY() const;
     vec2<float> getSize() const;
     vec2<float> getAnchor() const;
-    vec2<int> getChunkPQ() const;
     void modXY(const vec2<float>& xy);
-    void modPQ(const vec2<float>& pq);
-    
+
     void write(std::ofstream& out) override
     {
-      filesystem::writeStruct(out, p);
-      filesystem::writeStruct(out, q);
+      filesystem::writeStruct(out, pos);
       filesystem::writeStruct(out, size);
       filesystem::writeStruct(out, anchor);
     }
     
     void read(std::ifstream& in) override
     {
-      filesystem::readStruct(in, p);
-      filesystem::readStruct(in, q);
+      filesystem::readStruct(in, pos);
       filesystem::readStruct(in, size);
       filesystem::readStruct(in, anchor);
     }

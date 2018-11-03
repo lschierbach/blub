@@ -94,12 +94,12 @@ class Chunk
   
   public:
 
-    Chunk(int p, int q);
+    Chunk(int x, int y);
     Chunk(Chunk& cpy);
     ~Chunk();
 
-    int getQ() const;
-    int getP() const;
+    int getX() const;
+    int getY() const;
     
     uint32_t getLastTick() const;
 

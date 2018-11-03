@@ -89,7 +89,6 @@ class Renderer
     void tick(const float tickTime);
 
     vec2<float> pixelToXYAuto(vec2<float> pixel);
-    vec2<float> pixelToPQAuto(vec2<float> pixel);
 };
 
 #endif /* RENDERER_H */

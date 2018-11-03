@@ -6,7 +6,7 @@
 class Player : public Entity
 {
   public:
-    Player(int p, int q) : Entity(p, q) {};
+    Player(int x, int y) : Entity(x, y) {};
 };
 
 #endif /* PLAYER_H */

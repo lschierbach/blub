@@ -97,7 +97,7 @@ void Map::tickChunks()
 void Map::addEntity(SharedEntityPtr entity)
 {
 
-  game::Vector<2, int> entityPos = entity.get()->getChunkPQ();
+  game::Vector<2, int> entityPos = game::math::entityToChunkPos(entity.get()->getXY());
 
   // don't add doubled element
   if (m_Chunks.count(entity) > 0)
@@ -163,7 +163,7 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
 
   SharedChunkPtrArr tempChunks = { nullptr };
 
-  auto entityPos = entity.get()->getChunkPQ();
+  auto entityPos = game::math::entityToChunkPos(entity.get()->getXY());
   auto centerChunkPos = chunks[loadingDistance][loadingDistance].get()->getPos();
   
   // has entity moved? Or is it its first update?
@@ -336,8 +336,8 @@ void Map::print()
     {
       for (size_t q = 0; q < containerLength; q++)
       {
-        if (chunks[p][q]->getP() >= 0 && chunks[p][q]->getP() < 20 && chunks[p][q]->getQ() >= 0 && chunks[p][q]->getQ() < 20)
-          mapUsages[chunks[p][q]->getP()][chunks[p][q]->getQ()] = chunks[p][q].use_count();
+        if (chunks[p][q]->getX() >= 0 && chunks[p][q]->getX() < 20 && chunks[p][q]->getY() >= 0 && chunks[p][q]->getY() < 20)
+          mapUsages[chunks[p][q]->getX()][chunks[p][q]->getY()] = chunks[p][q].use_count();
       }
     }
   }
@@ -369,7 +369,7 @@ Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
 std::vector<PhysicsEntity*> Map::getEntitiesAt(game::vec2<float> pos, float radius) 
 {
   auto entityVector = std::vector<PhysicsEntity*> {};
-  vec2<int> targetChunkPos = game::math::cartesianToChunk(pos);
+  vec2<int> targetChunkPos = game::math::entityToChunkPos(pos);
   
   for (auto& chunkEntry : m_Chunks)
   {

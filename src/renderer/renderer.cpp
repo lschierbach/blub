@@ -203,11 +203,11 @@ bool Renderer::chunkInBounds(const Chunk& chunk, const CameraEntry& camera)
 {
   Camera* camptr = std::static_pointer_cast<Camera>(camera.camera).get();
 
-  vec2<> chunkUpperLeft = game::math::axialToCartesian(vec2<>(game::math::chunkToAxialP(chunk.getP())-0.5f,
-                                                              game::math::chunkToAxialQ(chunk.getQ())-0.5f));
+  vec2<> chunkUpperLeft = vec2<>(game::math::chunkToEntityX(chunk.getX())-0.5f,
+                                 game::math::chunkToEntityY(chunk.getY())-0.5f);
 
-  vec2<> chunkLowerRight = game::math::axialToCartesian(vec2<>(game::math::chunkToAxialP(chunk.getP())+game::math::chunkSize+0.5f,
-                                                               game::math::chunkToAxialQ(chunk.getQ())+game::math::chunkSize+0.5f));
+  vec2<> chunkLowerRight = vec2<>(game::math::chunkToEntityX(chunk.getX())+game::math::chunkSize+0.5f,
+                                  game::math::chunkToEntityY(chunk.getY())+game::math::chunkSize+0.5f);
 
   vec2<> camUpperLeft(camptr->getXY() - 0.5f*camptr->unitsInPixel()*camptr->getSize());
   vec2<> camLowerRight(camptr->getXY() + 0.5f*camptr->unitsInPixel()*camptr->getSize());
@@ -261,16 +261,7 @@ void Renderer::renderCamera(CameraEntry& camera)
     for(int j=0-(int)Map::getLoadingDistance(); j<=(int)Map::getLoadingDistance(); j++)
     { //p
 
-#ifdef DEBUG_RENDERER_PREMUL_COORDINATES
-  vec2<float> oldCoord = theCam.get()->getPQ();
-  theCam.get()->setPQ(oldCoord/(float)Chunk::size);
-#endif
-
       auto* c = map->getChunk(j, i, theCam);
-
-#ifdef DEBUG_RENDERER_PREMUL_COORDINATES
-  theCam.get()->setPQ(oldCoord);
-#endif
 
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] got chunk" << std::endl;
@@ -285,13 +276,7 @@ void Renderer::renderCamera(CameraEntry& camera)
         for(const auto& ts: c->m_Data.m_Tilesets)
         {
 
-          vec2<float> chunkOffset = game::math::axialToCartesian(
-            /*vec2<float>{
-              (float)((c->getP() * Chunk::size) + ts.offsetX),
-              (float)((c->getQ() * Chunk::size) + ts.offsetY)
-            }*/
-            game::math::chunkToAxial(c->getPos()) + vec2<float>(ts.offsetX,ts.offsetY)
-          );
+          vec2<float> chunkOffset = game::math::chunkToEntityPos(c->getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
 
           camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
         }
@@ -388,23 +373,6 @@ vec2<float> Renderer::pixelToXYAuto(vec2<float> pixel)
        camIt->data[1] < ratioY && camIt->data[3]-camIt->data[1] > ratioY)
     {
       return std::static_pointer_cast<Camera>(camIt->camera).get()->pixelToXY(vec2<float>(pixel[0]*camIt->data[2],pixel[1]*camIt->data[3]));
-    }
-  }
-
-  return vec2<float>(NAN, NAN);
-}
-
-vec2<float> Renderer::pixelToPQAuto(vec2<float> pixel)
-{
-  float ratioX = pixel[0]/renderTarget->w;
-  float ratioY = pixel[1]/renderTarget->h;
-
-  for(auto camIt = cameras.begin(); camIt != cameras.end(); ++camIt)
-  {
-    if(camIt->data[0] < ratioX && camIt->data[2]-camIt->data[0] > ratioX &&
-       camIt->data[1] < ratioY && camIt->data[3]-camIt->data[1] > ratioY)
-    {
-      return std::static_pointer_cast<Camera>(camIt->camera).get()->pixelToPQ(vec2<float>(pixel[0]*camIt->data[2],pixel[1]*camIt->data[3]));
     }
   }
 

@@ -92,7 +92,7 @@ namespace generator
     
     for (auto i = 0u; i < 20 + rand() % 10; i++)
     {
-      auto chunkPos = game::math::chunkToAxial( {chunkP, chunkQ} );
+      auto chunkPos = game::math::chunkToEntityPos( {chunkP, chunkQ} );
       auto p = chunkPos + vec2<float> { static_cast<float>(rand() % game::math::chunkSize), static_cast<float>(rand() % game::math::chunkSize) };
       
       auto width = rand() / float(RAND_MAX);
