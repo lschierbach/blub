@@ -120,11 +120,10 @@ void Chunk::save()
   Data temp;
 
   // copy threadsafe
-  std::unique_lock<std::mutex> lock(m_DataMutex);
-
-  temp = m_Data;
-
-  lock.unlock();
+  {
+    std::scoped_lock lock(m_DataMutex);
+    temp = m_Data;
+  }
 
   // write m_Data into .tdat file
   filesystem::writeStruct(path + ".tdat", temp);
@@ -143,10 +142,10 @@ void Chunk::load()
   // read m_tilesets from .tdat file
   filesystem::readStruct(path + ".tdat", temp);
   // copy it threadsafe
-  std::lock_guard<std::mutex> lock(m_DataMutex);
-
-  m_Data = temp;
-
+  {
+    std::scoped_lock lock(m_DataMutex);
+    m_Data = temp;
+  }
 
   #ifdef DEBUG_CHUNK_RELOAD
     printf("[CHUNK]\tLOAD\n");
@@ -191,9 +190,12 @@ void Chunk::generate()
 */
 void Chunk::reload()
 {
-  // remove old tileset m_Data
-  m_Data.m_Tilesets.clear();
-  m_Data.m_Entities.clear();
+  {
+    std::scoped_lock lock(m_DataMutex);
+    // remove old tileset m_Data
+    m_Data.m_Tilesets.clear();
+    m_Data.m_Entities.clear();
+  }
   
   // if chunk-m_Data exists
   if (filesystem::fileExists(chunkFolder + std::to_string(m_pos[0]) + "." + std::to_string(m_pos[1]) + ".tdat"))
@@ -230,10 +232,13 @@ void Chunk::joinThreads()
 void Chunk::tick()
 {
   // @todo: don't lock if chunk is saving/loading, instead skip tick
-  std::lock_guard<std::mutex> lock(m_DataMutex);
-  for (auto& entity : m_Data.m_Entities)
+  
   {
-    entity.tick();
+    std::scoped_lock lock(m_DataMutex);
+    for (auto& entity : m_Data.m_Entities)
+    {
+      entity.tick();
+    }
   }
   
   m_LastTick = global::tickCount;
@@ -251,5 +256,10 @@ Chunk::Chunk(Chunk& cpy)
 
 void Chunk::lockData()
 {
-  std::lock_guard<std::mutex> lock(m_DataMutex);
+  m_DataMutex.lock();
+}
+
+void Chunk::unlockData()
+{
+  m_DataMutex.unlock();
 }

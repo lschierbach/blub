@@ -282,6 +282,9 @@ void Renderer::renderCamera(CameraEntry& camera)
     std::cout << "[RENDERER] tilesets for chunk relative " << j << "|" << i << std::endl;
   #endif
         //render all tilesets of current chunk
+    
+        c->lockData();
+    
         for(const auto& ts: c->m_Data.m_Tilesets)
         {
 
@@ -295,6 +298,9 @@ void Renderer::renderCamera(CameraEntry& camera)
 
           camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
         }
+        
+        
+        c->unlockData();
       }
 
     }
@@ -313,6 +319,7 @@ void Renderer::renderCameraEntities(CameraEntry& camera)
 
       auto* c = map->getChunk(j, i, theCam);
 
+      c->lockData();
       //render all entities in that chunk
       for(auto& entity: c->m_Data.m_Entities)
       {
@@ -321,6 +328,7 @@ void Renderer::renderCameraEntities(CameraEntry& camera)
 #endif
         camcast.get()->renderEntity(entity);
       }
+      c->unlockData();
     }
   }
 }

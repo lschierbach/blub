@@ -361,8 +361,6 @@ Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
   auto& chunks = m_Chunks.find(entity)->second;
   auto chunkPtr = chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get();
   
-  chunkPtr->lockData();
-  
   return (chunkPtr);
 }
 

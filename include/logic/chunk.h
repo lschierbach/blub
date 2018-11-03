@@ -111,6 +111,7 @@ class Chunk
     game::vec2<int> getPos() const;
     
     void lockData();
+    void unlockData();
 };
 
 #endif /* CHUNK_H */
