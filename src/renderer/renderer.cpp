@@ -232,8 +232,8 @@ LODImage testLoadLOD()
 {
   std::string filestrings[3];
   filestrings[0] = std::string("data/img/defaultTileset.png");
-  filestrings[1] = std::string("data/img/defaultTileset_2064.png");
-  filestrings[2] = std::string("data/img/defaultTileset_1032.png");
+  filestrings[1] = std::string("data/img/defaultTileset_512.png");
+  filestrings[2] = std::string("data/img/defaultTileset_256.png");
 
   LODImage theImage(filestrings, 3, 64);
   return theImage;
@@ -278,7 +278,7 @@ void Renderer::renderCamera(CameraEntry& camera)
 
           vec2<float> chunkOffset = game::math::chunkToEntityPos(c->getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
 
-          camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.0019f, 0.0017f, chunkOffset[0], chunkOffset[1]);
+          camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
         }
       }
 
