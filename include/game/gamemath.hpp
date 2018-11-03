@@ -12,7 +12,10 @@ namespace game::math {
 
   static vec2<float> chunkToEntityPos(const vec2<int>& chunk)
   {
-    return vec2<float>(chunkSize*chunk[0], chunkSize*chunk[1]);
+    return vec2<float>(
+    	static_cast<float>(chunkSize*chunk[0]),
+    	static_cast<float>(chunkSize*chunk[1])
+    );
   }
 
   static vec2<int> entityToChunkPos(const vec2<float>& entity)
