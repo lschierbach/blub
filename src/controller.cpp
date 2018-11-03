@@ -27,7 +27,7 @@ void Controller::init()
     unsigned int windowWidth;
     unsigned int windowHeight;
     bool fullscreen;
-  } args = {1600, 900, false};
+  } args = {800, 600, false};
   
   global::tickCount = 0;
   global::lastTickDuration = .0f;

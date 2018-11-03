@@ -256,36 +256,73 @@ Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
 std::vector<PhysicsEntity*> Map::getEntitiesAt(game::vec2<float> pos, float radius) 
 {
   auto entityVector = std::vector<PhysicsEntity*> {};
-  auto targetChunkPos = game::math::entityToChunkPos(pos);
   
-  for (auto& chunkEntry : m_Chunks)
+  std::vector<Chunk*> possibleChunks;
+  
+  auto topLeftChunkPos     = game::math::entityToChunkPos(pos + game::vec2<float>(-radius, -radius));
+  auto bottomRightChunkPos = game::math::entityToChunkPos(pos + game::vec2<float>( radius,  radius));
+  
+  for (auto x = topLeftChunkPos[0]; x <= bottomRightChunkPos[0]; x++)
   {
-    const auto& chunk = chunkEntry.second;
-    
-    auto diff = chunk[loadingDistance][loadingDistance].get()->getPos() - targetChunkPos;
-    
-    // @todo: optimization... very stupid way atm
-    if (abs(diff[0]) <= loadingDistance && abs(diff[1]) <= loadingDistance)
+    for (auto y = topLeftChunkPos[1]; y <= bottomRightChunkPos[1]; y++)
     {
-      for (auto x = 0u; x < containerLength; x++)
-      {
-        for (auto y = 0u; y < containerLength; y++)
-        {
-          for (auto& entity : chunk[x][y].get()->m_Data.m_Entities)
-          {
-            auto diff = pos - entity.getPos(); 
-            if(game::math::abs(diff) <= radius)
-            {
-              entityVector.push_back(&entity);
-            }
-          }
-        }
-      }
-      return entityVector;
+      possibleChunks.push_back(getIdealChunk(game::vec2<int>(x, y)));
     }
   }
   
+  for (auto* chunk : possibleChunks)
+  {
+    if (chunk != nullptr)
+    {
+      for (auto& entity : chunk->m_Data.m_Entities)
+      {
+        auto diff = pos - entity.getPos(); 
+        if(diff <= vec2<float>(radius, 0.f))
+        {
+          entityVector.push_back(&entity);
+        }
+      }
+    }
+  }
   return entityVector;
+}
+
+Chunk* Map::getIdealChunk(game::vec2<float> pos) 
+{
+  auto chunkPos = game::math::entityToChunkPos(pos);
+  
+  for (auto& chunkEntry : m_Chunks)
+  {
+    const auto& chunks = chunkEntry.second;
+    auto chunksCenter = chunks[loadingDistance][loadingDistance].get()->getPos();
+    
+    // check bounds
+    if (chunkPos[0] >= chunksCenter[0] - static_cast<int>(loadingDistance) && chunkPos[0] <= chunksCenter[0] + static_cast<int>(loadingDistance) &&
+        chunkPos[1] >= chunksCenter[1] - static_cast<int>(loadingDistance) && chunkPos[1] <= chunksCenter[1] + static_cast<int>(loadingDistance))
+    {
+      return chunks[loadingDistance + (chunkPos[0] - chunksCenter[0])][loadingDistance + (chunkPos[1] - chunksCenter[1])].get();
+    }
+  }
+  
+  return nullptr;
+}
+
+Chunk* Map::getIdealChunk(game::vec2<int> pos) 
+{
+  for (auto& chunkEntry : m_Chunks)
+  {
+    const auto& chunks = chunkEntry.second;
+    auto chunksCenter = chunks[loadingDistance][loadingDistance].get()->getPos();
+    
+    // check bounds
+    if (pos[0] >= chunksCenter[0] - static_cast<int>(loadingDistance) && pos[0] <= chunksCenter[0] + static_cast<int>(loadingDistance) &&
+        pos[1] >= chunksCenter[1] - static_cast<int>(loadingDistance) && pos[1] <= chunksCenter[1] + static_cast<int>(loadingDistance))
+    {
+      return chunks[loadingDistance + (pos[0] - chunksCenter[0])][loadingDistance + (pos[1] - chunksCenter[1])].get();
+    }
+  }
+  
+  return nullptr;
 }
 
 size_t Map::getLoadingDistance()

@@ -21,6 +21,7 @@ Chunk::Chunk(int x, int y) : m_pos({x, y})
 
 Chunk::~Chunk()
 {
+  joinThreads();
   m_saveThread = std::thread(&Chunk::save, this);
   joinThreads();
 }

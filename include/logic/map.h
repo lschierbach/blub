@@ -61,9 +61,12 @@ class Map
     void tickChunks();
     
     void print();
-    
+
 
   public:
+    Chunk* getIdealChunk(game::vec2<float> pos);
+    Chunk* getIdealChunk(game::vec2<int> pos);
+    
     void tick();
 
     void addEntity(SharedEntityPtr entity);
