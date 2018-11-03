@@ -291,20 +291,7 @@ Chunk* Map::getIdealChunk(game::vec2<float> pos)
 {
   auto chunkPos = game::math::entityToChunkPos(pos);
   
-  for (auto& chunkEntry : m_Chunks)
-  {
-    const auto& chunks = chunkEntry.second;
-    auto chunksCenter = chunks[loadingDistance][loadingDistance].get()->getPos();
-    
-    // check bounds
-    if (chunkPos[0] >= chunksCenter[0] - static_cast<int>(loadingDistance) && chunkPos[0] <= chunksCenter[0] + static_cast<int>(loadingDistance) &&
-        chunkPos[1] >= chunksCenter[1] - static_cast<int>(loadingDistance) && chunkPos[1] <= chunksCenter[1] + static_cast<int>(loadingDistance))
-    {
-      return chunks[loadingDistance + (chunkPos[0] - chunksCenter[0])][loadingDistance + (chunkPos[1] - chunksCenter[1])].get();
-    }
-  }
-  
-  return nullptr;
+  return getIdealChunk(chunkPos);
 }
 
 Chunk* Map::getIdealChunk(game::vec2<int> pos) 
