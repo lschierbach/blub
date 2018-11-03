@@ -74,6 +74,10 @@ void Entity::setAnchor(const vec2<float>& a)
   anchor = a;
 }
 
+void Entity::setSprite(game::SharedSpritePtr s) {
+  sprite = s;
+}
+
 vec2<float> Entity::getSize() const
 {
   return size;

@@ -23,6 +23,8 @@
 #include "game/vector.hpp"
 #include "game/filesystem.hpp"
 #include "game/saveable.h"
+#include "renderer/sprite.h"
+#include "renderer/simplesprite.h"
 
 using game::vec2;
 
@@ -31,6 +33,7 @@ class Entity : public Saveable {
   private:
 
   public:
+    game::SharedSpritePtr sprite;
     vec2<float> pos; //x y
     vec2<float> size; // w h
     vec2<float> anchor; //fraction of size
@@ -46,6 +49,7 @@ class Entity : public Saveable {
     void setY(float y);
     void setSize(const vec2<float>& s);
     void setAnchor(const vec2<float>& a);
+    void setSprite(game::SharedSpritePtr s);
     vec2<float> getPos() const;
     vec2<float> getSize() const;
     vec2<float> getAnchor() const;

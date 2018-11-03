@@ -85,6 +85,7 @@ namespace generator
       auto width = rand() / float(RAND_MAX);
       width += 0.2f;
       PhysicsEntity e(p, { width, width }, { .5f, .5f });
+      e.setSprite(std::make_shared<SimpleSprite>("data/img/testEntity.png"));
       chunkData.m_Entities.push_back(e);
     }
   }
