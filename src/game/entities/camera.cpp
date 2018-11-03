@@ -130,7 +130,7 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
          && (targetRect.x+targetRect.w > 0 && targetRect.y+targetRect.h > 0)
          && (targetRect.x < image->w && targetRect.y < image ->h) ) 
       {
-        GPU_Rect sourceRect = getTile(img, c, 1);
+        GPU_Rect sourceRect = getTile(img, c, 0);
         GPU_Rect roundedTarget = GPU_MakeRect(
           floor(targetRect.x)-overlap,
           floor(targetRect.y)-overlap,
