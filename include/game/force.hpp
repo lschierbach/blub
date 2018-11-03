@@ -4,8 +4,10 @@
 #include "game/vector.hpp"
 namespace game
 {
-  struct Force
+  struct Force : public Saveable
   {
+    Force() {}
+    
     Force(game::vec2<float> force, float lifeTime)
     {
       m_Force = force;
@@ -43,6 +45,19 @@ namespace game
       return *this;
     }
     
+    void write(std::ofstream& out) override
+    {
+      filesystem::writeStruct(out, m_LifeTime);
+      filesystem::writeStruct(out, m_Force);
+      filesystem::writeStruct(out, m_Dir);
+    }
+    
+    void read(std::ifstream& in) override
+    {
+      filesystem::readStruct(in, m_LifeTime);
+      filesystem::readStruct(in, m_Force);
+      filesystem::readStruct(in, m_Dir);
+    }
     
     
     float m_LifeTime;

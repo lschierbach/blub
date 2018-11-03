@@ -37,7 +37,7 @@ Camera::Camera(float x, float y, float w, float h, float scale)
   GPU_GetTarget(image);
   GPU_SetImageFilter(image, GPU_FILTER_NEAREST); //No blur when scaling up
 
-  setXY(vec2<float>(x,y));
+  setPos(vec2<float>(x,y));
   setSize(vec2<float>(w,h));
   setScale(scale);
 }
@@ -111,8 +111,8 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
   float realHeight    = ts.scale * pixelsInUnit() * (1+2*pad_y);
   float realWidth     = realHeight * ((float)img->w / (float)img->h) * (1+2*pad_x);
 
-  float initX = (getSize()[0]/2) - (getXY()[0] - x_offset - pad_x) * pixelsInUnit() * ts.scale;
-  float initY = (getSize()[1]/2) - (getXY()[1] - y_offset - pad_y) * pixelsInUnit() * ts.scale;
+  float initX = (getSize()[0]/2) - (getPos()[0] - x_offset - pad_x) * pixelsInUnit() * ts.scale;
+  float initY = (getSize()[1]/2) - (getPos()[1] - y_offset - pad_y) * pixelsInUnit() * ts.scale;
 
   GPU_Rect targetRect = GPU_MakeRect(
       initX,
@@ -203,14 +203,14 @@ void Camera::renderEntity(RenderEntity e)
 
 void Camera::renderEntity(Entity e)
 {
-  float entityX = (getSize()[0]/2) - (getXY()[0] - e.getXY()[0]) * pixelsInUnit();
-  float entityY = (getSize()[1]/2) - (getXY()[1] - e.getXY()[1]) * pixelsInUnit();
+  float entityX = (getSize()[0]/2) - (getPos()[0] - e.getPos()[0]) * pixelsInUnit();
+  float entityY = (getSize()[1]/2) - (getPos()[1] - e.getPos()[1]) * pixelsInUnit();
 
 #ifdef DEBUG_CAMERA_VERBOSE
   std::cout << "[CAMERA] Entity screen pos:"
   "( size:" << getSize()[0] << "|" << getSize()[1] << " - " <<
-  "camera:" << getXY()[0] << "|" << getXY()[1] << " - " <<
-  "entity:" << e.getXY()[0] << "|" << e.getXY()[1] << " ) * " <<
+  "camera:" << getPos()[0] << "|" << getPos()[1] << " - " <<
+  "entity:" << e.getPos()[0] << "|" << e.getPos()[1] << " ) * " <<
   "p_unit:" << pixelsInUnit() << " = " << entityX << "|" << entityY << std::endl;
 #endif
 
@@ -282,11 +282,11 @@ void Camera::track(Map::SharedEntityPtr entity)
 void Camera::tick(float tickTime) {
   if(tracked.get() != NULL) 
   {
-    setXY(tracked.get()->getXY());
+    setPos(tracked.get()->getPos());
   }
 }
 
 vec2<float> Camera::pixelToXY(vec2<float> pixel)
 {
-  return ((pixel - (getSize()/2.f)) * unitsInPixel()) + getXY();
+  return ((pixel - (getSize()/2.f)) * unitsInPixel()) + getPos();
 }

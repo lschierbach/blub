@@ -49,7 +49,7 @@ Entity::~Entity()
 {
 }
 
-void Entity::setXY(const vec2<float>& xy)
+void Entity::setPos(const vec2<float>& xy)
 {
   pos = xy;
 }
@@ -84,7 +84,7 @@ vec2<float> Entity::getAnchor() const
   return anchor;
 }
 
-vec2<float> Entity::getXY() const
+vec2<float> Entity::getPos() const
 {
     return pos;
 }
@@ -96,5 +96,5 @@ void Entity::tick(float tickTime)
 
 void Entity::modXY(const vec2<float>& xy)
 {
-    setXY(getXY()+xy);
+    setPos(getPos()+xy);
 }

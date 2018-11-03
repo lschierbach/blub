@@ -41,12 +41,12 @@ class Entity : public Saveable {
     ~Entity();
 
     void tick(float tickTime);
-    void setXY(const vec2<float>& xy);
+    void setPos(const vec2<float>& xy);
     void setX(float x);
     void setY(float y);
     void setSize(const vec2<float>& s);
     void setAnchor(const vec2<float>& a);
-    vec2<float> getXY() const;
+    vec2<float> getPos() const;
     vec2<float> getSize() const;
     vec2<float> getAnchor() const;
     void modXY(const vec2<float>& xy);

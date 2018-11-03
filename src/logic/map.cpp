@@ -75,7 +75,7 @@ void Map::tickChunks()
 void Map::addEntity(SharedEntityPtr entity)
 {
 
-  auto entityPos = game::math::entityToChunkPos(entity.get()->getXY());
+  auto entityPos = game::math::entityToChunkPos(entity.get()->getPos());
 
   // don't add doubled element
   if (m_Chunks.count(entity) > 0)
@@ -130,7 +130,7 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
 
   SharedChunkPtrArr tempChunks = { nullptr };
 
-  auto entityPos = game::math::entityToChunkPos(entity.get()->getXY());
+  auto entityPos = game::math::entityToChunkPos(entity.get()->getPos());
   auto centerChunkPos = chunks[loadingDistance][loadingDistance].get()->getPos();
   
   if (centerChunkPos != entityPos || firstUpdate)
@@ -273,7 +273,7 @@ std::vector<PhysicsEntity*> Map::getEntitiesAt(game::vec2<float> pos, float radi
         {
           for (auto& entity : chunk[x][y].get()->m_Data.m_Entities)
           {
-            auto diff = pos - entity.getXY(); 
+            auto diff = pos - entity.getPos(); 
             if(game::math::abs(diff) <= radius)
             {
               entityVector.push_back(&entity);

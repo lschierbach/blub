@@ -39,6 +39,8 @@ class Controller
     Renderer* m_Renderer;
     
     bool tick();
+    
+    void quit();
 };
 
 #endif /* CONTROLLER_H */

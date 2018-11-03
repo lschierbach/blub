@@ -12,7 +12,6 @@ class PhysicsEntity : public Entity
     
     float m_Mass;
     game::vec2<float> m_Velocity;
-    game::vec2<float> m_Position;
     forceVector m_Forces;
     
   public:
@@ -26,16 +25,18 @@ class PhysicsEntity : public Entity
     
     void write(std::ofstream& out) override
     {
-      filesystem::writeStruct(out, m_Position);
-      filesystem::writeStruct(out, size);
-      filesystem::writeStruct(out, anchor);
+      Entity::write(out);
+      filesystem::writeStruct(out, m_Mass);
+      filesystem::writeStruct(out, m_Velocity);
+      filesystem::writeRange(out, m_Forces);
     }
     
     void read(std::ifstream& in) override
     {
-      filesystem::readStruct(in, m_Position);
-      filesystem::readStruct(in, size);
-      filesystem::readStruct(in, anchor);
+      Entity::read(in);
+      filesystem::readStruct(in, m_Mass);
+      filesystem::readStruct(in, m_Velocity);
+      filesystem::readRange(in, m_Forces);
     }
 };
 
