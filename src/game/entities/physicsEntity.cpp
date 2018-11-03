@@ -11,8 +11,7 @@ void PhysicsEntity::tick()
 {
   physicsTick();
   m_Position += m_Velocity * global::lastTickDuration;
-  this->p = m_Position[0];
-  this->q = m_Position[1];
+  this->pos = m_Position;
 }
 
 void PhysicsEntity::physicsTick()

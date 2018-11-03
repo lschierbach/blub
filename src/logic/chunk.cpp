@@ -19,7 +19,7 @@
 #include "game/generator.hpp"
 #include "game/gamemath.hpp"
 
-Chunk::Chunk(int p, int q) : m_pos({p, q})
+Chunk::Chunk(int x, int y) : m_pos({x, y})
 {
   reload();
 }
@@ -32,7 +32,7 @@ Chunk::~Chunk()
 /**
     returns p
 */
-int Chunk::getP() const
+int Chunk::getX() const
 {
   return m_pos[0];
 }
@@ -40,7 +40,7 @@ int Chunk::getP() const
 /**
     returns q
 */
-int Chunk::getQ() const
+int Chunk::getY() const
 {
   return m_pos[1];
 }
