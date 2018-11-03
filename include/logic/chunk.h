@@ -88,7 +88,7 @@ class Chunk
     uint32_t getLastTick() const;
 
     void setPos(game::vec2<int> pos);
-    void tick();
+    std::vector<PhysicsEntity> tick();
     
     Data m_Data;
     

@@ -125,19 +125,31 @@ void Chunk::joinThreads()
   }
 }
 
-void Chunk::tick()
+std::vector<PhysicsEntity> Chunk::tick()
 {
+  std::vector<PhysicsEntity> entitiesChangedChunk;
   // @todo: don't lock if chunk is saving/loading, instead skip tick
   
   {
     std::scoped_lock lock(m_DataMutex);
-    for (auto& entity : m_Data.m_Entities)
+    for (auto it = m_Data.m_Entities.begin(); it != m_Data.m_Entities.end();)
     {
-      entity.tick();
+      it->tick();
+      if (game::math::entityToChunkPos(it->getPos()) != getPos())
+      {
+        entitiesChangedChunk.push_back(*it);
+        it = m_Data.m_Entities.erase(it);
+      }
+      else
+      {
+        it++;
+      }
     }
   }
   
   m_LastTick = global::tickCount;
+  
+  return entitiesChangedChunk;
 }
 
 uint32_t Chunk::getLastTick() const

@@ -65,7 +65,16 @@ void Map::tickChunks()
       {
         if (chunkPtrArray[x][y].get()->getLastTick() != global::tickCount)
         {
-          chunkPtrArray[x][y].get()->tick();
+          auto entitiesChangedPosition = chunkPtrArray[x][y].get()->tick();
+          
+          for (auto& entity : entitiesChangedPosition)
+          {
+            auto* chunk = getIdealChunk(entity.getPos());
+            if (chunk != nullptr)
+            {
+              chunk->m_Data.m_Entities.push_back(entity);
+            }
+          }
         }
       }
     }

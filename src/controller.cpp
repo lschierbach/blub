@@ -63,13 +63,13 @@ void Controller::handleSDLEvents()
         {
           vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));
           
-          auto entities = m_Model->getMap()->getEntitiesAt(clickXY, 5.f);
+          auto entities = m_Model->getMap()->getEntitiesAt(clickXY, 500.f);
           
           for (auto& entity : entities)
           {
             auto diff = (entity->getPos() - clickXY);
             auto forcedir = game::math::norm(diff);
-            entity->addForce(game::Force( 100.f * forcedir * ( 1 / forcedir.abs()), .0f));
+            entity->addForce(game::Force( -800.f * forcedir * ( 1 / forcedir.abs()), .0f));
           }
         }
         break;
