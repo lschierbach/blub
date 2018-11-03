@@ -175,7 +175,6 @@ void Camera::render2dMap(int* data, SDL_Color (*conversion)(int), size_t w, size
   }
 }
 
-//rendering entities does not support anchor at the time (will be ignored)
 /*
 void Camera::renderEntity(RenderEntity e)
 {
@@ -203,8 +202,9 @@ void Camera::renderEntity(RenderEntity e)
 
 void Camera::renderEntity(Entity e)
 {
-  float entityX = (getSize()[0]/2) - (getPos()[0] - e.getPos()[0]) * pixelsInUnit();
-  float entityY = (getSize()[1]/2) - (getPos()[1] - e.getPos()[1]) * pixelsInUnit();
+  //get upper left on-screen x and y
+  float entityX = (getSize()[0]/2) - (getPos()[0] - e.getPos()[0] + e.getAnchor()[0]*e.getSize()[0]) * pixelsInUnit();
+  float entityY = (getSize()[1]/2) - (getPos()[1] - e.getPos()[1] + e.getAnchor()[1]*e.getSize()[1]) * pixelsInUnit();
 
 #ifdef DEBUG_CAMERA_VERBOSE
   std::cout << "[CAMERA] Entity screen pos:"
@@ -220,7 +220,7 @@ void Camera::renderEntity(Entity e)
     entityY,                                     // y1
     entityX + (e.getSize()[0] * pixelsInUnit()), // x2
     entityY + (e.getSize()[1] * pixelsInUnit()), // y2
-    {0,0,0,255}                              // color for generic entity
+    {0,0,0,255}                                  // color for generic entity
   );
 }
 
