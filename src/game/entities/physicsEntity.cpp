@@ -1,5 +1,6 @@
 #include "game/entities/physicsEntity.h"
 #include "game/global.h"
+#include "game/gamemath.hpp"
 
 PhysicsEntity::PhysicsEntity(vec2<float> p, vec2<float> s, vec2<float> a) : Entity(p, s, a)
 {
@@ -31,10 +32,16 @@ void PhysicsEntity::physicsTick()
       it++;
     }
   }
-  m_Velocity += (acceleration * global::lastTickDuration / m_Mass);
+  m_Velocity += (acceleration / m_Mass);
 
+  if (m_Velocity.abs() > 4.f)
+  {
+    m_Velocity = 4.f * m_Velocity.norm();
+  }
+  
   // add friction for next frame
-  addForce(game::Force(-5 * m_Velocity, .0f));
+  auto friction = -17 * m_Velocity;
+  addForce(game::Force(friction, .0f));
 }
 
 void PhysicsEntity::addForce(game::Force force)

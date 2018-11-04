@@ -20,6 +20,7 @@
 #include <chrono>
 #include "controller.h"
 #include "game/force.hpp"
+#include "game/gamemath.hpp"
 
 void Controller::init()
 {
@@ -37,11 +38,12 @@ void Controller::init()
   m_Quit = false;
   
   m_Renderer->addCamera(0, 0, 1, 1, 14);
-
+  m_Renderer->moveCamera(0, game::math::chunkSize / 2.f, game::math::chunkSize / 2.f);
+  
   SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
-Entity* selectedEntity = nullptr;
+PhysicsEntity* selectedEntity = nullptr;
 
 void Controller::handleSDLEvents()
 {
@@ -101,16 +103,30 @@ void Controller::quit()
 void Controller::handleInput()
 {
   const auto* keystate = SDL_GetKeyboardState(NULL);
-  auto camSpeed = 0.5 * global::lastTickDuration;
+  auto camSpeed = 30.f * global::lastTickDuration;
+  auto moveForce = 4.f;
   
-  if (keystate[SDL_SCANCODE_W]) m_Renderer->moveCamera(0, 0.0, -camSpeed * m_Renderer->getCameraScale(0));
-  if (keystate[SDL_SCANCODE_A]) m_Renderer->moveCamera(0, -camSpeed * m_Renderer->getCameraScale(0), 0.0);
-  if (keystate[SDL_SCANCODE_S]) m_Renderer->moveCamera(0, 0.0, camSpeed * m_Renderer->getCameraScale(0));
-  if (keystate[SDL_SCANCODE_D]) m_Renderer->moveCamera(0, camSpeed * m_Renderer->getCameraScale(0), 0.0);
+  auto moveVec = game::vec2<float>(.0f, .0f);
+  
+  if (keystate[SDL_SCANCODE_W]) moveVec += { .0f, -1.f};
+  if (keystate[SDL_SCANCODE_A]) moveVec += {-1.f,  .0f};
+  if (keystate[SDL_SCANCODE_S]) moveVec += { .0f,  1.f};
+  if (keystate[SDL_SCANCODE_D]) moveVec += { 1.f,  .0f};
   if (keystate[SDL_SCANCODE_E]) m_Renderer->toggleFullscreen();
   if (keystate[SDL_SCANCODE_Q]) m_Quit = true;
   if (keystate[SDL_SCANCODE_R]) m_Renderer->zoomCamera(0, 0.9);
   if (keystate[SDL_SCANCODE_F]) m_Renderer->zoomCamera(0, 1.111111111111111);
+  
+  moveVec.norm();
+  
+  if (selectedEntity != nullptr)
+  {
+    selectedEntity->addForce(game::Force(moveForce * moveVec, .0f));
+  }
+  else
+  {
+    m_Renderer->moveCamera(0, moveVec[0] * camSpeed, moveVec[1] * camSpeed);
+  }
   
   //m_Renderer->moveCamera(0, m_MouseMotion.xrel * camSpeed * m_Renderer->getCameraScale(0), m_MouseMotion.yrel * camSpeed * m_Renderer->getCameraScale(0));
 }

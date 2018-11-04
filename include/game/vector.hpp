@@ -140,6 +140,9 @@ namespace game
   
   template<typename Type = float>
   using vec2 = Vector<2, Type>;
+  
+  template<typename Type = float>
+  using vec3 = Vector<3, Type>;
 
   namespace math
   {
