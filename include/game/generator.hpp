@@ -67,27 +67,26 @@ namespace generator
       std::vector<Tile> temp;
       for(int p = 0; p < size; p++)
       {
-        char tileIndex = 65;
-        
-        temp.push_back(Tile(tileIndex, .0f));
+        temp.push_back(Tile(collisionMap[p][q] ? 1 : 0, .0f));
+        if (rand() % 100 <= 10 && !collisionMap[p][q])
+        {
+          auto entityPos = game::math::chunkToEntityPos( {chunkP, chunkQ} );
+          auto pos = entityPos + game::vec2<float>(static_cast<float>(p), static_cast<float>(q));
+          
+          // @todo: why not += (.5, .5) ?
+          pos += game::vec2<float>(.0f, .5f);
+          
+          auto width = rand() / float(RAND_MAX);
+          width += 0.2f;
+          PhysicsEntity e(pos, { width, width }, { .5f, .5f });
+          chunkData.m_Entities.push_back(e);
+        }
       }
 
       tileData.push_back(temp);
     }
 
     chunkData.m_Tilesets.push_back(Tileset(0.5f, 1.0f, 1.0f, imgName, tileData));
-    
-    for (auto i = 0u; i < 20 + rand() % 10; i++)
-    {
-      auto chunkPos = game::math::chunkToEntityPos( {chunkP, chunkQ} );
-      auto p = chunkPos + vec2<float> { static_cast<float>(rand() % game::math::chunkSize), static_cast<float>(rand() % game::math::chunkSize) };
-      
-      auto width = rand() / float(RAND_MAX);
-      width += 0.2f;
-      PhysicsEntity e(p, { width, width }, { .5f, .5f });
-      e.setSprite(std::make_shared<SimpleSprite>("data/img/testEntity.png"));
-      chunkData.m_Entities.push_back(e);
-    }
   }
 }
 

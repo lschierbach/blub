@@ -41,6 +41,8 @@ void Controller::init()
   SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
+Entity* selectedEntity = nullptr;
+
 void Controller::handleSDLEvents()
 {
   SDL_Event evt;
@@ -63,13 +65,25 @@ void Controller::handleSDLEvents()
         {
           vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));
           
-          auto entities = m_Model->getMap()->getEntitiesAt(clickXY, 500.f);
+          auto* entity = m_Model->getMap()->getEntityAt(clickXY);
           
-          for (auto& entity : entities)
+          if (entity != nullptr)
           {
-            auto diff = (entity->getPos() - clickXY);
-            auto forcedir = game::math::norm(diff);
-            entity->addForce(game::Force( -800.f * forcedir * ( 1 / forcedir.abs()), .0f));
+            if (selectedEntity != nullptr)
+            {
+              selectedEntity->setSprite(nullptr);
+            }
+            selectedEntity = entity;
+            
+            selectedEntity->setSprite(std::make_shared<SimpleSprite>("data/img/testEntitySelected.png"));
+          }
+          else
+          {
+            if (selectedEntity != nullptr)
+            {
+              selectedEntity->setSprite(nullptr);
+            }
+            selectedEntity = nullptr;
           }
         }
         break;
