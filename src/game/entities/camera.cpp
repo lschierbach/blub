@@ -199,7 +199,7 @@ void Camera::renderEntity(RenderEntity e)
 }
 */
 
-void Camera::renderEntity(Entity e)
+void Camera::renderEntity(const Entity& e)
 {
   //get upper left on-screen x and y
   float entityX = (getSize()[0]/2) - (getPos()[0] - e.getPos()[0] + e.getAnchor()[0]*e.getSize()[0]) * pixelsInUnit();
