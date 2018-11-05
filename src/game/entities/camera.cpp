@@ -1,9 +1,8 @@
 /*
- *  FILENAME:      main.cpp
+ *  FILENAME:      camera.cpp
  *
  *  DESCRIPTION:
- *      Main file of project, initialise graphics and run input/render loop
- *
+ *      convenient ways of rendering to a GPU_Image
  *  NOTES:
  *    
  *
