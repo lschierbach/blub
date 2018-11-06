@@ -19,7 +19,7 @@ class PhysicsEntity : public Entity
     PhysicsEntity() { m_MaxSpeed = 4.f; };
     PhysicsEntity(vec2<float> p, vec2<float> s, vec2<float> a);
     
-    void tick();
+    virtual void tick() override;
     void physicsTick();
     
     void addForce(game::Force force);

@@ -40,7 +40,7 @@ void PhysicsEntity::physicsTick()
   }
   
   // add friction for next frame
-  auto friction = -17 * m_Velocity;
+  auto friction = -0.1 * m_Velocity;
   addForce(game::Force(friction, .0f));
 }
 

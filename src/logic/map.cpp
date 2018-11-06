@@ -67,13 +67,14 @@ void Map::tickChunks()
         {
           auto entitiesChangedPosition = chunkPtrArray[x][y].get()->tick();
           
-          for (auto& entity : entitiesChangedPosition)
+          for (auto& entityVariant : entitiesChangedPosition)
           {
-            auto* chunk = getIdealChunk(entity.getPos());
+            auto* entity = game::getEntityPtr<Entity>(entityVariant);
+            auto* chunk = getIdealChunk(entity->getPos());
             if (chunk != nullptr)
             {
               chunk->lockData();
-              chunk->m_Data.m_Entities.push_back(entity);
+              chunk->m_Data.m_Entities.push_back(entityVariant);
               chunk->unlockData();
             }
           }
@@ -262,77 +263,6 @@ Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
   auto chunkPtr = chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get();
   
   return (chunkPtr);
-}
-
-PhysicsEntity* Map::getEntityAt(game::vec2<float> pos) 
-{
-  std::vector<Chunk*> possibleChunks;
-  
-  auto topLeftChunkPos     = game::math::entityToChunkPos(pos + game::vec2<float>(-1.f, -1.f));
-  auto bottomRightChunkPos = game::math::entityToChunkPos(pos + game::vec2<float>( 1.f,  1.f));
-  
-  for (auto x = topLeftChunkPos[0]; x <= bottomRightChunkPos[0]; x++)
-  {
-    for (auto y = topLeftChunkPos[1]; y <= bottomRightChunkPos[1]; y++)
-    {
-      possibleChunks.push_back(getIdealChunk(game::vec2<int>(x, y)));
-    }
-  }
-  
-  for (auto* chunk : possibleChunks)
-  {
-    if (chunk != nullptr)
-    {
-      for (auto& entity : chunk->m_Data.m_Entities)
-      {
-        auto entityPos = entity.getPos(); 
-        auto topLeft = entityPos - game::vec2<float>(entity.getSize()[0] * entity.getAnchor()[0], entity.getSize()[1] * entity.getAnchor()[1]);
-        auto bottomRight = entityPos + game::vec2<float>(entity.getSize()[0] * entity.getAnchor()[0], entity.getSize()[1] * entity.getAnchor()[1]);
-
-        if(pos[0] >= topLeft[0] && pos[0] <= bottomRight[0] &&
-           pos[1] >= topLeft[1] && pos[1] <= bottomRight[1])
-        {
-          return &entity;
-        }
-      }
-    }
-  }
-  return nullptr;
-}
-
-
-std::vector<PhysicsEntity*> Map::getEntitiesAt(game::vec2<float> pos, float radius) 
-{
-  auto entityVector = std::vector<PhysicsEntity*> {};
-  
-  std::vector<Chunk*> possibleChunks;
-  
-  auto topLeftChunkPos     = game::math::entityToChunkPos(pos + game::vec2<float>(-radius, -radius));
-  auto bottomRightChunkPos = game::math::entityToChunkPos(pos + game::vec2<float>( radius,  radius));
-  
-  for (auto x = topLeftChunkPos[0]; x <= bottomRightChunkPos[0]; x++)
-  {
-    for (auto y = topLeftChunkPos[1]; y <= bottomRightChunkPos[1]; y++)
-    {
-      possibleChunks.push_back(getIdealChunk(game::vec2<int>(x, y)));
-    }
-  }
-  
-  for (auto* chunk : possibleChunks)
-  {
-    if (chunk != nullptr)
-    {
-      for (auto& entity : chunk->m_Data.m_Entities)
-      {
-        auto diff = pos - entity.getPos(); 
-        if(diff <= vec2<float>(radius, 0.f))
-        {
-          entityVector.push_back(&entity);
-        }
-      }
-    }
-  }
-  return entityVector;
 }
 
 Chunk* Map::getIdealChunk(game::vec2<float> pos) 

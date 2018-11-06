@@ -43,7 +43,7 @@ void Controller::init()
   SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
-PhysicsEntity* selectedEntity = nullptr;
+Entity* selectedEntity = nullptr;
 
 void Controller::handleSDLEvents()
 {
@@ -67,7 +67,7 @@ void Controller::handleSDLEvents()
         {
           vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));
           
-          auto* entity = m_Model->getMap()->getEntityAt(clickXY);
+          auto* entity = m_Model->getMap()->getEntityAt<Entity>(clickXY);
           
           if (entity != nullptr)
           {
@@ -84,6 +84,21 @@ void Controller::handleSDLEvents()
             if (selectedEntity != nullptr)
             {
               selectedEntity->setSprite(nullptr);
+            }
+            else
+            {
+              auto entity = m_Model->getMap()->getEntitiesAt<PhysicsEntity>(clickXY, 20.f);
+            
+              vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));
+
+              auto entitiesInRange = m_Model->getMap()->getEntitiesAt<PhysicsEntity>(clickXY, 20.f);
+
+              for (auto& entity : entitiesInRange)
+              {
+                auto diff = (entity->getPos() - clickXY);
+                auto forcedir = game::math::norm(diff);
+                entity->addForce(game::Force( 100.f * forcedir * ( 1 / forcedir.abs()), .0f));
+              }
             }
             selectedEntity = nullptr;
           }
@@ -121,7 +136,7 @@ void Controller::handleInput()
   
   if (selectedEntity != nullptr)
   {
-    selectedEntity->addForce(game::Force(moveForce * moveVec, .0f));
+    selectedEntity->setPos(selectedEntity->getPos() + (moveVec * 0.2f));
   }
   else
   {

@@ -35,13 +35,13 @@
 #include "game/vector.hpp"
 #include "game/entities/physicsEntity.h"
 #include "game/filesystem.hpp"
+#include "game/gamemath.hpp"
 
 class Chunk
 {
   private:
     
     using tilesetVector = std::vector<Tileset>;
-    using entityVector = std::vector<PhysicsEntity>;
 
   
     const std::string chunkFolder = "data/chunks/";
@@ -67,18 +67,18 @@ class Chunk
     struct Data : public Saveable
     {
       tilesetVector m_Tilesets;
-      entityVector m_Entities;
+      game::EntityVector m_Entities;
       
       void write(std::ofstream& out) override
       {
         filesystem::writeRange(out, m_Tilesets);
-        filesystem::writeRange(out, m_Entities);
+        //filesystem::writeRange(out, m_Entities);
       }
       
       void read(std::ifstream& in) override
       {
         filesystem::readRange(in, m_Tilesets);
-        filesystem::readRange(in, m_Entities);
+        //filesystem::readRange(in, m_Entities);
       }
     };
     
@@ -88,7 +88,7 @@ class Chunk
     uint32_t getLastTick() const;
 
     void setPos(game::vec2<int> pos);
-    std::vector<PhysicsEntity> tick();
+    game::EntityVector tick();
     
     Data m_Data;
     

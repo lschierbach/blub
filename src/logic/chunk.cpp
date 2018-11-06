@@ -125,17 +125,19 @@ void Chunk::joinThreads()
   }
 }
 
-std::vector<PhysicsEntity> Chunk::tick()
+game::EntityVector Chunk::tick()
 {
-  std::vector<PhysicsEntity> entitiesChangedChunk;
+  game::EntityVector entitiesChangedChunk;
   // @todo: don't lock if chunk is saving/loading, instead skip tick
   
   {
     std::scoped_lock lock(m_DataMutex);
     for (auto it = m_Data.m_Entities.begin(); it != m_Data.m_Entities.end();)
     {
-      it->tick();
-      if (game::math::entityToChunkPos(it->getPos()) != getPos())
+      auto* entity = game::getEntityPtr<Entity>(*it);
+      
+      entity->tick();
+      if (game::math::entityToChunkPos(entity->getPos()) != getPos())
       {
         entitiesChangedChunk.push_back(*it);
         it = m_Data.m_Entities.erase(it);

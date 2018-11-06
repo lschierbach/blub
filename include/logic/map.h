@@ -73,9 +73,16 @@ class Map
     void removeEntity(SharedEntityPtr entity);
 
     std::vector<PhysicsEntity*> getEntitiesAt(game::vec2<float> pos, float radius);
-    PhysicsEntity* getEntityAt(game::vec2<float> pos);
+    
+    template<typename EntityType>
+    auto getEntityAt(game::vec2<float> pos) -> EntityType*;
+    
+    template<typename EntityType>
+    auto getEntitiesAt(game::vec2<float> pos, float radius) -> std::vector<EntityType*>;
     
     Chunk* getChunk(int relativeP, int relativeQ, SharedEntityPtr entity);
 };
+
+#include "map.tpp"
 
 #endif /* MAP_H */

@@ -43,7 +43,7 @@ class Entity : public Saveable {
     Entity(int p, int q);
     ~Entity();
 
-    void tick(float tickTime);
+    virtual void tick();
     void setPos(const vec2<float>& xy);
     void setX(float x);
     void setY(float y);

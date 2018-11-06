@@ -303,8 +303,9 @@ void Renderer::renderCameraEntities(CameraEntry& camera)
 
       c->lockData();
       //render all entities in that chunk
-      for(auto& entity: c->m_Data.m_Entities)
+      for(auto& entityVariant: c->m_Data.m_Entities)
       {
+        auto* entity = game::getEntityPtr<Entity>(entityVariant);
 #ifdef DEBUG_RENDERER_VERBOSE
   std::cout << "[RENDERER] iterating over entities" << std::endl;
 #endif
@@ -340,7 +341,7 @@ void Renderer::tick(float tickTime)
 {
   for(CameraEntry entry: cameras)
   {
-    std::static_pointer_cast<Camera>(entry.camera).get()->tick(tickTime);
+    std::static_pointer_cast<Camera>(entry.camera).get()->tick();
   }
 
   renderFrame();

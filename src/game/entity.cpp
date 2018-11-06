@@ -93,9 +93,9 @@ vec2<float> Entity::getPos() const
     return pos;
 }
 
-void Entity::tick(float tickTime)
+void Entity::tick()
 {
-  //printf("tick %lu\n", global::tickCount);
+  
 }
 
 void Entity::modXY(const vec2<float>& xy)

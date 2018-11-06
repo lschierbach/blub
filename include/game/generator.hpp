@@ -78,8 +78,16 @@ namespace generator
           
           auto width = rand() / float(RAND_MAX);
           width += 0.2f;
-          PhysicsEntity e(pos, { width, width }, { .5f, .5f });
-          chunkData.m_Entities.push_back(e);
+          if (rand() % 100 > 50)
+          {
+            PhysicsEntity e(pos, { width, width }, { .5f, .5f });
+            chunkData.m_Entities.push_back( {e });
+          }
+          else
+          {
+            Entity e(pos, { width, width }, { .5f, .5f });
+            chunkData.m_Entities.push_back( {e });
+          }
         }
       }
 
