@@ -66,7 +66,7 @@ class Camera: public Entity
         void clearRender();
         void renderTileset(const Tileset& ts, GPU_Image* img, float factor_width, float factor_height, float x_offset, float y_offset);
         void render2dMap(int* data, SDL_Color (*conversion)(int), size_t w, size_t h);
-        void renderEntity(Entity e);
+        void renderEntity(const Entity& e);
         void renderOverlays();
 
         void track(Map::SharedEntityPtr entity);
