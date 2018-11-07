@@ -199,11 +199,11 @@ void Camera::renderEntity(RenderEntity e)
 }
 */
 
-void Camera::renderEntity(Entity* e)
+void Camera::renderEntity(Entity& e)
 {
   //get upper left on-screen x and y
-  float entityX = (getSize()[0]/2) - (getPos()[0] - e->getPos()[0] + e->getAnchor()[0]*e->getSize()[0]) * pixelsInUnit();
-  float entityY = (getSize()[1]/2) - (getPos()[1] - e->getPos()[1] + e->getAnchor()[1]*e->getSize()[1]) * pixelsInUnit();
+  float entityX = (getSize()[0]/2) - (getPos()[0] - e.getPos()[0] + e.getAnchor()[0]*e.getSize()[0]) * pixelsInUnit();
+  float entityY = (getSize()[1]/2) - (getPos()[1] - e.getPos()[1] + e.getAnchor()[1]*e.getSize()[1]) * pixelsInUnit();
 
 #ifdef DEBUG_CAMERA_VERBOSE
   std::cout << "[CAMERA] Entity screen pos:"
@@ -213,22 +213,22 @@ void Camera::renderEntity(Entity* e)
   "p_unit:" << pixelsInUnit() << " = " << entityX << "|" << entityY << std::endl;
 #endif
 
-  if(e->sprite != nullptr) {
-    GPU_Rect sourceRect = e->sprite.get()->getFrame();
+  if(e.sprite != nullptr) {
+    GPU_Rect sourceRect = e.sprite.get()->getFrame();
     GPU_Rect targetRect = GPU_MakeRect(
       entityX,
       entityY,
-      e->getSize()[0] * pixelsInUnit(),
-      e->getSize()[1] * pixelsInUnit()
+      e.getSize()[0] * pixelsInUnit(),
+      e.getSize()[1] * pixelsInUnit()
     );
-    GPU_BlitRect(e->sprite.get()->getImage(), &sourceRect, image->target, &targetRect);
+    GPU_BlitRect(e.sprite.get()->getImage(), &sourceRect, image->target, &targetRect);
   } else {
     GPU_RectangleFilled(
       image->target,                               // render target
       entityX,                                     // x1
       entityY,                                     // y1
-      entityX + (e->getSize()[0] * pixelsInUnit()), // x2
-      entityY + (e->getSize()[1] * pixelsInUnit()), // y2
+      entityX + (e.getSize()[0] * pixelsInUnit()), // x2
+      entityY + (e.getSize()[1] * pixelsInUnit()), // y2
       {255,255,0,255}                                  // color for generic entity
     );
   }

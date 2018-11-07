@@ -294,26 +294,12 @@ void Renderer::renderCameraEntities(CameraEntry& camera)
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 
-  for(int i=0-(int)Map::getLoadingDistance(); i<=(int)Map::getLoadingDistance(); i++)
-  { //q
-    for(int j=0-(int)Map::getLoadingDistance(); j<=(int)Map::getLoadingDistance(); j++)
-    { //p
-
-      auto* c = map->getChunk(j, i, theCam);
-
-      c->lockData();
-      //render all entities in that chunk
-      for(auto& entityVariant: c->m_Data.m_Entities)
-      {
-        auto* entity = game::getEntityPtr<Entity>(entityVariant);
-#ifdef DEBUG_RENDERER_VERBOSE
-  std::cout << "[RENDERER] iterating over entities" << std::endl;
-#endif
-        camcast.get()->renderEntity(entity);
-      }
-      c->unlockData();
+  map->for_each_entity_in_box<Entity>(camcast.get()->getPos() - (0.5f * camcast.get()->getSize()), camcast.get()->getSize(), 
+    [&](auto& entity) -> void
+    {
+      camcast.get()->renderEntity(entity);
     }
-  }
+  );
 }
 
 void Renderer::show()

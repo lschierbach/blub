@@ -67,7 +67,7 @@ void Controller::handleSDLEvents()
         {
           vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));
           
-          auto* entity = m_Model->getMap()->getEntityAt<Entity>(clickXY);
+          auto* entity = m_Model->getMap()->get_entity_at<Entity>(clickXY);
           
           if (entity != nullptr)
           {
@@ -87,18 +87,14 @@ void Controller::handleSDLEvents()
             }
             else
             {
-              auto entity = m_Model->getMap()->getEntitiesAt<PhysicsEntity>(clickXY, 20.f);
-            
-              vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));
-
-              auto entitiesInRange = m_Model->getMap()->getEntitiesAt<PhysicsEntity>(clickXY, 20.f);
-
-              for (auto& entity : entitiesInRange)
-              {
-                auto diff = (entity->getPos() - clickXY);
-                auto forcedir = game::math::norm(diff);
-                entity->addForce(game::Force( 100.f * forcedir * ( 1 / forcedir.abs()), .0f));
-              }
+              m_Model->getMap()->for_each_entity_in_range<PhysicsEntity>(clickXY, 20.f, 
+                [&](auto& entity) -> void
+                {
+                  auto diff = (entity.getPos() - clickXY);
+                  auto forcedir = game::math::norm(diff);
+                  entity.addForce(game::Force( forcedir * -300.f, .0f)); 
+                }
+              );
             }
             selectedEntity = nullptr;
           }

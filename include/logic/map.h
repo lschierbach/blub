@@ -75,10 +75,13 @@ class Map
     std::vector<PhysicsEntity*> getEntitiesAt(game::vec2<float> pos, float radius);
     
     template<typename EntityType>
-    auto getEntityAt(game::vec2<float> pos) -> EntityType*;
+    auto get_entity_at(game::vec2<float> pos) -> EntityType*;
     
-    template<typename EntityType>
-    auto getEntitiesAt(game::vec2<float> pos, float radius) -> std::vector<EntityType*>;
+    template<typename EntityType, typename Lambda>
+    auto for_each_entity_in_range(game::vec2<float> pos, float radius, Lambda&& lam) -> void;
+    
+    template<typename EntityType, typename Lambda>
+    auto for_each_entity_in_box(game::vec2<float> boxTopLeft, game::vec2<float> size, Lambda&& lam) -> void;
     
     Chunk* getChunk(int relativeP, int relativeQ, SharedEntityPtr entity);
 };
