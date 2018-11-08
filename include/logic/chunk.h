@@ -72,13 +72,13 @@ class Chunk
       void write(std::ofstream& out) override
       {
         filesystem::writeRange(out, m_Tilesets);
-        //filesystem::writeRange(out, m_Entities);
+        filesystem::writeRange(out, m_Entities);
       }
       
       void read(std::ifstream& in) override
       {
         filesystem::readRange(in, m_Tilesets);
-        //filesystem::readRange(in, m_Entities);
+        filesystem::readRange(in, m_Entities);
       }
     };
     

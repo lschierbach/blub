@@ -48,6 +48,7 @@
 #include <vector>
 #include <fstream>
 #include <ostream>
+#include <variant>
 
 template<typename... Ts> struct make_void { typedef void type;};
 template<typename... Ts> using void_t = typename make_void<Ts...>::type;
@@ -64,11 +65,21 @@ struct is_iterable : public std::false_type {};
 template <typename T>
 struct is_iterable<T, void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : public std::true_type {};
 
+template <typename T, typename = void>
+struct has_index : public std::false_type {};
+
+template <typename T>
+struct has_index<T, void_t<decltype(std::declval<T>().index())>> :  public std::true_type {};
+
+
+
 
 
 template <typename Type>
 struct is_range : public std::integral_constant<bool, (has_size<Type>::value && is_iterable<Type>::value)> {};
 
+template <typename T>
+struct is_variant : public std::integral_constant<bool, (has_index<T>::value)> {};
 
 template< bool B, class T = void >
 using enable_if_t = typename std::enable_if<B,T>::type;
@@ -79,13 +90,13 @@ namespace filesystem
   ////////////////////// WRITE_STRUCT /////////////////////
   
   template<typename Struct>
-  auto writeStruct(std::ofstream& out, Struct& saveableStruct)  -> enable_if_t<!std::is_fundamental<Struct>::value>
+  auto writeStruct(std::ofstream& out, Struct& saveableStruct)  -> enable_if_t<!std::is_fundamental<Struct>::value && !is_variant<Struct>::value>
   {
     out << saveableStruct;
   }
 
   template<typename Fundamental>
-  auto writeStruct(std::ofstream& out, Fundamental& primitive)  -> enable_if_t<std::is_fundamental<Fundamental>::value>
+  auto writeStruct(std::ofstream& out, Fundamental& primitive)  -> enable_if_t<std::is_fundamental<Fundamental>::value && !is_variant<Fundamental>::value>
   {
     out.write(reinterpret_cast<const char*>(&primitive), sizeof(Fundamental));
   }
@@ -96,7 +107,23 @@ namespace filesystem
     std::ofstream fstream(filePath, std::ios::out | std::ios::binary);
     writeStruct(fstream, strct);
   }
+  
+  ////////////////////// WRITE_VARIANT /////////////////////
 
+  template <typename Variant>
+  auto writeStruct(std::ofstream& out, Variant& variant)  -> enable_if_t<is_variant<Variant>::value>
+  {
+    uint32_t index = variant.index();
+    writeStruct<uint32_t>(out, index);
+    
+    std::visit
+    ([&](auto&& arg) -> void
+      {
+        writeStruct(out, arg);
+      }, variant
+    );
+  }
+  
   ////////////////////// WRITE_RANGE //////////////////////
   
   template <typename Struct>
@@ -126,14 +153,24 @@ namespace filesystem
   
   ////////////////////// READ_STRUCT //////////////////////
   
+  
+  template <typename Variant, typename Indices = std::make_index_sequence<std::variant_size_v<Variant>>>
+  auto readVariant(std::ifstream& in, Variant& variant) -> void;
+  
+  template<typename Variant>
+  auto readStruct(std::ifstream& in, Variant& variant)    -> enable_if_t<(is_variant<Variant>::value)>
+  {
+    readVariant(in, variant);
+  }
+  
   template<typename Struct>
-  auto readStruct(std::ifstream& in, Struct& saveableStruct)    -> enable_if_t<!std::is_fundamental<Struct>::value>
+  auto readStruct(std::ifstream& in, Struct& saveableStruct)    -> enable_if_t<(!std::is_fundamental<Struct>::value && !is_variant<Struct>::value)>
   {
     in >> saveableStruct;
   }
 
   template<typename Fundamental>
-  auto readStruct(std::ifstream& in, Fundamental& primitive)    -> enable_if_t<std::is_fundamental<Fundamental>::value>
+  auto readStruct(std::ifstream& in, Fundamental& primitive)    -> enable_if_t<(std::is_fundamental<Fundamental>::value && !is_variant<Fundamental>::value)>
   {
     in.read(reinterpret_cast<char*>(&primitive), sizeof(Fundamental));
   }
@@ -143,6 +180,34 @@ namespace filesystem
   {
     std::ifstream fstream(filePath, std::ios::in | std::ios::binary);
     readStruct(fstream, strct);
+  }
+  
+  ////////////////////// READ_VARIANT //////////////////////
+  
+  template <std::size_t I, typename Variant>
+  auto loadVariantType(std::ifstream& in, Variant& variant, size_t index)
+  {
+      if (index == I)
+      {
+          using T = std::decay_t<decltype(std::get<I>(variant))>;
+          T result;
+          readStruct(in, result);
+          variant = result;
+      }
+  }
+
+  template <typename Variant, std::size_t... I>
+  auto loadVariantImpl(std::ifstream& in, size_t index, Variant& variant, std::index_sequence<I...>) -> void
+  {
+      (loadVariantType<I>(in, variant, index), ...);
+  }
+
+  template <typename Variant, typename Indices = std::make_index_sequence<std::variant_size_v<Variant>>>
+  auto readVariant(std::ifstream& in, Variant& variant) -> void// std::enable_if_t<is_variant<Variant>::value, void>
+  {
+      uint32_t index;
+      readStruct<uint32_t>(in, index);
+      loadVariantImpl(in, index, variant, Indices { });
   }
 
   /////////////////////// READ_RANGE //////////////////////
