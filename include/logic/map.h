@@ -42,7 +42,7 @@
 class Map
 {
   private:
-    static const size_t loadingDistance = 1;
+    static const size_t loadingDistance = 2;
     static const size_t containerLength = loadingDistance * 2 + 1;
 
   public:

@@ -59,9 +59,9 @@ void Map::tickChunks()
   for (auto& chunkEntry : m_Chunks)
   {
     auto& chunkPtrArray = chunkEntry.second;
-    for (auto x = 0u; x < containerLength; x++)
+    for (auto x = 1u; x < containerLength-1; x++)
     {
-      for (auto y = 0u; y < containerLength; y++)
+      for (auto y = 1u; y < containerLength-1; y++)
       {
         if (chunkPtrArray[x][y].get()->getLastTick() != global::tickCount)
         {

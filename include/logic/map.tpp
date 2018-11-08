@@ -1,3 +1,6 @@
+
+#include "chunk.h"
+
 template<typename EntityType>
 auto Map::get_entity_at(game::vec2<float> pos) -> EntityType*
 {
@@ -11,6 +14,7 @@ auto Map::get_entity_at(game::vec2<float> pos) -> EntityType*
       auto* chunk = getIdealChunk(game::vec2<int>(x, y));
       if (chunk != nullptr)
       {
+        chunk->lockData();
         EntityType* result = game::find_in_variant_by_type<EntityType>(chunk->m_Data.m_Entities, 
           [&](auto &entity) -> bool
           {
@@ -22,6 +26,7 @@ auto Map::get_entity_at(game::vec2<float> pos) -> EntityType*
                     pos[1] >= topLeft[1] && pos[1] <= bottomRight[1]);
           }
         );
+        chunk->unlockData();
         if (result != nullptr)
         {
           return result;
@@ -48,6 +53,7 @@ auto Map::for_each_entity_in_range(game::vec2<float> pos, float radius, Lambda&&
       auto* chunk = getIdealChunk(game::vec2<int>(x, y));
       if (chunk != nullptr)
       {
+        chunk->lockData();
         game::for_each_variant_by_type<EntityType>(chunk->m_Data.m_Entities, 
           [&](auto& entity) -> void
           {
@@ -57,6 +63,7 @@ auto Map::for_each_entity_in_range(game::vec2<float> pos, float radius, Lambda&&
             }
           }
         );
+        chunk->unlockData();
       }
     }
   }
@@ -77,6 +84,7 @@ auto Map::for_each_entity_in_box(game::vec2<float> boxTopLeft, game::vec2<float>
       auto* chunk = getIdealChunk(game::vec2<int>(x, y));
       if (chunk != nullptr)
       {
+        chunk->lockData();
         game::for_each_variant_by_type<EntityType>(chunk->m_Data.m_Entities, 
           [&](auto& entity) -> void
           {
@@ -96,6 +104,7 @@ auto Map::for_each_entity_in_box(game::vec2<float> boxTopLeft, game::vec2<float>
             }
           }
         );
+        chunk->unlockData();
       }
     }
   }
