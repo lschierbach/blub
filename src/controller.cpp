@@ -92,7 +92,7 @@ void Controller::handleSDLEvents()
                 {
                   auto diff = (entity.getPos() - clickXY);
                   auto forcedir = game::math::norm(diff);
-                  entity.addForce(game::Force( forcedir * -300.f, .0f)); 
+                  entity.addForce(game::Force( forcedir * -50.f, .0f)); 
                 }
               );
             }

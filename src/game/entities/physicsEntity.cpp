@@ -34,14 +34,15 @@ void PhysicsEntity::physicsTick()
   }
   m_Velocity += (acceleration / m_Mass);
 
-  if (m_Velocity.abs() > 4.f)
+  if (m_Velocity.fastAbs() < 0.1f)
   {
-    m_Velocity = 4.f * m_Velocity.norm();
+    m_Velocity = game::vec2<float> { 0.f, 0.f };
   }
-  
-  // add friction for next frame
-  auto friction = -0.1 * m_Velocity;
-  addForce(game::Force(friction, .0f));
+  else
+  {
+    auto friction = -0.1 * m_Velocity;
+    addForce(game::Force(friction, .0f));
+  }
 }
 
 void PhysicsEntity::addForce(game::Force force)

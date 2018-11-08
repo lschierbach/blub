@@ -135,6 +135,9 @@ namespace game
       // math functions
       float abs() { float sum = 0; for(auto i = 0u; i < N; i++) { sum += data[i] * data[i]; }return std::sqrt(sum); };
 
+      // math functions
+      float fastAbs() { float sum = 0; for(auto i = 0u; i < N; i++) { sum += data[i] * data[i]; }return sum; };
+
       Vector<N, Type> norm() { return Vector<N, Type>( *this / abs() ); };
   };
   
