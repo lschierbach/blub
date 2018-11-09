@@ -11,13 +11,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(BLUB_VERSION_MAJOR 0)
 set(BLUB_VERSION_MINOR 1)
 
-project(blub)
+project(blub CXX)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL_GPU REQUIRED)
-find_package(RapidJSON REQUIRED)
-message(STATUS "SDL2 Include: " ${SDL2_INCLUDE_DIR})
-message(STATUS "SDL_GPU Include " ${SDL_GPU_INCLUDE_DIRS})
+if(UNIX)
+    find_package(RapidJSON REQUIRED)
+else()
+    set(RAPIDJSON_INCLUDE_DIR $ENV{RAPIDJSONINCLUDE} CACHE PATH "Where rapidjson includes directory lives")
+endif()
 set(LIBS ${LIBS} ${SDL2_LIBRARY} ${SDL_GPU_LIBRARY})
 
 
