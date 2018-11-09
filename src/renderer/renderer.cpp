@@ -19,8 +19,8 @@
 #include <string>
 #include <fstream>
 
-#include <rapidjson/document.h>
-#include <rapidjson/istreamwrapper.h>
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
 
 #include "renderer/renderer.h"
 #include "game/entity.h"

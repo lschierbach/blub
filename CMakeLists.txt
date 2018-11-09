@@ -15,6 +15,7 @@ project(blub)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL_GPU REQUIRED)
+find_package(RapidJSON REQUIRED)
 message(STATUS "SDL2 Include: " ${SDL2_INCLUDE_DIR})
 message(STATUS "SDL_GPU Include " ${SDL_GPU_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${SDL2_LIBRARY} ${SDL_GPU_LIBRARY})
@@ -26,6 +27,7 @@ add_executable(blub ${SOURCES})
 
 include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${SDL_GPU_INCLUDE_DIR})
+include_directories(${RAPIDJSON_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 target_link_libraries(blub ${LIBS})
