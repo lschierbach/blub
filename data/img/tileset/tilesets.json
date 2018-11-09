@@ -1,0 +1,22 @@
+[
+    {
+        "tileset": "Stein",
+        "image": [
+            "stein.png",
+            "stein_2048.png",
+            "stein_1024.png"
+        ],
+        "min_resolution": 512
+    },
+    {
+        "tileset": "Gras",
+        "image": [
+            "gras.png",
+            "gras_2048.png",
+            "gras_1024.png"
+        ],
+        "min_resolution": 1024
+    }
+]
+
+
