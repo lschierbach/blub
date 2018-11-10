@@ -101,6 +101,8 @@ class Chunk
     
     game::vec2<int> getPos() const;
     
+    game::vec2<int> worldToTilePosition(game::vec2<float> worldPos) const;
+    
     void lockData();
     void unlockData();
 };

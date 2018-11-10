@@ -72,7 +72,7 @@ namespace generator
         
         chunkData.m_GameLayer[x][y] = collisionMap[x][y] ? 1 : 0;
         
-        if (rand() % 100 <= 10 && !collisionMap[x][y])
+        if (x == 1 && y == 8)
         {
           auto entityPos = game::math::chunkToEntityPos( {chunkP, chunkQ} );
           auto pos = entityPos + game::vec2<float>(static_cast<float>(x), static_cast<float>(y));
@@ -80,9 +80,8 @@ namespace generator
           // @todo: why not += (.5, .5) ?
           pos += game::vec2<float>(.0f, .5f);
           
-          auto width = rand() / float(RAND_MAX);
-          width += 0.2f;
-          if (rand() % 100 > 50)
+          auto width = .5f;
+          if (chunkP == 0 && chunkQ == 0)
           {
             PhysicsEntity e(pos, { width, width }, { .5f, .5f }, map->getNextEntityId());
             chunkData.m_Entities.push_back( { e });
@@ -90,7 +89,7 @@ namespace generator
           else
           {
             Entity e(pos, { width, width }, { .5f, .5f }, map->getNextEntityId());
-            chunkData.m_Entities.push_back( { e });
+            //chunkData.m_Entities.push_back( { e });
           }
         }
       }

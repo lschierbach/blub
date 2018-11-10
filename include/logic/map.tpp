@@ -150,3 +150,33 @@ auto Map::for_each_entity_in_box(game::vec2<float> boxTopLeft, game::vec2<float>
     }
   }
 }
+
+template<typename EntityType, typename Lambda>
+auto Map::for_each_entity(Lambda&& lam) -> void
+{
+  std::vector<Chunk*> differentChunks;
+  
+  for (auto& chunkEntry : m_Chunks)
+  {
+    const auto& chunks = chunkEntry.second;
+    for (auto x = 1u; x < containerLength - 1; x++)
+    {
+      for (auto y = 1u; y < containerLength - 1; y++)
+      {
+        auto* chunk = chunks[x][y].get();
+        if (std::find(differentChunks.begin(), differentChunks.end(), chunk) == differentChunks.end())
+        {
+          differentChunks.push_back(chunk);
+        }
+      }
+    }
+  }
+  
+  for (auto* chunk : differentChunks)
+  {
+    chunk->lockData();
+    game::for_each_variant_by_type<EntityType>(chunk->m_Data.m_Entities, lam);
+    chunk->unlockData();
+  }
+}
+

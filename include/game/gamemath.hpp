@@ -91,7 +91,7 @@ namespace game
         static_cast<int>(floor(entity[1]/chunkSize))
       );
     }
-
+    
     static float chunkToEntityX(float entityX) {
       return entityX*chunkSize;
     }

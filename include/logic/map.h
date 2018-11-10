@@ -114,6 +114,9 @@ class Map
     auto get_entity_by_id(unsigned int id) -> EntityType*;
     
     template<typename EntityType, typename Lambda>
+    auto for_each_entity(Lambda&& lam) -> void;
+    
+    template<typename EntityType, typename Lambda>
     auto for_each_entity_in_range(game::vec2<float> pos, float radius, Lambda&& lam) -> void;
     
     template<typename EntityType, typename Lambda>
