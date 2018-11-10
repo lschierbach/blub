@@ -35,7 +35,7 @@ class Controller
     static constexpr float m_IdealCameraScale = 14;
     
   public:
-    void init();
+    void init(int argc, char** argv);
       
     Model* m_Model;
     Renderer* m_Renderer;

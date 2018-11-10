@@ -16,7 +16,6 @@
  */
 
 #include <iostream>
-#include <getopt.h>
 
 #include "SDL_gpu.h"
 
@@ -27,8 +26,8 @@ int main(int argc, char** argv)
   std::cout << "Program starting up" << std::endl;
   
   Controller ctrl;
- 
-  ctrl.init();
+
+  ctrl.init(argc, argv);
     
   do{ }while(ctrl.tick());
 

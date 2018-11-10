@@ -18,11 +18,13 @@
  */
 
 #include <chrono>
+#include <getopt.h>
+
 #include "controller.h"
 #include "game/force.hpp"
 #include "game/gamemath.hpp"
 
-void Controller::init()
+void Controller::init(int argc, char** argv)
 {
   struct {
     unsigned int windowWidth;
@@ -30,6 +32,25 @@ void Controller::init()
     bool fullscreen;
   } args = {800, 600, false};
   
+  extern char* optarg;
+  extern int optind;
+  int c;
+
+  while((c = getopt(argc, argv, "x:y:f")) != -1)
+  {
+    switch(c)
+    {
+      case 'x':
+        args.windowWidth = atoi(optarg);
+        break;
+      case 'y':
+        args.windowHeight = atoi(optarg);
+        break;
+      case 'f':
+        args.fullscreen = true;
+    }
+  }
+
   global::tickCount = 0;
   global::lastTickDuration = .0f;
   
