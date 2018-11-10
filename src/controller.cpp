@@ -143,6 +143,7 @@ void Controller::handleInput()
     if (selectedEntity != nullptr)
     {
       selectedEntity->setPos(selectedEntity->getPos() + (moveVec * 0.2f));
+      m_Renderer->setCameraPos(0, selectedEntity->getPos());
     }
     else
     {

@@ -77,6 +77,7 @@ class Renderer
     void show();
 
     void moveCamera(size_t cameraId, float x, float y);
+    void setCameraPos(size_t cameraId, vec2<float> pos);
     void cameraTrack(size_t cameraId, Map::SharedEntityPtr entity);
     void zoomCamera(size_t cameraId, float factor);
     void setScale(size_t cameraId, float scale);

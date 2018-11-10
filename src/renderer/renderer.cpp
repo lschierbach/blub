@@ -317,6 +317,13 @@ void Renderer::moveCamera(size_t cameraId, float x, float y)
   std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get()->modXY(vec2<float>(x,y));
 }
 
+void Renderer::setCameraPos(size_t cameraId, vec2<float> pos) 
+{
+  Camera* cam = std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get();
+  cam->setPos(pos);
+}
+
+
 void Renderer::zoomCamera(size_t cameraId, float factor)
 {
   Camera* cam = std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get();
