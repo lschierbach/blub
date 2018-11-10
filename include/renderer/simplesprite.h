@@ -10,6 +10,7 @@ class SimpleSprite: public Sprite
   private:
     static std::map<const char*, GPU_Image*> loaded;
     const char* path;
+    GPU_Image* image;
   public:
     SimpleSprite(const char* imagepath);
     GPU_Image* getImage();
