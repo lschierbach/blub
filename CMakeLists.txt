@@ -22,6 +22,16 @@ else()
 endif()
 set(LIBS ${LIBS} ${SDL2_LIBRARY} ${SDL_GPU_LIBRARY})
 
+set(USE_MWINDOWS false CACHE BOOL "Use -mwindows to remove terminal on mingw")
+if(WIN32)
+    set(USE_MWINDOWS true)
+else()
+    mark_as_advanced(USE_MWINDOWS)
+endif()
+if(USE_MWINDOWS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mwindows")
+    message("Use mwindows: ${CMAKE_CXX_FLAGS}")
+endif()
 
 file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.cpp")
 
