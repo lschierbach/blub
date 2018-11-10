@@ -71,7 +71,10 @@ struct has_index : public std::false_type {};
 template <typename T>
 struct has_index<T, void_t<decltype(std::declval<T>().index())>> :  public std::true_type {};
 
-
+template<class T>
+struct is_array:std::is_array<T>{};
+template<class T, std::size_t N>
+struct is_array<std::array<T,N>>:std::true_type{};
 
 
 
@@ -133,7 +136,7 @@ namespace filesystem
   }
 
   template<typename Range>
-  auto writeRange(std::ofstream& out, Range& currentRange)      -> enable_if_t<is_range<Range>::value>
+  auto writeRange(std::ofstream& out, Range& currentRange)      -> enable_if_t<is_range<Range>::value && !is_array<Range>::value>
   {
     uint32_t size = currentRange.size();
     writeStruct<uint32_t>(out, size);
@@ -141,6 +144,15 @@ namespace filesystem
     for(auto& elem : currentRange)
     {
       writeRange(out, elem);
+    }
+  }
+  
+  template<typename Array>
+  auto writeRange(std::ofstream& out, Array& arr)      -> enable_if_t<is_array<Array>::value>
+  {
+    for (auto i = 0u; i < arr.size(); i++)
+    {
+      writeRange(out, arr[i]);
     }
   }
   
@@ -219,16 +231,27 @@ namespace filesystem
   }
 
   template<typename Range>
-  auto readRange(std::ifstream& in, Range& range)               -> enable_if_t<is_range<Range>::value>
+  auto readRange(std::ifstream& in, Range& range)               -> enable_if_t<is_range<Range>::value && !is_array<Range>::value>
   {
     uint32_t size;
     readStruct<uint32_t>(in, size);
     
-    for (auto i = 0; i < size; i++)
+    for (auto i = 0u; i < size; i++)
     {
       typename Range::value_type elem;
       readRange(in, elem);
       range.push_back(elem);
+    }
+  }
+
+  template<typename Array>
+  auto readRange(std::ifstream& in, Array& arr)               -> enable_if_t<is_array<Array>::value>
+  {
+    for (auto i = 0u; i < arr.size(); i++)
+    {
+      typename Array::value_type elem;
+      readRange(in, elem);
+      arr[i] = elem;
     }
   }
 

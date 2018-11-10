@@ -44,7 +44,7 @@ class Chunk
   private:
     
     using tilesetVector = std::vector<Tileset>;
-
+    using gameLayer = std::array<std::array<char, game::math::chunkSize>, game::math::chunkSize>;
   
     const std::string chunkFolder = "data/map/chunks/";
       
@@ -70,17 +70,20 @@ class Chunk
  
     struct Data : public Saveable
     {
+      gameLayer m_GameLayer;
       tilesetVector m_Tilesets;
       game::EntityVector m_Entities;
       
       void write(std::ofstream& out) override
       {
+        filesystem::writeRange(out, m_GameLayer);
         filesystem::writeRange(out, m_Tilesets);
         filesystem::writeRange(out, m_Entities);
       }
       
       void read(std::ifstream& in) override
       {
+        filesystem::readRange(in, m_GameLayer);
         filesystem::readRange(in, m_Tilesets);
         filesystem::readRange(in, m_Entities);
       }
