@@ -2,30 +2,8 @@
  *  FILENAME:      filesystem.hpp
  * 
  *  DESCRIPTION:
- *      offers template functions for saving/loading structs or vectors of structs
+ *      offers template functions for saving/loading structs or containers of structs
  *
- *  PUBLIC FUNCTIONS:
- *      struct bool           is_range TRUE if Type has methods: size, begin, end
- *      struct bool           is_saveable TRUE if Type has methods: read, write
- *
- *      void        template  writeStruct(std::ofstream&, Type) -> isPrimitive
- *      void        template  writeStruct(std::ofstream&, Type) -> !isPrimitive
- *      void        template  writeStruct(const std::string&, Type)
- *
- *      void        template  writeContainer(std::ofstream&, Type) -> isrange
- *      void        template  writeContainer(std::ofstream&, Type) -> !isrange
- *      void        template  writeContainer(const std::string&, Type)
- *
- *      void        template  readStruct(std::ifstream&, Type) -> isPrimitive
- *      void        template  readStruct(std::ifstream&, Type) -> !isPrimitive
- *      void        template  readStruct(const std::string&, Type)
- *
- *      void        template  readContainer(std::ifstream&, Type) -> isRange
- *      void        template  readContainer(std::ifstream&, Type) -> !isRange
- *      void        template  readContainer(const std::string&, Type) 
- *      
- *      bool        fileExists(const std::string)
- *      
  *  NOTES:
  *      When trying to save a struct or a vector of structs with non primitive data (string, vector, ..) it should inherit from class "Saveable" or provide methods "save" and write".
  *      
@@ -41,6 +19,12 @@
  *
  *      LS, 25.10.2018
  *                 -Saves/Loads non-primitive Structs using streaming operators << & >> instead as Byte-Array
+ * 
+ *      LS, 07.11.2018
+ *                 -Filesystem can now handle std::variant
+ * 
+ *      LS, 10.11.2018
+ *                 -Filesystem can now handle std::array
  */
 #ifndef FILESYSTEM_HPP
 #define FILESYSTEM_HPP
