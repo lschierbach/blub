@@ -159,15 +159,6 @@ uint32_t Chunk::getLastTick() const
   return m_LastTick;
 }
 
-game::vec2<int> Chunk::worldToTilePosition(game::vec2<float> worldPos) const
-{
-  return game::vec2<int>
-  {
-    static_cast<int>(floor(worldPos[0])) - m_pos[0] - 1,
-    static_cast<int>(floor(worldPos[1])) - m_pos[1] - 1
-  };
-}
-
 void Chunk::lockData()
 {
   m_DataMutex.lock();

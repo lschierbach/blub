@@ -97,7 +97,7 @@ namespace generator
       tileData.push_back(temp);
     }
 
-    chunkData.m_Tilesets.push_back(Tileset(0.5f, 1.0f, 1.0f, imgName, tileData));
+    chunkData.m_Tilesets.push_back(Tileset(0.f, 0.f, 1.0f, imgName, tileData));
   }
 }
 
