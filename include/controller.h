@@ -32,6 +32,8 @@ class Controller
     // at 60fps one fram is about 16ms
     static constexpr int m_IdealFrameTime = 16;
     
+    static constexpr float m_IdealCameraScale = 14;
+    
   public:
     void init();
       

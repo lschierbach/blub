@@ -323,6 +323,12 @@ void Renderer::zoomCamera(size_t cameraId, float factor)
   cam->setScale(cam->getScale()*factor);
 }
 
+void Renderer::setScale(size_t cameraId, float scale) 
+{
+  Camera* cam = std::static_pointer_cast<Camera>(getCamera(cameraId).camera).get();
+  cam->setScale(scale);
+}
+
 void Renderer::tick(float tickTime)
 {
   for(CameraEntry entry: cameras)

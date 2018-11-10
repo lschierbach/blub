@@ -37,7 +37,7 @@ void Controller::init()
   m_Renderer = new Renderer(args.windowWidth, args.windowHeight, args.fullscreen, m_Model->getMap());
   m_Quit = false;
   
-  m_Renderer->addCamera(0, 0, 1, 1, 14);
+  m_Renderer->addCamera(0, 0, 1, 1, m_IdealCameraScale);
   m_Renderer->moveCamera(0, game::math::chunkSize / 2.f, game::math::chunkSize / 2.f);
   
   SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -127,6 +127,7 @@ void Controller::handleInput()
   if (keystate[SDL_SCANCODE_Q]) m_Quit = true;
   if (keystate[SDL_SCANCODE_R]) m_Renderer->zoomCamera(0, 0.9);
   if (keystate[SDL_SCANCODE_F]) m_Renderer->zoomCamera(0, 1.111111111111111);
+  if (keystate[SDL_SCANCODE_V]) m_Renderer->setScale(0, m_IdealCameraScale);
   
   moveVec.norm();
   

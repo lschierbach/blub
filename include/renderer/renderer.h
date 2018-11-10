@@ -79,6 +79,7 @@ class Renderer
     void moveCamera(size_t cameraId, float x, float y);
     void cameraTrack(size_t cameraId, Map::SharedEntityPtr entity);
     void zoomCamera(size_t cameraId, float factor);
+    void setScale(size_t cameraId, float scale);
     
     float getCameraScale(size_t cameraId);
 
