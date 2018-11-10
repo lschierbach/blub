@@ -5,7 +5,7 @@
 /lib/*
 /dll/*
 /bin/*
-/data/chunks/*
+/data/map/*
 /CMakeFiles/*
 /nbproject/*
 CMakeCache.txt
