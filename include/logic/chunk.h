@@ -37,6 +37,8 @@
 #include "game/filesystem.hpp"
 #include "game/gamemath.hpp"
 
+class Map;
+
 class Chunk
 {
   private:
@@ -44,7 +46,7 @@ class Chunk
     using tilesetVector = std::vector<Tileset>;
 
   
-    const std::string chunkFolder = "data/chunks/";
+    const std::string chunkFolder = "data/map/chunks/";
       
     std::thread m_saveThread;
     std::thread m_reloadThread;
@@ -62,6 +64,8 @@ class Chunk
     
     uint32_t m_LastTick;
  
+    Map* m_Map;
+    
   public:
  
     struct Data : public Saveable
@@ -82,7 +86,7 @@ class Chunk
       }
     };
     
-    Chunk(int x, int y);
+    Chunk(int x, int y, Map* map);
     ~Chunk();
     
     uint32_t getLastTick() const;

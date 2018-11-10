@@ -26,11 +26,12 @@
 #include "game/gamemath.hpp"
 #include "logic/chunk.h"
 
-Entity::Entity(vec2<float> p, vec2<float> s, vec2<float> a)
+Entity::Entity(vec2<float> p, vec2<float> s, vec2<float> a, unsigned int id)
 {
     pos = p;
     size = s;
     anchor = a;
+    this->id = id;
 }
 
 Entity::Entity(int x, int y)
@@ -92,6 +93,12 @@ vec2<float> Entity::getPos() const
 {
     return pos;
 }
+
+unsigned int Entity::getId() const 
+{
+  return id;
+}
+
 
 void Entity::tick()
 {

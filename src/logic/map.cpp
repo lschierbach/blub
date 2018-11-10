@@ -25,6 +25,36 @@ int mod(int a, int b)
   return (b + (a % b)) % b;
 }
 
+Map::Map() 
+{
+  if (filesystem::fileExists(m_MapFolder + "data.dat"))
+  {
+    filesystem::readStruct(m_MapFolder + "data.dat", m_Data);
+  }
+  else
+  {
+    init();
+  }
+}
+
+void Map::init() 
+{
+  m_Data.m_EntityCount = 1;
+}
+
+
+Map::~Map() 
+{
+  filesystem::writeStruct(m_MapFolder + "data.dat", m_Data);
+}
+
+unsigned int Map::getNextEntityId() 
+{
+  std::scoped_lock(m_DataMutex);
+  return m_Data.m_EntityCount++;
+}
+
+
 void Map::tick()
 {
   std::stack<SharedEntityPtr> unusedEntites;
@@ -100,7 +130,7 @@ void Map::addEntity(SharedEntityPtr entity)
   {
     for (auto y = 0u; y < containerLength; y++)
     {
-      chunks[x][y] = std::make_shared<Chunk>(entityPos[0] - loadingDistance + x, entityPos[1] - loadingDistance + y);
+      chunks[x][y] = std::make_shared<Chunk>(entityPos[0] - loadingDistance + x, entityPos[1] - loadingDistance + y, this);
     }
   }
   m_Chunks.insert(std::make_pair(entity, chunks));

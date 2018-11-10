@@ -36,6 +36,7 @@
 #include <vector> //std::vector
 #include <map>    //std::map
 #include <stack>  //std::stack
+#include <mutex>
 
 #include <memory> //std::shared_ptr
 
@@ -57,6 +58,29 @@ class Map
 
     std::map<SharedEntityPtr, SharedChunkPtrArr> m_Chunks;
 
+    const std::string m_MapFolder = "data/map/";
+    
+    void init();
+    
+    struct Data : public Saveable
+    {
+      unsigned int m_EntityCount;
+      
+      void write(std::ofstream& out) override
+      {
+        filesystem::writeStruct(out, m_EntityCount);
+      }
+      
+      void read(std::ifstream& in) override
+      {
+        filesystem::readStruct(in, m_EntityCount);
+      }
+    };
+    
+    Data m_Data;
+    
+    std::mutex m_DataMutex;
+    
     void updateEntity(SharedEntityPtr entity, bool firstUpdate = false);
     void tickChunks();
     
@@ -64,6 +88,13 @@ class Map
 
 
   public:
+    Map();
+    ~Map();
+    Map(const Map&) = delete;
+    Map(Map&&) = delete;
+    Map& operator=(const Map&) = delete;
+    Map& operator=(const Map&&) = delete;
+    
     Chunk* getIdealChunk(game::vec2<float> pos);
     Chunk* getIdealChunk(game::vec2<int> pos);
     
@@ -72,10 +103,15 @@ class Map
     void addEntity(SharedEntityPtr entity);
     void removeEntity(SharedEntityPtr entity);
 
+    unsigned int getNextEntityId();
+    
     std::vector<PhysicsEntity*> getEntitiesAt(game::vec2<float> pos, float radius);
     
     template<typename EntityType>
     auto get_entity_at(game::vec2<float> pos) -> EntityType*;
+    
+    template<typename EntityType>
+    auto get_entity_by_id(unsigned int id) -> EntityType*;
     
     template<typename EntityType, typename Lambda>
     auto for_each_entity_in_range(game::vec2<float> pos, float radius, Lambda&& lam) -> void;

@@ -2,7 +2,7 @@
 #include "game/global.h"
 #include "game/gamemath.hpp"
 
-PhysicsEntity::PhysicsEntity(vec2<float> p, vec2<float> s, vec2<float> a) : Entity(p, s, a)
+PhysicsEntity::PhysicsEntity(vec2<float> p, vec2<float> s, vec2<float> a, unsigned int id) : Entity(p, s, a, id)
 {
   m_Mass = 1.f + (s[0] * s[1]);
   m_Velocity = { 0.f, 0.f };

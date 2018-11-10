@@ -9,6 +9,7 @@
 #include "game/simplexnoise.h"
 #include "game/entities/physicsEntity.h"
 #include "game/gamemath.hpp"
+#include "logic/map.h"
 
 namespace generator
 {
@@ -45,7 +46,7 @@ namespace generator
   }
   
   template<unsigned SIZE>
-  void generateChunk(Chunk::Data& chunkData, int chunkP, int chunkQ, int size)
+  void generateChunk(Chunk::Data& chunkData, int chunkP, int chunkQ, int size, Map* map)
   {
     std::array<std::array<bool, SIZE>, SIZE> collisionMap;
     getCollisionMap<SIZE>(collisionMap);
@@ -80,12 +81,12 @@ namespace generator
           width += 0.2f;
           if (rand() % 100 > 50)
           {
-            PhysicsEntity e(pos, { width, width }, { .5f, .5f });
+            PhysicsEntity e(pos, { width, width }, { .5f, .5f }, map->getNextEntityId());
             chunkData.m_Entities.push_back( {e });
           }
           else
           {
-            Entity e(pos, { width, width }, { .5f, .5f });
+            Entity e(pos, { width, width }, { .5f, .5f }, map->getNextEntityId());
             chunkData.m_Entities.push_back( {e });
           }
         }

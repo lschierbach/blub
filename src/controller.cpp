@@ -43,7 +43,7 @@ void Controller::init()
   SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
-Entity* selectedEntity = nullptr;
+unsigned int selectedEntityId = 0;
 
 void Controller::handleSDLEvents()
 {
@@ -71,18 +71,23 @@ void Controller::handleSDLEvents()
           
           if (entity != nullptr)
           {
+            selectedEntityId = entity->getId();
+            auto* selectedEntity = m_Model->getMap()->get_entity_by_id<Entity>(selectedEntityId);
             if (selectedEntity != nullptr)
             {
               selectedEntity->setSprite(nullptr);
             }
             selectedEntity = entity;
             
+            selectedEntityId = selectedEntity->getId();
+            
             selectedEntity->setSprite(std::make_shared<SimpleSprite>("data/img/testEntitySelected.png"));
           }
           else
           {
-            if (selectedEntity != nullptr)
+            if (selectedEntityId != 0)
             {
+              auto* selectedEntity = m_Model->getMap()->get_entity_by_id<Entity>(selectedEntityId);
               selectedEntity->setSprite(nullptr);
             }
             else
@@ -96,7 +101,7 @@ void Controller::handleSDLEvents()
                 }
               );
             }
-            selectedEntity = nullptr;
+            selectedEntityId = 0;
           }
         }
         break;
@@ -130,10 +135,19 @@ void Controller::handleInput()
   if (keystate[SDL_SCANCODE_V]) m_Renderer->setScale(0, m_IdealCameraScale);
   
   moveVec.norm();
-  
-  if (selectedEntity != nullptr)
+
+  if (selectedEntityId != 0)
   {
-    selectedEntity->setPos(selectedEntity->getPos() + (moveVec * 0.2f));
+    auto* selectedEntity = m_Model->getMap()->get_entity_by_id<Entity>(selectedEntityId);
+    selectedEntity = m_Model->getMap()->get_entity_by_id<Entity>(selectedEntityId);
+    if (selectedEntity != nullptr)
+    {
+      selectedEntity->setPos(selectedEntity->getPos() + (moveVec * 0.2f));
+    }
+    else
+    {
+      selectedEntityId = 0;
+    }
   }
   else
   {

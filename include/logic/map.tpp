@@ -1,5 +1,46 @@
-
 #include "chunk.h"
+#include "algorithm"
+#include "map.h"
+
+
+template<typename EntityType>
+auto Map::get_entity_by_id(unsigned int id) -> EntityType*
+{
+  std::vector<Chunk*> differentChunks;
+  
+  for (auto& chunkEntry : m_Chunks)
+  {
+    const auto& chunks = chunkEntry.second;
+    for (auto x = 1u; x < containerLength - 1; x++)
+    {
+      for (auto y = 1u; y < containerLength - 1; y++)
+      {
+        auto* chunk = chunks[x][y].get();
+        if (std::find(differentChunks.begin(), differentChunks.end(), chunk) == differentChunks.end())
+        {
+          differentChunks.push_back(chunk);
+        }
+      }
+    }
+  }
+  
+  for (auto* chunk : differentChunks)
+  {
+    chunk->lockData();
+    EntityType* result = game::find_in_variant_by_type<EntityType>(chunk->m_Data.m_Entities, 
+      [&](auto &entity) -> bool
+      {
+        return entity.getId() == id;
+      }
+    );
+    chunk->unlockData();
+    if (result != nullptr)
+    {
+      return result;
+    }
+  }
+  return nullptr;
+}
 
 template<typename EntityType>
 auto Map::get_entity_at(game::vec2<float> pos) -> EntityType*
