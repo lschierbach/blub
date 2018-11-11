@@ -2,38 +2,85 @@
 #include "algorithm"
 #include "map.h"
 
-
-template<typename EntityType>
-auto Map::get_entity_by_id(unsigned int id) -> EntityType*
+template<typename Lambda>
+auto Map::for_each_chunk(Lambda&& lam) -> void
 {
-  std::vector<Chunk*> differentChunks;
+  std::vector<Map::ChunkLogicLock*> differentChunks;
   
   for (auto& chunkEntry : m_Chunks)
   {
-    const auto& chunks = chunkEntry.second;
+    auto& chunks = chunkEntry.second;
     for (auto x = 1u; x < containerLength - 1; x++)
     {
       for (auto y = 1u; y < containerLength - 1; y++)
       {
-        auto* chunk = chunks[x][y].get();
-        if (std::find(differentChunks.begin(), differentChunks.end(), chunk) == differentChunks.end())
+        auto& chunk = chunks[x][y];
+        if (std::find(differentChunks.begin(), differentChunks.end(), &chunk) == differentChunks.end())
         {
-          differentChunks.push_back(chunk);
+          differentChunks.push_back(&chunk);
         }
       }
     }
   }
   
-  for (auto* chunk : differentChunks)
+  for (auto* chunkLogic : differentChunks)
   {
-    chunk->lockData();
+    Map::ScopedChunkLock chunk { *chunkLogic };
+    lam(*chunk.get());
+  }
+}
+
+template<typename Lambda>
+auto Map::for_each_chunk_in_box(game::vec2<float> boxTopLeft, game::vec2<float> size, Lambda&& lam) -> void
+{
+  auto topLeftChunkPos = game::math::entityToChunkPos(boxTopLeft);
+  auto bottomRightChunkPos = game::math::entityToChunkPos(boxTopLeft + size);
+  
+  for (auto x = topLeftChunkPos[0]; x <= bottomRightChunkPos[0]; x++)
+  {
+    for (auto y = topLeftChunkPos[1]; y <= bottomRightChunkPos[1]; y++)
+    {
+      auto optionalChunkLock = getIdealChunk(game::vec2<int>(x, y));
+      if (optionalChunkLock)
+      {
+        auto* chunk = optionalChunkLock->get();
+        
+        lam(*chunk);
+      }
+    }
+  }
+}
+
+template<typename EntityType>
+auto Map::get_entity_by_id(unsigned int id) -> EntityType*
+{
+  std::vector<Map::ChunkLogicLock*> differentChunks;
+  
+  for (auto& chunkEntry : m_Chunks)
+  {
+    auto& chunks = chunkEntry.second;
+    for (auto x = 1u; x < containerLength - 1; x++)
+    {
+      for (auto y = 1u; y < containerLength - 1; y++)
+      {
+        auto& chunk = chunks[x][y];
+        if (std::find(differentChunks.begin(), differentChunks.end(), &chunk) == differentChunks.end())
+        {
+          differentChunks.push_back(&chunk);
+        }
+      }
+    }
+  }
+  
+  for (auto* chunkLogic : differentChunks)
+  {
+    Map::ScopedChunkLock chunk { *chunkLogic };
     EntityType* result = game::find_in_variant_by_type<EntityType>(chunk->m_Data.m_Entities, 
       [&](auto &entity) -> bool
       {
         return entity.getId() == id;
       }
     );
-    chunk->unlockData();
     if (result != nullptr)
     {
       return result;
@@ -52,10 +99,11 @@ auto Map::get_entity_at(game::vec2<float> pos) -> EntityType*
   {
     for (auto y = topLeftChunkPos[1]; y <= bottomRightChunkPos[1]; y++)
     {
-      auto* chunk = getIdealChunk(game::vec2<int>(x, y));
-      if (chunk != nullptr)
+      auto optionalChunkLock = getIdealChunk(game::vec2<int>(x, y));
+      if (optionalChunkLock)
       {
-        chunk->lockData();
+        auto* chunk = optionalChunkLock->get();
+        
         EntityType* result = game::find_in_variant_by_type<EntityType>(chunk->m_Data.m_Entities, 
           [&](auto &entity) -> bool
           {
@@ -67,7 +115,6 @@ auto Map::get_entity_at(game::vec2<float> pos) -> EntityType*
                     pos[1] >= topLeft[1] && pos[1] <= bottomRight[1]);
           }
         );
-        chunk->unlockData();
         if (result != nullptr)
         {
           return result;
@@ -91,10 +138,11 @@ auto Map::for_each_entity_in_range(game::vec2<float> pos, float radius, Lambda&&
   {
     for (auto y = topLeftChunkPos[1]; y <= bottomRightChunkPos[1]; y++)
     {
-      auto* chunk = getIdealChunk(game::vec2<int>(x, y));
-      if (chunk != nullptr)
+      auto optionalChunkLock = getIdealChunk(game::vec2<int>(x, y));
+      if (optionalChunkLock)
       {
-        chunk->lockData();
+        auto* chunk = optionalChunkLock->get();
+        
         game::for_each_variant_by_type<EntityType>(chunk->m_Data.m_Entities, 
           [&](auto& entity) -> void
           {
@@ -104,7 +152,6 @@ auto Map::for_each_entity_in_range(game::vec2<float> pos, float radius, Lambda&&
             }
           }
         );
-        chunk->unlockData();
       }
     }
   }
@@ -113,70 +160,40 @@ auto Map::for_each_entity_in_range(game::vec2<float> pos, float radius, Lambda&&
 template<typename EntityType, typename Lambda>
 auto Map::for_each_entity_in_box(game::vec2<float> boxTopLeft, game::vec2<float> size, Lambda&& lam) -> void
 {
-  auto topLeftChunkPos     = game::math::entityToChunkPos(boxTopLeft);
-  auto bottomRightChunkPos = game::math::entityToChunkPos(boxTopLeft + size);
-  
   auto boxBottomRight = boxTopLeft + size;
-  
-  for (auto x = topLeftChunkPos[0]; x <= bottomRightChunkPos[0]; x++)
-  {
-    for (auto y = topLeftChunkPos[1]; y <= bottomRightChunkPos[1]; y++)
+  for_each_chunk_in_box(boxTopLeft, size,
+    [&](auto&& chunk) -> void
     {
-      auto* chunk = getIdealChunk(game::vec2<int>(x, y));
-      if (chunk != nullptr)
-      {
-        chunk->lockData();
-        game::for_each_variant_by_type<EntityType>(chunk->m_Data.m_Entities, 
-          [&](auto& entity) -> void
-          {
-            auto entityBottomRight = entity.getPos() + game::vec2<float> {
-              entity.getSize()[0] * entity.getAnchor()[0], 
-              entity.getSize()[1] * entity.getAnchor()[1]
-            };
-            auto entityTopLeft = entity.getPos() - game::vec2<float> {
-              entity.getSize()[0] * entity.getAnchor()[0], 
-              entity.getSize()[1] * entity.getAnchor()[1]
-            };
+      game::for_each_variant_by_type<EntityType>(chunk.m_Data.m_Entities, 
+        [&](auto&& entity) -> void
+        {
+          auto entityBottomRight = entity.getPos() + game::vec2<float> {
+            entity.getSize()[0] * entity.getAnchor()[0], 
+            entity.getSize()[1] * entity.getAnchor()[1]
+          };
+          auto entityTopLeft = entity.getPos() - game::vec2<float> {
+            entity.getSize()[0] * entity.getAnchor()[0], 
+            entity.getSize()[1] * entity.getAnchor()[1]
+          };
             
-            if (entityTopLeft[0] >= boxTopLeft[0] && entityBottomRight[0] <= boxBottomRight[0] &&
-                entityTopLeft[1] >= boxTopLeft[1] && entityBottomRight[1] <= boxBottomRight[1])
-            {
-              lam(entity);
-            }
+          if (entityTopLeft[0] >= boxTopLeft[0] && entityBottomRight[0] <= boxBottomRight[0] &&
+              entityTopLeft[1] >= boxTopLeft[1] && entityBottomRight[1] <= boxBottomRight[1])
+          {
+            lam(entity);
           }
-        );
-        chunk->unlockData();
-      }
+        }
+      );
     }
-  }
+  );
 }
 
 template<typename EntityType, typename Lambda>
 auto Map::for_each_entity(Lambda&& lam) -> void
 {
-  std::vector<Chunk*> differentChunks;
-  
-  for (auto& chunkEntry : m_Chunks)
-  {
-    const auto& chunks = chunkEntry.second;
-    for (auto x = 1u; x < containerLength - 1; x++)
+  for_each_chunk(
+    [&](auto&& chunk) -> void
     {
-      for (auto y = 1u; y < containerLength - 1; y++)
-      {
-        auto* chunk = chunks[x][y].get();
-        if (std::find(differentChunks.begin(), differentChunks.end(), chunk) == differentChunks.end())
-        {
-          differentChunks.push_back(chunk);
-        }
-      }
+      game::for_each_variant_by_type<EntityType>(chunk.m_Data.m_Entities, lam);
     }
-  }
-  
-  for (auto* chunk : differentChunks)
-  {
-    chunk->lockData();
-    game::for_each_variant_by_type<EntityType>(chunk->m_Data.m_Entities, lam);
-    chunk->unlockData();
-  }
+  );
 }
-

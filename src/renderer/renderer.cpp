@@ -252,41 +252,23 @@ void Renderer::renderCamera(CameraEntry& camera)
 
   camcast.get()->clearRender();
 
-  //for all chunks within loading distance
-  for(int i=0-(int)Map::getLoadingDistance(); i<=(int)Map::getLoadingDistance(); i++)
-  { //q
-    for(int j=0-(int)Map::getLoadingDistance(); j<=(int)Map::getLoadingDistance(); j++)
-    { //p
-
-      auto* c = map->getChunk(j, i, theCam);
-
-#ifdef DEBUG_RENDERER_VERBOSE
-  std::cout << "[RENDERER] got chunk" << std::endl;
-#endif
-
-      if(chunkInBounds(*c, camera))
+  auto topLeftScreen =     pixelToXYAuto(vec2<float>(1.f, 1.f));
+  auto bottomRightScreen = pixelToXYAuto(camcast.get()->getSize() - vec2<float>(1.f, 1.f));
+  
+  map->for_each_chunk_in_box(topLeftScreen, bottomRightScreen - topLeftScreen, 
+    [&](auto&& chunk) -> void
+    {
+      for(const auto& ts: chunk.m_Data.m_Tilesets)
       {
-  #ifdef DEBUG_RENDERER_VERBOSE
-    std::cout << "[RENDERER] tilesets for chunk relative " << j << "|" << i << std::endl;
-  #endif
-        //render all tilesets of current chunk
-    
-        c->lockData();
-    
-        for(const auto& ts: c->m_Data.m_Tilesets)
-        {
 
-          vec2<float> chunkOffset = game::math::chunkToEntityPos(c->getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
+        vec2<float> chunkOffset = game::math::chunkToEntityPos(chunk.getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
 
-          camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
-        }
-        
-        
-        c->unlockData();
+        camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
       }
-
     }
-  }
+  );
+  
+  return;
 }
 
 void Renderer::renderCameraEntities(CameraEntry& camera)
@@ -294,7 +276,10 @@ void Renderer::renderCameraEntities(CameraEntry& camera)
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 
-  map->for_each_entity_in_box<Entity>(camcast.get()->getPos() - (0.5f * camcast.get()->getSize()), camcast.get()->getSize(), 
+  auto topLeftScreen =     pixelToXYAuto(vec2<float>(1.f, 1.f));
+  auto bottomRightScreen = pixelToXYAuto(camcast.get()->getSize() - vec2<float>(1.f, 1.f));
+  
+  map->for_each_entity_in_box<Entity>(topLeftScreen, bottomRightScreen - topLeftScreen, 
     [&](auto& entity) -> void
     {
       camcast.get()->renderEntity(entity);

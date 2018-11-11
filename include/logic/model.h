@@ -24,6 +24,8 @@ class Model
   private:
     Map* m_Map;
     
+    void handleMapCollision();
+    
   public:
     
     Model();

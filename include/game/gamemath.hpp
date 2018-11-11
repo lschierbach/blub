@@ -71,7 +71,7 @@ namespace game
 
   namespace math
   {
-    static const int chunkSize = 32;
+    static const int chunkSize = 16;
 
     static const float tileHeight = 1.f;
     static const float tileWidth  = 1.f;

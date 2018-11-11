@@ -16,12 +16,6 @@
  *
  *  AUTHOR:         Leon Schierbach     DATE: 12.09.2018
  *
- *  DEBUG:          DEBUG_MAP
- *                  DEBUG_MAP_PRINT
- *                  DEBUG_MAP_UPDATE
- *
- *
- *  CHANGES:
  */
 
 #ifndef MAP_H
@@ -46,13 +40,101 @@ class Map
     static const size_t loadingDistance = 2;
     static const size_t containerLength = loadingDistance * 2 + 1;
 
+    using SharedChunkPtr = std::shared_ptr<Chunk>;
+    
+    struct ChunkLogicLock
+    {
+      SharedChunkPtr chunk;
+      bool isLogicLocked;
+      
+      void lock()
+      {
+        isLogicLocked = true;
+        chunk.get()->lockData();
+      }
+      
+      void unlock()
+      {
+        isLogicLocked = false;
+        chunk.get()->unlockData();
+      }
+      
+      Chunk* get() const
+      {
+        return chunk.get();
+      }
+      
+      SharedChunkPtr getSharedPtr() const
+      {
+        return chunk;
+      }
+    };
+    
+    using SharedChunkPtrArr = std::array<std::array<ChunkLogicLock, containerLength>, containerLength>;
+    
   public:
     using SharedEntityPtr = std::shared_ptr<Entity>;
-    using SharedChunkPtr = std::shared_ptr<Chunk>;
-    using SharedChunkPtrArr = std::array<std::array<SharedChunkPtr, containerLength>, containerLength>;
     
     static size_t getLoadingDistance();
 
+    
+    class ScopedChunkLock
+    {
+      private:
+        ChunkLogicLock* chunkLock;
+        bool previouslyLocked;
+      
+      public:
+        ScopedChunkLock(ChunkLogicLock& c) : chunkLock(&c)
+        {
+          previouslyLocked = chunkLock->isLogicLocked;
+
+          if (!previouslyLocked)
+          {
+            chunkLock->get()->lockData();
+            chunkLock->isLogicLocked = true;
+          }
+        }
+        
+        ScopedChunkLock(ScopedChunkLock&& c)
+        {
+          chunkLock = c.chunkLock;
+          c.chunkLock = nullptr;
+          previouslyLocked = c.previouslyLocked;
+        }
+        
+        ScopedChunkLock& operator=(ScopedChunkLock&& c)
+        {
+          chunkLock = c.chunkLock;
+          c.chunkLock = nullptr;
+          previouslyLocked = c.previouslyLocked;
+          return *this;
+        }
+        
+        ~ScopedChunkLock()
+        {
+          if (!previouslyLocked && chunkLock != nullptr)
+          {
+            chunkLock->get()->unlockData();
+            chunkLock->isLogicLocked = false;
+          }
+        }
+
+        ScopedChunkLock()                                  = delete;
+        ScopedChunkLock(const ScopedChunkLock&)            = delete;
+        ScopedChunkLock& operator=(const ScopedChunkLock&) = delete;
+
+        Chunk* operator->() const
+        {
+          return chunkLock->get();
+        }
+        
+        Chunk* get() const
+        {
+          return chunkLock->get();
+        }
+    };
+    
   private:
     std::stack<SharedChunkPtr> m_unusedChunks;
 
@@ -90,13 +172,13 @@ class Map
   public:
     Map();
     ~Map();
-    Map(const Map&) = delete;
-    Map(Map&&) = delete;
-    Map& operator=(const Map&) = delete;
+    Map(const Map&)             = delete;
+    Map(Map&&)                  = delete;
+    Map& operator=(const Map&)  = delete;
     Map& operator=(const Map&&) = delete;
     
-    Chunk* getIdealChunk(game::vec2<float> pos);
-    Chunk* getIdealChunk(game::vec2<int> pos);
+    std::optional<ScopedChunkLock> getIdealChunk(game::vec2<float> pos);
+    std::optional<ScopedChunkLock> getIdealChunk(game::vec2<int> pos);
     
     void tick();
 
@@ -105,13 +187,19 @@ class Map
 
     unsigned int getNextEntityId();
     
-    std::vector<PhysicsEntity*> getEntitiesAt(game::vec2<float> pos, float radius);
+    char getGamelayerIdAt(game::vec2<float> pos);
     
     template<typename EntityType>
     auto get_entity_at(game::vec2<float> pos) -> EntityType*;
     
     template<typename EntityType>
     auto get_entity_by_id(unsigned int id) -> EntityType*;
+    
+    template<typename Lambda>
+    auto for_each_chunk(Lambda&& lam) -> void;
+    
+    template<typename Lambda>
+    auto for_each_chunk_in_box(game::vec2<float> boxTopLeft, game::vec2<float> size, Lambda&& lam) -> void;
     
     template<typename EntityType, typename Lambda>
     auto for_each_entity(Lambda&& lam) -> void;
@@ -121,8 +209,6 @@ class Map
     
     template<typename EntityType, typename Lambda>
     auto for_each_entity_in_box(game::vec2<float> boxTopLeft, game::vec2<float> size, Lambda&& lam) -> void;
-    
-    Chunk* getChunk(int relativeP, int relativeQ, SharedEntityPtr entity);
 };
 
 #include "map.tpp"

@@ -142,7 +142,7 @@ void Controller::handleInput()
     selectedEntity = m_Model->getMap()->get_entity_by_id<Entity>(selectedEntityId);
     if (selectedEntity != nullptr)
     {
-      selectedEntity->setPos(selectedEntity->getPos() + (moveVec * 0.2f));
+      selectedEntity->setPos(selectedEntity->getPos() + (moveVec * 0.05f));
       m_Renderer->setCameraPos(0, selectedEntity->getPos());
     }
     else

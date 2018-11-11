@@ -51,42 +51,40 @@ void Model::tick()
 {
   m_Map->tick();
   
-  // handle collision
+  handleMapCollision();
+}
+
+void Model::handleMapCollision() 
+{ 
   m_Map->for_each_entity<PhysicsEntity>
   (
     [&](auto&& entity) -> void
     {
-      auto entityTopLeft = entity.getPos() - game::vec2<float> {
+      auto entityTopLeft = entity.getPos() + game::vec2<float> {
+        -entity.getSize()[0] * entity.getAnchor()[0], 
+        -entity.getSize()[1] * entity.getAnchor()[1]
+      };
+      auto entityTopRight = entity.getPos() + game::vec2<float> {
+        entity.getSize()[0] * entity.getAnchor()[0], 
+        -entity.getSize()[1] * entity.getAnchor()[1]
+      };
+      auto entityBottomLeft = entity.getPos() + game::vec2<float> {
+        -entity.getSize()[0] * entity.getAnchor()[0], 
+        entity.getSize()[1] * entity.getAnchor()[1]
+      };
+      auto entityBottomRight = entity.getPos() + game::vec2<float> {
         entity.getSize()[0] * entity.getAnchor()[0], 
         entity.getSize()[1] * entity.getAnchor()[1]
       };
-      auto entityBottomRight = entityTopLeft + entity.getSize();
-      std::cout << entity.getSize()[0] << std::endl;
       
-      auto topLeftChunk = m_Map->getIdealChunk(entityTopLeft);
-      auto bottomRightChunk = m_Map->getIdealChunk(entityBottomRight);
+      bool topLeftCollision = m_Map->getGamelayerIdAt(entityTopLeft) == 1;
+      bool topRightCollision = m_Map->getGamelayerIdAt(entityTopRight) == 1;
+      bool bottomLeftCollision = m_Map->getGamelayerIdAt(entityBottomLeft) == 1;
+      bool bottomRightCollision = m_Map->getGamelayerIdAt(entityBottomRight) == 1;
       
-      //auto tilePosTopLeft = topLeftChunk->worldToTilePosition(entityTopLeft);
-      //auto tilePosBottomRight = bottomRightChunk->worldToTilePosition(entityBottomRight);
-
-      //get position *inside* chunk (make gamemath/chunk method?)
-      auto tilePosTopLeftF = entityTopLeft - game::math::chunkToEntityPos(topLeftChunk->getPos());
-      auto tilePosBottomRightF = entityBottomRight - game::math::chunkToEntityPos(bottomRightChunk->getPos());
-
-      //convert to integer (needed?)
-      auto tilePosTopLeftI = game::vec2<int>(
-        static_cast<int>(floor(tilePosTopLeftF[0])),
-        static_cast<int>(floor(tilePosTopLeftF[1]))
-      );
-      auto tilePosBottomRightI = game::vec2<int>(
-        static_cast<int>(floor(tilePosBottomRightF[0])),
-        static_cast<int>(floor(tilePosBottomRightF[1]))
-      );
-      
-      if (topLeftChunk->m_Data.m_GameLayer[tilePosTopLeftI[0]][tilePosTopLeftI[1]] == 1 ||
-          bottomRightChunk->m_Data.m_GameLayer[tilePosBottomRightI[0]][tilePosBottomRightI[1]] == 1)
+      if (topLeftCollision || topRightCollision || bottomLeftCollision || bottomRightCollision)
       {
-        printf("collision\n");
+        
       }
     }
   );
