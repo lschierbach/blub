@@ -58,6 +58,9 @@ class Renderer
 
     GPU_Image* LoadImageWithMipmaps(const char* filename);
 
+    Uint32 sp;
+    GPU_ShaderBlock block;
+
   public:
     Renderer(float w, float h, bool fullscreen, Map* map);
     ~Renderer();

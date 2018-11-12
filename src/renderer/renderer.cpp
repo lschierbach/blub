@@ -30,9 +30,23 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   renderTarget = GPU_Init(w, h, RENDERER_INIT_FLAGS);
   setFullscreen(fullscreen);
   this->map = map;
-#ifdef DEBUG_RENDERER_PRINTID
+//#ifdef DEBUG_RENDERER_PRINTID
   std::cout << "[RENDERER] Current rendering backend: " << GPU_GetCurrentRenderer()->id.name << " (major Version " << GPU_GetCurrentRenderer()->id.major_version << "; minor version " << GPU_GetCurrentRenderer()->id.minor_version << ")" << std::endl;
-#endif
+//#endif
+
+  auto vs = GPU_LoadShader(GPU_VERTEX_SHADER, "data/shader/common.vs.glsl");
+  if(!vs) { std::cout << "Loading/compiling vertex shader failed" << std::endl; }
+
+  auto fs = GPU_LoadShader(GPU_FRAGMENT_SHADER, "data/shader/common.fs.glsl");
+  if(!fs) { std::cout << "Loading/compiling fragment shader failed" << std::endl; }
+
+  sp = GPU_LinkShaders(vs, fs);
+  if(!sp) { std::cout << "GLSL linking failed" << std::endl; }
+
+  if(vs && fs && sp) {
+    auto defaultShaderBlock = GPU_GetShaderBlock();
+    block = GPU_LoadShaderBlock(sp, "gpu_Vertex", "gpu_TexCoord", "gpu_Color", "gpu_ModelViewProjectionMatrix");
+  }
 }
 
 Renderer::~Renderer()
@@ -182,6 +196,10 @@ void Renderer::renderFrame()
   }
 
   //final blitting
+
+  //first enable the custom GLSL shaders
+  GPU_ActivateShaderProgram(sp, &block);
+
   for(CameraEntry& camera: cameras)
   {
     std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
@@ -197,6 +215,8 @@ void Renderer::renderFrame()
     GPU_BlitRect(camcast.get()->getRender(), NULL, renderTarget, &cameraRect);
 
   }
+  //disable shaders when done
+  GPU_DeactivateShaderProgram();
 }
 
 bool Renderer::chunkInBounds(const Chunk& chunk, const CameraEntry& camera)
