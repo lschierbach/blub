@@ -2,30 +2,8 @@
  *  FILENAME:      filesystem.hpp
  * 
  *  DESCRIPTION:
- *      offers template functions for saving/loading structs or vectors of structs
+ *      offers template functions for saving/loading structs or containers of structs
  *
- *  PUBLIC FUNCTIONS:
- *      struct bool           is_range TRUE if Type has methods: size, begin, end
- *      struct bool           is_saveable TRUE if Type has methods: read, write
- *
- *      void        template  writeStruct(std::ofstream&, Type) -> isPrimitive
- *      void        template  writeStruct(std::ofstream&, Type) -> !isPrimitive
- *      void        template  writeStruct(const std::string&, Type)
- *
- *      void        template  writeContainer(std::ofstream&, Type) -> isrange
- *      void        template  writeContainer(std::ofstream&, Type) -> !isrange
- *      void        template  writeContainer(const std::string&, Type)
- *
- *      void        template  readStruct(std::ifstream&, Type) -> isPrimitive
- *      void        template  readStruct(std::ifstream&, Type) -> !isPrimitive
- *      void        template  readStruct(const std::string&, Type)
- *
- *      void        template  readContainer(std::ifstream&, Type) -> isRange
- *      void        template  readContainer(std::ifstream&, Type) -> !isRange
- *      void        template  readContainer(const std::string&, Type) 
- *      
- *      bool        fileExists(const std::string)
- *      
  *  NOTES:
  *      When trying to save a struct or a vector of structs with non primitive data (string, vector, ..) it should inherit from class "Saveable" or provide methods "save" and write".
  *      
@@ -41,6 +19,12 @@
  *
  *      LS, 25.10.2018
  *                 -Saves/Loads non-primitive Structs using streaming operators << & >> instead as Byte-Array
+ * 
+ *      LS, 07.11.2018
+ *                 -Filesystem can now handle std::variant
+ * 
+ *      LS, 10.11.2018
+ *                 -Filesystem can now handle std::array
  */
 #ifndef FILESYSTEM_HPP
 #define FILESYSTEM_HPP
@@ -71,7 +55,10 @@ struct has_index : public std::false_type {};
 template <typename T>
 struct has_index<T, void_t<decltype(std::declval<T>().index())>> :  public std::true_type {};
 
-
+template<class T>
+struct is_array:std::is_array<T>{};
+template<class T, std::size_t N>
+struct is_array<std::array<T,N>>:std::true_type{};
 
 
 
@@ -133,7 +120,7 @@ namespace filesystem
   }
 
   template<typename Range>
-  auto writeRange(std::ofstream& out, Range& currentRange)      -> enable_if_t<is_range<Range>::value>
+  auto writeRange(std::ofstream& out, Range& currentRange)      -> enable_if_t<is_range<Range>::value && !is_array<Range>::value>
   {
     uint32_t size = currentRange.size();
     writeStruct<uint32_t>(out, size);
@@ -141,6 +128,15 @@ namespace filesystem
     for(auto& elem : currentRange)
     {
       writeRange(out, elem);
+    }
+  }
+  
+  template<typename Array>
+  auto writeRange(std::ofstream& out, Array& arr)      -> enable_if_t<is_array<Array>::value>
+  {
+    for (auto i = 0u; i < arr.size(); i++)
+    {
+      writeRange(out, arr[i]);
     }
   }
   
@@ -219,16 +215,27 @@ namespace filesystem
   }
 
   template<typename Range>
-  auto readRange(std::ifstream& in, Range& range)               -> enable_if_t<is_range<Range>::value>
+  auto readRange(std::ifstream& in, Range& range)               -> enable_if_t<is_range<Range>::value && !is_array<Range>::value>
   {
     uint32_t size;
     readStruct<uint32_t>(in, size);
     
-    for (auto i = 0; i < size; i++)
+    for (auto i = 0u; i < size; i++)
     {
       typename Range::value_type elem;
       readRange(in, elem);
       range.push_back(elem);
+    }
+  }
+
+  template<typename Array>
+  auto readRange(std::ifstream& in, Array& arr)               -> enable_if_t<is_array<Array>::value>
+  {
+    for (auto i = 0u; i < arr.size(); i++)
+    {
+      typename Array::value_type elem;
+      readRange(in, elem);
+      arr[i] = elem;
     }
   }
 

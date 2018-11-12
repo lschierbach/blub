@@ -63,31 +63,33 @@ namespace generator
     // which tiles are open? Starting from top left, going clockwise.
     int open[6] = { 0 };
     
-    for(int q = 0; q < size; q++)
+    for(int y = 0; y < size; y++)
     {
       std::vector<Tile> temp;
-      for(int p = 0; p < size; p++)
+      for(int x = 0; x < size; x++)
       {
-        temp.push_back(Tile(collisionMap[p][q] ? 1 : 0, .0f));
-        if (rand() % 100 <= 10 && !collisionMap[p][q])
+        temp.push_back(Tile(collisionMap[x][y] ? 1 : 0, .0f));
+        
+        chunkData.m_GameLayer[x][y] = collisionMap[x][y] ? 1 : 0;
+        
+        if (x == 1 && y == 8)
         {
           auto entityPos = game::math::chunkToEntityPos( {chunkP, chunkQ} );
-          auto pos = entityPos + game::vec2<float>(static_cast<float>(p), static_cast<float>(q));
+          auto pos = entityPos + game::vec2<float>(static_cast<float>(x), static_cast<float>(y));
           
           // @todo: why not += (.5, .5) ?
           pos += game::vec2<float>(.0f, .5f);
           
-          auto width = rand() / float(RAND_MAX);
-          width += 0.2f;
-          if (rand() % 100 > 50)
+          auto width = .5f;
+          if (chunkP == 0 && chunkQ == 0)
           {
             PhysicsEntity e(pos, { width, width }, { .5f, .5f }, map->getNextEntityId());
-            chunkData.m_Entities.push_back( {e });
+            chunkData.m_Entities.push_back( { e });
           }
           else
           {
             Entity e(pos, { width, width }, { .5f, .5f }, map->getNextEntityId());
-            chunkData.m_Entities.push_back( {e });
+            //chunkData.m_Entities.push_back( { e });
           }
         }
       }
@@ -95,7 +97,7 @@ namespace generator
       tileData.push_back(temp);
     }
 
-    chunkData.m_Tilesets.push_back(Tileset(0.5f, 1.0f, 1.0f, imgName, tileData));
+    chunkData.m_Tilesets.push_back(Tileset(0.f, 0.f, 1.0f, imgName, tileData));
   }
 }
 

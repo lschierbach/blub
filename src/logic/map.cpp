@@ -100,12 +100,10 @@ void Map::tickChunks()
           for (auto& entityVariant : entitiesChangedPosition)
           {
             auto* entity = game::getEntityPtr<Entity>(entityVariant);
-            auto* chunk = getIdealChunk(entity->getPos());
-            if (chunk != nullptr)
+            auto chunk = getIdealChunk(entity->getPos());
+            if (chunk)
             {
-              chunk->lockData();
-              chunk->m_Data.m_Entities.push_back(entityVariant);
-              chunk->unlockData();
+              chunk->get()->m_Data.m_Entities.push_back(entityVariant);
             }
           }
         }
@@ -124,20 +122,21 @@ void Map::addEntity(SharedEntityPtr entity)
   {
     return;
   }
-
-  SharedChunkPtrArr chunks;
-  for (auto x = 0u; x < containerLength; x++)
+  
   {
-    for (auto y = 0u; y < containerLength; y++)
+    SharedChunkPtrArr chunks;
+    for (auto x = 0u; x < containerLength; x++)
     {
-      chunks[x][y] = std::make_shared<Chunk>(entityPos[0] - loadingDistance + x, entityPos[1] - loadingDistance + y, this);
+      for (auto y = 0u; y < containerLength; y++)
+      {
+        chunks[x][y].chunk = std::make_shared<Chunk>(entityPos[0] - loadingDistance + x, entityPos[1] - loadingDistance + y, this);
+      }
     }
+    m_Chunks.insert(std::make_pair(entity, chunks));
+
+    // delete references so update doesn't get confused with use_count while updating entity
+    //chunks = { nullptr };
   }
-  m_Chunks.insert(std::make_pair(entity, chunks));
-
-  // delete references so update doesn't get confused with use_count while updating entity
-  chunks = { nullptr };
-
   updateEntity(entity, true);
 }
 
@@ -156,7 +155,7 @@ void Map::removeEntity(SharedEntityPtr entity)
   {
     for (auto y = 0u; y < containerLength; y++)
     {
-      if (chunks[x][y].use_count() > 1)
+      if (chunks[x][y].chunk.use_count() > 1)
       {
         m_unusedChunks.pop();
       }
@@ -214,10 +213,10 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
           }
         }
 
-        if (tempChunks[newChunkArrayPosition[0]][newChunkArrayPosition[1]] == nullptr)
+        if (tempChunks[newChunkArrayPosition[0]][newChunkArrayPosition[1]].chunk == nullptr)
         {
           // if no other entity uses current chunk, take one from stack
-          if (chunks[x][y].use_count() > 1)
+          if (chunks[x][y].chunk.use_count() > 1)
           {
             // maybe chunk still lays on stack
             bool foundInUnusedChunks  = false;
@@ -230,7 +229,7 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
               if (m_unusedChunks.top()->getPos() == entityPos + newChunkArrayPosition - game::Vector<2, int>{ static_cast<int>(loadingDistance), static_cast<int>(loadingDistance) })
               {
                 foundInUnusedChunks = true;
-                tempChunks[newChunkArrayPosition[0]][newChunkArrayPosition[1]] = m_unusedChunks.top();
+                tempChunks[newChunkArrayPosition[0]][newChunkArrayPosition[1]].chunk = m_unusedChunks.top();
                 m_unusedChunks.pop();
                 break;
               }
@@ -254,7 +253,7 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
             }
 
             // if not, take first element from stack and overrite it later..
-            chunks[x][y] = m_unusedChunks.top();
+            chunks[x][y].chunk = m_unusedChunks.top();
             m_unusedChunks.pop();
           }
 
@@ -263,7 +262,7 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
               y - diff[1] >= containerLength || y - diff[1] < 0)
           {
             // override chunk
-            chunks[x][y]->setPos({
+            chunks[x][y].get()->setPos({
               entityPos[0] + (newChunkArrayPosition[0] - static_cast<int>(loadingDistance)), 
               entityPos[1] + (newChunkArrayPosition[1] - static_cast<int>(loadingDistance)) 
             });
@@ -275,9 +274,9 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
         else
         {
           // but only, if no other entity uses it
-          if (chunks[x][y].use_count() < 2)
+          if (chunks[x][y].chunk.use_count() < 2)
           {
-            m_unusedChunks.push(chunks[x][y]);
+            m_unusedChunks.push(chunks[x][y].chunk);
           }
         }
       }
@@ -287,37 +286,46 @@ void Map::updateEntity(SharedEntityPtr entity, bool firstUpdate)
   }
 }
 
-Chunk* Map::getChunk(int relativeP, int relativeQ, SharedEntityPtr entity)
-{
-  auto& chunks = m_Chunks.find(entity)->second;
-  auto chunkPtr = chunks[loadingDistance + relativeP][loadingDistance + relativeQ].get();
-  
-  return (chunkPtr);
-}
-
-Chunk* Map::getIdealChunk(game::vec2<float> pos) 
+std::optional<Map::ScopedChunkLock>  Map::getIdealChunk(game::vec2<float> pos) 
 {
   auto chunkPos = game::math::entityToChunkPos(pos);
   
   return getIdealChunk(chunkPos);
 }
 
-Chunk* Map::getIdealChunk(game::vec2<int> pos) 
+std::optional<Map::ScopedChunkLock>  Map::getIdealChunk(game::vec2<int> pos) 
 {
   for (auto& chunkEntry : m_Chunks)
   {
-    const auto& chunks = chunkEntry.second;
+    auto& chunks = chunkEntry.second;
     auto chunksCenter = chunks[loadingDistance][loadingDistance].get()->getPos();
     
     // check bounds
-    if (pos[0] >= chunksCenter[0] - static_cast<int>(loadingDistance) && pos[0] <= chunksCenter[0] + static_cast<int>(loadingDistance) &&
-        pos[1] >= chunksCenter[1] - static_cast<int>(loadingDistance) && pos[1] <= chunksCenter[1] + static_cast<int>(loadingDistance))
+    if (pos[0] >= chunksCenter[0] - static_cast<int>(loadingDistance-1) && pos[0] <= chunksCenter[0] + static_cast<int>(loadingDistance-1) &&
+        pos[1] >= chunksCenter[1] - static_cast<int>(loadingDistance-1) && pos[1] <= chunksCenter[1] + static_cast<int>(loadingDistance-1))
     {
-      return chunks[loadingDistance + (pos[0] - chunksCenter[0])][loadingDistance + (pos[1] - chunksCenter[1])].get();
+      return ScopedChunkLock { chunks[loadingDistance + (pos[0] - chunksCenter[0])][loadingDistance + (pos[1] - chunksCenter[1])] };
     }
   }
   
-  return nullptr;
+  return { };
+}
+
+char Map::getGamelayerIdAt(game::vec2<float> pos)
+{
+  auto chunkLock = getIdealChunk(pos);
+
+  if (chunkLock)
+  {
+    auto* chunk = chunkLock->get();
+    auto tilePos = pos - game::math::chunkToEntityPos(chunk->getPos());
+
+    auto result = chunkLock->get()->m_Data.m_GameLayer[static_cast<int>(tilePos[0])][static_cast<int>(tilePos[1])];
+
+    return result;
+  }
+  
+  return 0;
 }
 
 size_t Map::getLoadingDistance()
