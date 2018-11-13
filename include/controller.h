@@ -19,6 +19,7 @@
 #include "game/global.h"
 #include "logic/model.h"
 #include "renderer/renderer.h"
+#include "editor/editor.h"
 
 class Controller
 {
@@ -39,6 +40,7 @@ class Controller
       
     Model* m_Model;
     Renderer* m_Renderer;
+    Editor* m_Editor;
     
     bool tick();
     

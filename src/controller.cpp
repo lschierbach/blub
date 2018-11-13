@@ -61,6 +61,8 @@ void Controller::init(int argc, char** argv)
   m_Renderer->addCamera(0, 0, 1, 1, m_IdealCameraScale);
   m_Renderer->moveCamera(0, game::math::chunkSize / 2.f, game::math::chunkSize / 2.f);
   
+  m_Editor = new Editor(m_Model->getMap(), m_Renderer);
+
   SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
@@ -134,6 +136,7 @@ void Controller::quit()
 {
   delete m_Model;
   delete m_Renderer;
+  delete m_Editor;
 }
 
 
@@ -145,6 +148,8 @@ void Controller::handleInput()
   
   auto moveVec = game::vec2<float>(.0f, .0f);
   
+  m_Editor->handleKeyState(keystate);
+
   if (keystate[SDL_SCANCODE_W]) moveVec += { .0f, -1.f};
   if (keystate[SDL_SCANCODE_A]) moveVec += {-1.f,  .0f};
   if (keystate[SDL_SCANCODE_S]) moveVec += { .0f,  1.f};

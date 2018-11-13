@@ -255,32 +255,34 @@ void Camera::renderOverlays()
 
   for(const Overlay* o: overlays) 
   {
-    //If w/h <=0, auto-calculate that dimension
-    if(o->w <= 0 && o->h > 0) 
-    {
-      h = o->h;
-      w = (o->h * getSize()[1] / o->image->h) * o->image->w / getSize()[0];
-    } 
-    else if(o->h <= 0 && o->w > 0) 
-    {
-      w = o->w;
-      //h = (w * wt / wi) * hi / ht
-      h = (o->w * getSize()[0] / o->image->w) * o->image->h / getSize()[1];
-    }
-    else 
-    {
-      w = o->w;
-      h = o->h;
-    }
+      if(o->visible){
+      //If w/h <=0, auto-calculate that dimension
+      if(o->w <= 0 && o->h > 0)
+      {
+        h = o->h;
+        w = (o->h * getSize()[1] / o->image->h) * o->image->w / getSize()[0];
+      }
+      else if(o->h <= 0 && o->w > 0)
+      {
+        w = o->w;
+        //h = (w * wt / wi) * hi / ht
+        h = (o->w * getSize()[0] / o->image->w) * o->image->h / getSize()[1];
+      }
+      else
+      {
+        w = o->w;
+        h = o->h;
+      }
 
-    GPU_Rect targetRect = GPU_MakeRect(
-      o->x * getSize()[0],
-      o->y * getSize()[1],
-      w * getSize()[0],
-      h * getSize()[1]
-    );
- 
-    GPU_BlitRect(o->image, NULL, image->target, &targetRect);
+      GPU_Rect targetRect = GPU_MakeRect(
+        o->x * getSize()[0],
+        o->y * getSize()[1],
+        w * getSize()[0],
+        h * getSize()[1]
+      );
+
+      GPU_BlitRect(o->image, NULL, image->target, &targetRect);
+    }
   }
 }
 

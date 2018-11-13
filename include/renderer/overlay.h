@@ -20,6 +20,7 @@ struct Overlay
     float y;
     float w;
     float h;
+    bool visible;
 };
 
 #endif /* OVERLAY_H */
