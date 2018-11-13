@@ -79,9 +79,6 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
 
 Renderer::~Renderer()
 {
-  for(auto camIt = cameras.begin(); camIt != cameras.end(); ++camIt) {
-    std::static_pointer_cast<Camera>(camIt->camera).get()->~Camera();
-  }
   GPU_FreeTarget(renderTarget);
 }
 
