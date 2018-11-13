@@ -51,6 +51,20 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
     block = GPU_LoadShaderBlock(sp, "gpu_Vertex", "gpu_TexCoord", "gpu_Color", "gpu_ModelViewProjectionMatrix");
   }
 
+  GPU_ActivateShaderProgram(sp, &block);
+
+  //Set static uniforms
+  GPU_SetUniformf(GPU_GetUniformLocation(sp, "outerBound"), 1.5);
+  GPU_SetUniformf(GPU_GetUniformLocation(sp, "innerBound"), 0.9);
+  float outerColor[] = {1.1,0.6,0.6};
+  float innerColor[] = {1.0,1.0,1.0};
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp, "outerColor"), 3, 1, outerColor);
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp, "innerColor"), 3, 1, innerColor);
+  GPU_SetUniformf(GPU_GetUniformLocation(sp, "noiseFalloff"), 0.2);
+  GPU_SetUniformf(GPU_GetUniformLocation(sp, "noiseRatio"), 0.1);
+
+  GPU_DeactivateShaderProgram();
+
   std::ifstream tsJson("data/img/tileset/tilesets.json");
 
   rapidjson::IStreamWrapper isw {tsJson};
@@ -224,6 +238,10 @@ void Renderer::renderFrame()
 
   //first enable the custom GLSL shaders
   GPU_ActivateShaderProgram(sp, &block);
+
+  //set uniforms
+  GPU_SetUniformf(GPU_GetUniformLocation(sp, "time"), SDL_GetTicks()/1000.f);
+  GPU_SetUniformf(GPU_GetUniformLocation(sp, "aspect"), static_cast<float>(renderTarget->w)/renderTarget->h);
 
   for(CameraEntry& camera: cameras)
   {
