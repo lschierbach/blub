@@ -17,9 +17,12 @@
 #include <utility>
 #include <cmath>
 #include <string>
+#include <fstream>
+
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
 
 #include "renderer/renderer.h"
-#include "renderer/lodimage.hpp"
 #include "game/entity.h"
 #include "game/gamemath.hpp"
 
@@ -46,6 +49,31 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   if(vs && fs && sp) {
     auto defaultShaderBlock = GPU_GetShaderBlock();
     block = GPU_LoadShaderBlock(sp, "gpu_Vertex", "gpu_TexCoord", "gpu_Color", "gpu_ModelViewProjectionMatrix");
+  }
+
+  std::ifstream tsJson("data/img/tileset/tilesets.json");
+
+  rapidjson::IStreamWrapper isw {tsJson};
+  rapidjson::Document tsDoc;
+  tsDoc.ParseStream(isw);
+
+  assert(tsDoc.IsArray());
+  for(const auto& entry: tsDoc.GetArray()) {
+    auto value = entry["tileset"].GetString();
+    std::cout << "Loading tileset \"" << value << "\"..." << std::endl;
+
+    std::vector<std::string> paths;
+    for(const auto& image: entry["image"].GetArray()) {
+      paths.push_back(tilesetDirectory + std::string(image.GetString()));
+    }
+
+    LODImage newlod(&paths[0], paths.size(), entry["min_resolution"].GetInt());
+    tilesetImgs.insert(
+      std::make_pair(
+        std::string(entry["tileset"].GetString()),
+        newlod
+      )
+    );
   }
 }
 
@@ -262,7 +290,7 @@ void Renderer::renderCamera(CameraEntry& camera)
   std::cout << "[RENDERER] Rendering camera frames" << std::endl;
 #endif
 
-  static LODImage testImg = testLoadLOD();
+  //static LODImage testImg = testLoadLOD();
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
 
@@ -280,10 +308,18 @@ void Renderer::renderCamera(CameraEntry& camera)
     {
       for(const auto& ts: chunk.m_Data.m_Tilesets)
       {
+  #ifdef DEBUG_RENDERER_VERBOSE
+    std::cout << "[RENDERER] tilesets for chunk relative " << j << "|" << i << std::endl;
+  #endif
+        //render all tilesets of current chunk
 
         vec2<float> chunkOffset = game::math::chunkToEntityPos(chunk.getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
 
-        camcast.get()->renderTileset(ts, testImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
+        auto iter = tilesetImgs.find(ts.imgName);
+        auto& tilesetImg = std::get<LODImage>(*(iter));
+
+        camcast.get()->renderTileset(ts, tilesetImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
+
       }
     }
   );

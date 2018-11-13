@@ -31,11 +31,14 @@
 #include "logic/map.h"
 #include "game/entities/camera.h"
 #include "renderer/cameraentry.h"
+#include "renderer/lodimage.hpp"
 
 class Renderer
 {
   private:
-    //std::map<std::string, GPU_Image*> tilesetImgs;
+
+    static constexpr char tilesetDirectory[] = "data/img/tileset/";
+    std::map<std::string, LODImage> tilesetImgs;
 
     /*
     Data structure: cameras. Vector of Tuples saving

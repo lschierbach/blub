@@ -5,10 +5,11 @@ find_path(SDL_GPU_INCLUDE_DIR SDL_gpu.h PATHS
 	/opt/local/
 	/Library/Frameworks/
 	~/Library/Frameworks/
+    HINTS $ENV{SDL2GPUDIR}
 	PATH_SUFFIXES include/ include/SDL2/ include/SDL_gpu SDL2 SDL_gpu
 	NO_CMAKE_FIND_ROOT_PATH)
 
-find_library(SDL_GPU_LIBRARY NAMES SDL2_gpu libSDL2_gpu.so libSDL2_gpu.a libSDL2_gpu.dll.a PATHS /usr/local/lib/)
+find_library(SDL_GPU_LIBRARY NAMES SDL2_gpu libSDL2_gpu.dll.a HINTS $ENV{SDL2GPUDIR} PATHS /usr/local/lib/ PATH_SUFFIXES lib/ lib64/ )
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SDL_GPU DEFAULT_MSG SDL_GPU_LIBRARY SDL_GPU_INCLUDE_DIR)
