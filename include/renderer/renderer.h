@@ -32,6 +32,7 @@
 #include "game/entities/camera.h"
 #include "renderer/cameraentry.h"
 #include "renderer/lodimage.hpp"
+#include "renderer/coloredrect.h"
 
 class Renderer
 {
@@ -40,13 +41,8 @@ class Renderer
     static constexpr char tilesetDirectory[] = "data/img/tileset/";
     std::map<std::string, LODImage> tilesetImgs;
 
-    /*
-    Data structure: cameras. Vector of Tuples saving
-    * 1. the camera itself as SharedEntityPtr and
-    * 2. the x and y, w and h *relative* to complete renderer's target, as fraction of 1.
-    *   -> i.e. 0.5 0 0.5 1 means "camera starts at half the window's width (from the left), top of the window, half as wide as window and as tall as window".
-    */
     std::vector<CameraEntry> cameras;
+    std::vector<ColoredRect> boxQueue;
 
     GPU_Target* renderTarget;
     const static GPU_InitFlagEnum RENDERER_INIT_FLAGS = GPU_DEFAULT_INIT_FLAGS;
@@ -58,6 +54,7 @@ class Renderer
     size_t getCameraId() const;
     CameraEntry getCamera(size_t index);
     bool chunkInBounds(const Chunk& chunk, const CameraEntry& camera);
+    void drawBoxes();
 
     GPU_Image* LoadImageWithMipmaps(const char* filename);
 
@@ -93,6 +90,8 @@ class Renderer
     void addOverlay(size_t cameraId, const Overlay* const o);
     void removeOverlay(size_t cameraId, const Overlay* const element);
     void clearOverlays(size_t cameraId);
+
+    void renderBox(float x, float y, float w, float h, SDL_Color borderColor = {0,0,255,255}, SDL_Color areaColor = {0,0,0,0}, float borderRadius = 0.f);
 
     void tick(const float tickTime);
 

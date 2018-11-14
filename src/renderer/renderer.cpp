@@ -234,7 +234,7 @@ void Renderer::renderFrame()
     camcast.get()->renderOverlays();
   }
 
-  //final blitting
+  //final blitting of cameras to window
 
   //first enable the custom GLSL shaders
   GPU_ActivateShaderProgram(sp, &block);
@@ -260,6 +260,23 @@ void Renderer::renderFrame()
   }
   //disable shaders when done
   GPU_DeactivateShaderProgram();
+
+  //draw miscellaneous items
+  drawBoxes();
+
+}
+
+void Renderer::drawBoxes() {
+  for(auto& box: boxQueue) {
+    if(box.corners > 0.f) {
+      GPU_RectangleRoundFilled2(renderTarget, box.rect, box.corners, box.area);
+      GPU_RectangleRound2(renderTarget, box.rect, box.corners, box.border);
+    } else {
+      GPU_RectangleFilled2(renderTarget, box.rect, box.area);
+      GPU_Rectangle2(renderTarget, box.rect, box.border);
+    }
+  }
+  boxQueue.clear();
 }
 
 bool Renderer::chunkInBounds(const Chunk& chunk, const CameraEntry& camera)
@@ -421,6 +438,11 @@ void Renderer::removeOverlay(size_t cameraIndex, const Overlay* const element)
 void Renderer::clearOverlays(size_t cameraIndex)
 {
   std::static_pointer_cast<Camera>(getCamera(cameraIndex).camera).get()->clearOverlays();
+}
+
+void Renderer::renderBox(float x, float y, float w, float h, SDL_Color borderColor, SDL_Color areaColor, float borderRadius)
+{
+  boxQueue.push_back({x, y, w, h, borderColor, areaColor, borderRadius});
 }
 
 vec2<float> Renderer::pixelToXYAuto(vec2<float> pixel)
