@@ -6,7 +6,7 @@ out vec4 fragColor;
 
 uniform sampler2D tex;
 
-uniform float time;
+in float ftime;
 
 uniform float outerBound;
 uniform float innerBound;
@@ -23,7 +23,7 @@ float rand(float seed) {
 }
 
 float rand2d(vec2 seed) {
-  return fract(sin(dot(seed, vec2(62.2473,24.9312)))*236236.6231 + fract(time*2.0));
+  return fract(sin(dot(seed, vec2(62.2473,24.9312)))*236236.6231 + fract(ftime*2.0));
 }
 
 void main(void)

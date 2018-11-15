@@ -19,12 +19,6 @@
 #include "game/entities/camera.h"
 #include "game/gamemath.hpp"
 
-Camera::Camera()
-{
-  image = GPU_CreateImage(getSize()[0], getSize()[1], GPU_FORMAT_RGBA);
-  GPU_GetTarget(image);
-  GPU_SetImageFilter(image, GPU_FILTER_NEAREST); //No blur when scaling up
-}
 Camera::~Camera()
 {
   GPU_FreeImage(image);
@@ -39,6 +33,30 @@ Camera::Camera(float x, float y, float w, float h, float scale)
   setPos(vec2<float>(x,y));
   setSize(vec2<float>(w,h));
   setScale(scale);
+
+  auto vs_tile = GPU_LoadShader(GPU_VERTEX_SHADER, "data/shader/common.vs.glsl");
+  if(!vs_tile) { std::cout << "Loading/compiling vertex shader failed:" << std::endl << GPU_GetShaderMessage() << std::endl; }
+
+  auto fs_tile = GPU_LoadShader(GPU_FRAGMENT_SHADER, "data/shader/tile.fs.glsl");
+  if(!fs_tile) { std::cout << "Loading/compiling fragment shader failed" << std::endl  << GPU_GetShaderMessage() << std::endl; }
+
+  sp_tile = GPU_LinkShaders(vs_tile, fs_tile);
+  if(!sp_tile) { std::cout << "GLSL linking failed" << std::endl << GPU_GetShaderMessage() << std::endl; }
+
+  if(vs_tile && fs_tile && sp_tile) {
+    auto defaultShaderBlock = GPU_GetShaderBlock();
+    block_tile = GPU_LoadShaderBlock(sp_tile, "gpu_Vertex", "gpu_TexCoord", "gpu_Color", "gpu_ModelViewProjectionMatrix");
+  }
+
+  GPU_ActivateShaderProgram(sp_tile, &block_tile);
+
+  float color[] = {1.f, 0.8f, 1.2f};
+
+  //Set static uniforms
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "tileColor"), 3, 1, color);
+
+  GPU_DeactivateShaderProgram();
+
 }
 
 void Camera::setSize(vec2<float> s)
@@ -120,6 +138,11 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
       realHeight
   );
 
+  GPU_ActivateShaderProgram(sp_tile, &block_tile);
+
+  GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "time"), SDL_GetTicks()/1000.f);
+  GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "scale"), getScale());
+
   for(int i=0; i<ts.tileData.size(); i++)
   {
     for(int j=0; j<ts.tileData[i].size(); j++)
@@ -136,6 +159,7 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
           ceil(targetRect.w)+overlap,
           ceil(targetRect.h)+overlap
         );
+
         GPU_BlitRect(img, &sourceRect, image->target, &roundedTarget); //render from tile on given image to this cam's render image
 
 #ifdef DEBUG_CAMERA_BOUNDING_BOXES
@@ -147,6 +171,7 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
     targetRect.y += logicalHeight;
     targetRect.x = initX;
   }
+  GPU_DeactivateShaderProgram();
 }
 
 void Camera::render2dMap(int* data, SDL_Color (*conversion)(int), size_t w, size_t h)
