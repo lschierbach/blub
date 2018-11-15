@@ -64,6 +64,28 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   GPU_SetUniformf(GPU_GetUniformLocation(sp, "noiseRatio"), 0.1);
 
   GPU_DeactivateShaderProgram();
+  
+  auto vs_tile = GPU_LoadShader(GPU_VERTEX_SHADER, "data/shader/common.vs.glsl");
+  if(!vs_tile) { std::cout << "Loading/compiling vertex shader failed:" << std::endl << GPU_GetShaderMessage() << std::endl; }
+
+  auto fs_tile = GPU_LoadShader(GPU_FRAGMENT_SHADER, "data/shader/tile.fs.glsl");
+  if(!fs_tile) { std::cout << "Loading/compiling fragment shader failed" << std::endl  << GPU_GetShaderMessage() << std::endl; }
+
+  sp_tile = GPU_LinkShaders(vs_tile, fs_tile);
+  if(!sp_tile) { std::cout << "GLSL linking failed" << std::endl << GPU_GetShaderMessage() << std::endl; }
+
+  if(vs_tile && fs_tile && sp_tile) {
+    auto defaultShaderBlock = GPU_GetShaderBlock();
+    block_tile = GPU_LoadShaderBlock(sp_tile, "gpu_Vertex", "gpu_TexCoord", "gpu_Color", "gpu_ModelViewProjectionMatrix");
+  }
+
+  GPU_ActivateShaderProgram(sp_tile, &block_tile);
+  float color[] = {1.f, 0.8f, 1.2f};
+
+  //Set static uniforms
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "tileColor"), 3, 1, color);
+
+  GPU_DeactivateShaderProgram();
 
   std::ifstream tsJson("data/img/tileset/tilesets.json");
 
@@ -215,11 +237,13 @@ void Renderer::renderFrame()
 {
   GPU_ClearRGB(renderTarget, 50, 50, 50);
   
+  GPU_ActivateShaderProgram(sp_tile, &block_tile);
   //tiles & entities
   for(CameraEntry& camera: cameras)
   {
     renderCamera(camera);
   }
+  GPU_DeactivateShaderProgram();
 
   for(CameraEntry& camera: cameras)
   {

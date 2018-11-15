@@ -60,6 +60,9 @@ class Renderer
 
     Uint32 sp;
     GPU_ShaderBlock block;
+    
+    Uint32 sp_tile;
+    GPU_ShaderBlock block_tile;
 
   public:
     Renderer(float w, float h, bool fullscreen, Map* map);

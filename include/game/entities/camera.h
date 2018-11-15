@@ -41,8 +41,6 @@ class Camera: public Entity
 
         static constexpr float overlap = 1.f;
 
-        Uint32 sp_tile;
-        GPU_ShaderBlock block_tile;
 
   public:
         Camera(): Camera(0,0,0,0,16){}
