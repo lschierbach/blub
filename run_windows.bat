@@ -1,1 +1,0 @@
-"%~dp0\bin\blub.exe"
