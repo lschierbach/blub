@@ -63,23 +63,25 @@ class LODImage {
 
     GPU_Image* bestImage(Camera* camera) {
       // already requested last time?
-      if(camera->pixelsInUnit() == lastUnit) {
+      if (camera != nullptr)
+      {
+        if(camera->pixelsInUnit() == lastUnit) {
+          lastUnit = camera->pixelsInUnit();
+          return images[lastIndex];
+        }
+        // if not, update for next time
         lastUnit = camera->pixelsInUnit();
-        return images[lastIndex];
-      }
-      // if not, update for next time
-      lastUnit = camera->pixelsInUnit();
 
-      float optimalW = camera->pixelsInUnit()*16.f*game::math::tileWidth;
+        float optimalW = camera->pixelsInUnit()*16.f*game::math::tileWidth;
 
-      for(size_t i=images.size(); i>0; --i) {
-        if(images[i-1]->w >= optimalW) {
-          // keep track of index for next time
-          lastIndex = i-1;
-          return images[i-1];
+        for(size_t i=images.size(); i>0; --i) {
+          if(images[i-1]->w >= optimalW) {
+            // keep track of index for next time
+            lastIndex = i-1;
+            return images[i-1];
+          }
         }
       }
-
       // if nothing is found, return default first image
       return images[0];
     }

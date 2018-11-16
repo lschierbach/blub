@@ -52,7 +52,6 @@ class Renderer
     void renderCamera(CameraEntry& camera);
     void renderCameraEntities(CameraEntry& camera);
     size_t getCameraId() const;
-    CameraEntry getCamera(size_t index);
     bool chunkInBounds(const Chunk& chunk, const CameraEntry& camera);
     void drawBoxes();
 
@@ -99,6 +98,12 @@ class Renderer
     void tick(const float tickTime);
 
     vec2<float> pixelToXYAuto(vec2<float> pixel);
+    
+    CameraEntry getCamera(size_t index);
+    
+    GPU_Image* getTilesetImage(const std::string& imgName);
+    std::map<std::string, LODImage>* getTilesetImgs();
+
 };
 
 #endif /* RENDERER_H */

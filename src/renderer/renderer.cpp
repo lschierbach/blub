@@ -485,3 +485,16 @@ vec2<float> Renderer::pixelToXYAuto(vec2<float> pixel)
 
   return vec2<float>(NAN, NAN);
 }
+
+GPU_Image* Renderer::getTilesetImage(const std::string& imgName) 
+{
+  auto iter = tilesetImgs.find(imgName);
+  auto& tilesetImg = std::get<LODImage>(*(iter));
+
+  return tilesetImg.bestImage(nullptr);
+}
+
+std::map<std::string, LODImage>* Renderer::getTilesetImgs()
+{
+  return &tilesetImgs;
+}

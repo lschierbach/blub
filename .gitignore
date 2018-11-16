@@ -8,6 +8,7 @@
 /data/map/*
 /CMakeFiles/*
 /nbproject/*
+/include/rapidjson/*
 CMakeCache.txt
 Makefile
 cmake_install.cmake

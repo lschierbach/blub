@@ -7,7 +7,13 @@
 class Editor
 {
   Overlay m_TilesetSelection;
+  int m_SelectedTileset;
 
+  game::vec2<int> m_LastChunkPos;
+  
+  void changeSelectedTileset(int newTileset);
+  void addTileset();
+  
 public:
   Editor(Map* map, Renderer* renderer);
   ~Editor()                         = default;
