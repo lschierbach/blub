@@ -37,6 +37,8 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   std::cout << "[RENDERER] Current rendering backend: " << GPU_GetCurrentRenderer()->id.name << " (major Version " << GPU_GetCurrentRenderer()->id.major_version << "; minor version " << GPU_GetCurrentRenderer()->id.minor_version << ")" << std::endl;
 //#endif
 
+  //////////////////////////////////// SHADERS ////////////////////////////////////
+
   auto vs = GPU_LoadShader(GPU_VERTEX_SHADER, "data/shader/common.vs.glsl");
   if(!vs) { std::cout << "Loading/compiling vertex shader failed" << std::endl; }
 
@@ -80,12 +82,30 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   }
 
   GPU_ActivateShaderProgram(sp_tile, &block_tile);
-  float color[] = {1.f, 0.8f, 1.2f};
+
+  float ambient[] = {
+    0.8f, 0.8f, 0.8f
+  };
+  float lights[] = {
+    1.0, 1.0, 4.0,
+    10.0, 10.0, 2.0,
+    20.0, 5.0, 6.0
+  };
+  float lightColors[] = {
+    2.0, 0.0, 0.0,
+    0.0, 2.0, 0.0,
+    0.0, 0.0, 2.0
+  };
 
   //Set static uniforms
-  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "tileColor"), 3, 1, color);
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "ambient"), 3, 1, ambient);
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lights"), 3, 3, lights);
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lightColors"), 3, 3, lightColors);
+  GPU_SetUniformi(GPU_GetUniformLocation(sp_tile, "numLights"), 3);
 
   GPU_DeactivateShaderProgram();
+
+  ////////////////////////////////// SHADERS END //////////////////////////////////
 
   std::ifstream tsJson("data/img/tileset/tilesets.json");
 
@@ -241,14 +261,17 @@ void Renderer::renderFrame()
   //tiles & entities
   for(CameraEntry& camera: cameras)
   {
+    std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
+
     renderCamera(camera);
+    GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "pixelsInUnit"), camcast.get()->pixelsInUnit());
   }
-  GPU_DeactivateShaderProgram();
 
   for(CameraEntry& camera: cameras)
   {
     renderCameraEntities(camera);
   }
+  GPU_DeactivateShaderProgram();
 
   //overlays
   for(CameraEntry& camera: cameras)
