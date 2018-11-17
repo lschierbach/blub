@@ -1,9 +1,10 @@
 #include "editor/editor.h"
+#include <iostream>
 
 
 Editor::Editor(Map* map, Renderer* renderer) : m_Map(map), m_Renderer(renderer)
 {
-  m_TilesetSelection = {GPU_LoadImage("data/img/testEntity.png"), 0, 0, 1, - m_Renderer->getHeight() / m_Renderer->getWidth(), true};
+  m_TilesetSelection = {GPU_LoadImage("data/img/testEntity.png"), 0, 0, -1, 1, true};
   m_Renderer->addOverlay(0, &m_TilesetSelection);
   
   m_SelectedTileset = -1;
@@ -62,12 +63,13 @@ void Editor::tileSelectionTick()
     {
       auto prev = mouseToTilePos(tileSelectionStartPos);
       auto now = mouseToTilePos(mousePosition);
-      auto diff = prev - now;
-      
-      m_Renderer->renderBox(prev[0] * static_cast<int>(m_Renderer->getWidth() / 16), 
-                            prev[1] * static_cast<int>(m_Renderer->getWidth() / 16), 
-                            diff[0] * static_cast<int>(m_Renderer->getWidth() / 16), 
-                            diff[1] * static_cast<int>(m_Renderer->getWidth() / 16));
+      //auto prev = tileSelectionStartPos;
+      //auto now = mousePosition;
+      auto diff = now - prev;
+      m_Renderer->renderBox(prev[0],
+                            prev[1],
+                            diff[0],
+                            diff[1]);
       
     }
     else
@@ -84,14 +86,18 @@ void Editor::tileSelectionTick()
 
 game::vec2<int> Editor::mouseToTilePos(game::vec2<float> mousePos)
 {
+  //need float version so rounding errors don't stack up
+  float tileSizeF = m_Renderer->getHeight()/16;
+  int tileSizePx = static_cast<int>(tileSizeF);
+
   return game::vec2<int>
   {
-    static_cast<int>(mousePos[0]) % static_cast<int>(m_Renderer->getWidth() / 16),
-    static_cast<int>(mousePos[1]) % static_cast<int>(m_Renderer->getWidth() / 16)
+    static_cast<int>( ((static_cast<int>(mousePos[0]) + tileSizePx/2) / tileSizePx) * tileSizeF ),
+    static_cast<int>( ((static_cast<int>(mousePos[1]) + tileSizePx/2) / tileSizePx) * tileSizeF )
   };
 }
 
-void Editor::changeSelectedTileset(int newTileset) 
+void Editor::changeSelectedTileset(int newTileset)
 {
   if (newTileset == m_SelectedTileset)
   {
