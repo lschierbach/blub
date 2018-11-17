@@ -13,17 +13,27 @@ uniform vec3[12] lights;
 uniform vec3[12] lightColors;
 uniform int numLights;
 
+uniform sampler2D nmap;
+
+float normalFac(int lightIndex) {
+  vec3 normalVec = normalize(texture2D(nmap, texCoord).xyz * 2.0 - 1.0);
+
+  vec3 lightVec = normalize(vec3(gl_FragCoord.xy - lights[lightIndex].xy, -1.0));
+
+  return ((dot(normalVec, lightVec)+1.0) / 2.0);
+}
+
 vec3 lightFac() {
   float fac = 0.0;
   vec3 avgColor = vec3(0.0, 0.0, 0.0);
   for(int i=0; i<numLights; i++) {
     vec3 lightUnits = lights[i]*pixelsInUnit;
     float dist = distance(gl_FragCoord.xy, lightUnits.xy);
-    float newfac = smoothstep(lightUnits.z,0.0,dist);
+    float newfac = smoothstep(lightUnits.z,0.0,dist) * (normalFac(i)/dist*lightUnits.z);
     fac = max(fac, newfac);
-    avgColor += lightColors[i]*newfac;
+    avgColor += lightColors[i] * newfac;
   }
-  //avgColor /= numLights;
+  avgColor /= numLights;
   return fac*avgColor + (1.0-fac)*ambient;
 }
 

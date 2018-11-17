@@ -119,17 +119,26 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
     std::cout << "Loading tileset \"" << value << "\"..." << std::endl;
 
     std::vector<std::string> paths;
+    std::vector<std::string> paths_n;
+
     for(const auto& image: entry["image"].GetArray()) {
       paths.push_back(tilesetDirectory + std::string(image.GetString()));
     }
+    for(const auto& image: entry["normal_image"].GetArray()) {
+      paths_n.push_back(tilesetDirectory + std::string(image.GetString()));
+    }
 
     LODImage newlod(&paths[0], paths.size(), entry["min_resolution"].GetInt());
-    tilesetImgs.insert(
-      std::make_pair(
+    tilesetImgs.insert(std::make_pair(
         std::string(entry["tileset"].GetString()),
         newlod
-      )
-    );
+    ));
+
+    LODImage newlod_n(&paths_n[0], paths_n.size(), entry["min_resolution"].GetInt());
+    tilesetNormals.insert(std::make_pair(
+        std::string(entry["tileset"].GetString()),
+        newlod_n
+    ));
   }
 }
 
@@ -263,8 +272,8 @@ void Renderer::renderFrame()
   {
     std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
 
-    renderCamera(camera);
     GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "pixelsInUnit"), camcast.get()->pixelsInUnit());
+    renderCamera(camera);
   }
 
   for(CameraEntry& camera: cameras)
@@ -395,8 +404,11 @@ void Renderer::renderCamera(CameraEntry& camera)
         vec2<float> chunkOffset = game::math::chunkToEntityPos(chunk.getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
 
         auto iter = tilesetImgs.find(ts.imgName);
+        auto iter_n = tilesetNormals.find(ts.imgName);
         auto& tilesetImg = std::get<LODImage>(*(iter));
+        auto& tilesetImg_n = std::get<LODImage>(*(iter_n));
 
+        GPU_SetShaderImage(tilesetImg_n.bestImage(camcast.get()), GPU_GetUniformLocation(sp_tile, "nmap"), 1);
         camcast.get()->renderTileset(ts, tilesetImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
 
       }

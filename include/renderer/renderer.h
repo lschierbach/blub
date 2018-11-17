@@ -40,6 +40,7 @@ class Renderer
 
     static constexpr char tilesetDirectory[] = "data/img/tileset/";
     std::map<std::string, LODImage> tilesetImgs;
+    std::map<std::string, LODImage> tilesetNormals;
 
     std::vector<CameraEntry> cameras;
     std::vector<ColoredRect> boxQueue;
