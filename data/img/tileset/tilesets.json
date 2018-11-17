@@ -16,6 +16,13 @@
             "gras_1024.png"
         ],
         "min_resolution": 1024
+    },
+    {
+        "tileset": "Gras_TW",
+        "image": [
+            "grass_main.png"
+        ],
+        "min_resolution": 512
     }
 ]
 

@@ -30,6 +30,10 @@ class Controller
     bool m_Quit;
     
     SDL_MouseMotionEvent m_MouseMotion;
+    SDL_MouseButtonEvent m_MouseButton;
+    SDL_MouseWheelDirection m_MouseWheelDirection;
+    SDL_MouseWheelEvent m_MouseWheel;
+    
     // at 60fps one fram is about 16ms
     static constexpr int m_IdealFrameTime = 16;
     

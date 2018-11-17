@@ -83,9 +83,14 @@ void Controller::handleSDLEvents()
         m_Quit = true;
         break;
       case SDL_MOUSEMOTION:
+        m_Editor->mouseMotionEvent(evt.motion);
         m_MouseMotion = evt.motion;
         break;
+      case SDL_MOUSEWHEEL:
+        m_Editor->mouseWheelEvent(evt.wheel);
+        break;
       case SDL_MOUSEBUTTONDOWN:
+        m_Editor->mouseButtonEvent(evt.button);
         if (evt.button.clicks == 1)
         {
           vec2<float> clickXY = m_Renderer->pixelToXYAuto(vec2<float>(static_cast<float>(evt.button.x), static_cast<float>(evt.button.y)));

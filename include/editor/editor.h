@@ -6,13 +6,24 @@
 
 class Editor
 {
-  Overlay m_TilesetSelection;
-  int m_SelectedTileset;
-
   game::vec2<int> m_LastChunkPos;
   
+  Overlay m_TilesetSelection;
   void changeSelectedTileset(int newTileset);
+  void tileSelectionTick();
   void addTileset();
+  game::vec2<int> mouseToTilePos(game::vec2<float> mousePos);
+  bool m_LastTickTilesetChanged = false;
+  bool selectingTile = false;
+  game::vec2<float> tileSelectionStartPos { 0.f, 0.f };
+  int m_SelectedTileset;
+  
+  
+  
+  bool shiftingView = false;
+  game::vec2<float> shiftStartPos { 0.f, 0.f };
+  game::vec2<float> shiftStartMousPos { 0.f, 0.f };
+  game::vec2<float> mousePosition { 0.f, 0.f };
   
 public:
   Editor(Map* map, Renderer* renderer);
@@ -30,6 +41,11 @@ public:
   void tick();
 
   void handleKeyState(const Uint8* keystate);
+  void mouseMotionEvent(SDL_MouseMotionEvent& mouseMotion);
+  void mouseButtonEvent(SDL_MouseButtonEvent& mouseButton);
+  void mouseWheelDirectionEvent(SDL_MouseWheelDirection& mouseWheelDirection);
+  void mouseWheelEvent(SDL_MouseWheelEvent& mouseWheel);
+  
 };
 
 #endif
