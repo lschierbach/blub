@@ -267,6 +267,7 @@ void Renderer::renderFrame()
   GPU_ClearRGB(renderTarget, 50, 50, 50);
   
   GPU_ActivateShaderProgram(sp_tile, &block_tile);
+  GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "time"), SDL_GetTicks()/1000.f);
   //tiles & entities
   for(CameraEntry& camera: cameras)
   {

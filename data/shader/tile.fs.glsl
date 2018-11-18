@@ -15,11 +15,20 @@ uniform int numLights;
 
 uniform sampler2D nmap;
 
+float rand(float seed) {
+  return fract(sin(seed)*584216.0);
+}
+
 float normalFac(int lightIndex) {
   vec3 normalVec = normalize(texture2D(nmap, texCoord).xyz * 2.0 - 1.0);
 
   vec3 lightVec = normalize(vec3(gl_FragCoord.xy - lights[lightIndex].xy*pixelsInUnit, -1.0));
-  return (dot(normalVec, lightVec)+1.0) / 2.0;
+
+  //disregard normal map close to source, immitating bounce light and masking ugly normal glitches with 0 size source
+  float dist = distance(gl_FragCoord.xy, lights[lightIndex].xy*pixelsInUnit);
+  float near = 1.0-smoothstep(0.02*pixelsInUnit, 0.515*pixelsInUnit*lights[lightIndex].z, dist);
+
+  return ( (dot(normalVec, lightVec)+1.0) / 2.0 ) * (1.0-near) + near;
 }
 
 vec3 lightFac() {
@@ -28,7 +37,7 @@ vec3 lightFac() {
   for(int i=0; i<numLights; i++) {
     vec3 lightUnits = lights[i]*pixelsInUnit;
     float dist = distance(gl_FragCoord.xy, lightUnits.xy);
-    float newfac = smoothstep(lightUnits.z,0.0,dist) * normalFac(i);
+    float newfac = (1.0-smoothstep(0.0,lightUnits.z+0.036*sin(5.0*ftime)*pixelsInUnit,dist)) * normalFac(i);
     fac = max(fac, newfac);
     avgColor += lightColors[i] * newfac;
   }
