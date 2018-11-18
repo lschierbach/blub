@@ -13,11 +13,14 @@ class Editor
   void tileSelectionTick();
   void addTileset();
   game::vec2<int> mouseToTilePos(game::vec2<float> mousePos);
+  game::vec2<int> tileToMousePos(game::vec2<int> tilePos);
   bool m_LastTickTilesetChanged = false;
   bool selectingTile = false;
   game::vec2<float> tileSelectionStartPos { 0.f, 0.f };
   int m_SelectedTileset;
   
+  game::vec2<int> tileSelectionPos { -1, -1 };
+  game::vec2<int> tileSelectionSize { 0, 0 };
   
   
   bool shiftingView = false;

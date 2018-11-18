@@ -25,6 +25,7 @@ void Editor::handleKeyState(const Uint8* keystate)
   m_TilesetSelection.visible = false;
 
   if (keystate[SDL_SCANCODE_SPACE]) tileSelectionTick();
+  else selectingTile = false;
   if (keystate[SDL_SCANCODE_0]) changeSelectedTileset(0);
   if (keystate[SDL_SCANCODE_1]) changeSelectedTileset(1);
   if (keystate[SDL_SCANCODE_2]) changeSelectedTileset(2);
@@ -50,6 +51,44 @@ void Editor::handleKeyState(const Uint8* keystate)
   }
   else
   {
+    if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT) && !selectingTile)
+    {
+      if (tileSelectionPos != game::vec2<int> { -1, -1 })
+      {
+        printf("\t%d, %d\n", tileSelectionSize[0], tileSelectionSize[1]);
+        printf("\t%d, %d\n", tileSelectionPos[0], tileSelectionPos[1]);
+        m_Map->for_each_chunk_in_box(
+          m_Renderer->pixelToXYAuto(mousePosition), game::vec2<float>(tileSelectionSize[0] + 1, tileSelectionSize[1] + 1) , [&](auto&& chunk) -> void
+          {
+            for (auto x = 0u; x <= tileSelectionSize[0] + 1; x++)
+            {
+              for (auto y = 0u; y <= tileSelectionSize[1] + 1; y++)
+              {
+                auto chunkLock = m_Map->getIdealChunk(m_Renderer->pixelToXYAuto(mousePosition) + game::vec2<float> { x, y });
+                if (chunkLock)
+                {
+                  Chunk* chunk = chunkLock->get();
+                  auto tilePos = m_Renderer->pixelToXYAuto(mousePosition) - game::math::chunkToEntityPos(chunk->getPos());
+                  chunk->m_Data.m_Tilesets[0].tileData[static_cast<int>(tilePos[1])][static_cast<int>(tilePos[0])] = Tile { 10, 0.f };
+                }
+              }
+            }
+            printf("yeah boi %d, %d\n", chunk.getPos()[0], chunk.getPos()[1]);
+          }
+        );
+          /*
+        auto chunkLock = m_Map->getIdealChunk(m_Renderer->pixelToXYAuto(mousePosition));
+        if (chunkLock)
+        {
+          Chunk* chunk = chunkLock->get();
+          auto tilePos = mousePosition - game::math::chunkToEntityPos(chunk->getPos());
+          
+          chunk->m_Data.m_Tilesets[0].tileData[static_cast<int>(tilePos[0])][static_cast<int>(tilePos[1])] = Tile { tileSelectionPos[0] + 16 * tileSelectionPos[1], 0.f };
+          printf("click\n");
+        }
+           */
+      }
+    }
     shiftingView = false;
   }
 }
@@ -62,14 +101,14 @@ void Editor::tileSelectionTick()
     if (selectingTile)
     {
       auto prev = mouseToTilePos(tileSelectionStartPos);
-      auto now = mouseToTilePos(mousePosition);
+      auto now = mouseToTilePos(mousePosition) + game::vec2<int>{ 1, 1 };
       //auto prev = tileSelectionStartPos;
       //auto now = mousePosition;
       auto diff = now - prev;
-      m_Renderer->renderBox(prev[0],
-                            prev[1],
-                            diff[0],
-                            diff[1]);
+      m_Renderer->renderBox(tileToMousePos(prev)[0],
+                            tileToMousePos(prev)[1],
+                            tileToMousePos(diff)[0],
+                            tileToMousePos(diff)[1]);
       
     }
     else
@@ -80,7 +119,15 @@ void Editor::tileSelectionTick()
   }
   else
   {
-    selectingTile = false;
+    if (selectingTile)
+    {
+      auto now = mouseToTilePos(mousePosition);
+      
+      tileSelectionPos = mouseToTilePos(tileSelectionStartPos);
+      tileSelectionSize = now - tileSelectionPos;
+      
+      selectingTile = false;
+    }
   }
 }
 
@@ -92,8 +139,22 @@ game::vec2<int> Editor::mouseToTilePos(game::vec2<float> mousePos)
 
   return game::vec2<int>
   {
-    static_cast<int>( ((static_cast<int>(mousePos[0]) + tileSizePx/2) / tileSizePx) * tileSizeF ),
-    static_cast<int>( ((static_cast<int>(mousePos[1]) + tileSizePx/2) / tileSizePx) * tileSizeF )
+    //static_cast<int>( ((static_cast<int>(mousePos[0]) + tileSizePx/2) / tileSizePx) * tileSizeF ),
+    //static_cast<int>( ((static_cast<int>(mousePos[1]) + tileSizePx/2) / tileSizePx) * tileSizeF )
+    static_cast<int>( ((static_cast<int>(mousePos[0])) / tileSizePx)),
+    static_cast<int>( ((static_cast<int>(mousePos[1])) / tileSizePx))
+  };
+}
+
+game::vec2<int> Editor::tileToMousePos(game::vec2<int> tilePos)
+{
+  float tileSizeF = m_Renderer->getHeight()/16;
+  int tileSizePx = static_cast<int>(tileSizeF);
+
+  return game::vec2<int>
+  {
+    tilePos[0] * tileSizePx,
+    tilePos[1] * tileSizePx
   };
 }
 
