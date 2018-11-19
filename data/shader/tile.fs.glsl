@@ -28,7 +28,7 @@ float normalFac(int lightIndex) {
   float dist = distance(gl_FragCoord.xy, lights[lightIndex].xy*pixelsInUnit);
   float near = 1.0-smoothstep(0.02*pixelsInUnit, 0.515*pixelsInUnit*lights[lightIndex].z, dist);
 
-  return ( (dot(normalVec, lightVec)+1.0) / 2.0 ) * (1.0-near) + near;
+  return ( (dot(normalVec, lightVec)*0.5) + 0.5 ) * (1.0-near) + near;
 }
 
 vec3 lightFac() {

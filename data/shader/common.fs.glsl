@@ -32,7 +32,7 @@ void main(void)
   vec2 tmpCoord = texCoord - vec2(0.5, 0.5);
   tmpCoord.x = tmpCoord.x*aspect;
   float dist = sqrt(abs(tmpCoord.x*tmpCoord.x) + abs(tmpCoord.y*tmpCoord.y));
-  float boundsFac = smoothstep(outerBound/2.0, innerBound/2.0, dist);
+  float boundsFac = smoothstep(outerBound*0.5, innerBound*0.5, dist);
 
   float noise = (rand2d(texCoord)-0.5) * (1.0-boundsFac*noiseFalloff) * noiseRatio;
   vec4 tmpColor = texture2D(tex, texCoord);
