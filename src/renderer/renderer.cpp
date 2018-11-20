@@ -30,8 +30,12 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
 {
   renderTarget = NULL;
   //Add error handling!
+  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Window* win = SDL_CreateWindow("Hier kann Ihr Titel stehen" , SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN|SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_OPENGL);
+  GPU_SetInitWindow(SDL_GetWindowID(win));
   renderTarget = GPU_Init(w, h, RENDERER_INIT_FLAGS);
   setFullscreen(fullscreen);
+  SDL_GL_SetSwapInterval(1);
   this->map = map;
 //#ifdef DEBUG_RENDERER_PRINTID
   std::cout << "[RENDERER] Current rendering backend: " << GPU_GetCurrentRenderer()->id.name << " (major Version " << GPU_GetCurrentRenderer()->id.major_version << "; minor version " << GPU_GetCurrentRenderer()->id.minor_version << ")" << std::endl;

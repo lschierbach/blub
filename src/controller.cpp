@@ -215,10 +215,10 @@ bool Controller::tick()
   auto time2 = SDL_GetTicks();
   
   
-  if (time2 - time1 < m_IdealFrameTime)
+  /*if (time2 - time1 < m_IdealFrameTime)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(m_IdealFrameTime - (time2 - time1)));
-  }
+  }*/
   
   global::lastTickDuration = (SDL_GetTicks() - time1) / 1000.f;
   
