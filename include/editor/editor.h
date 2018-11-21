@@ -19,6 +19,8 @@ class Editor
   game::vec2<float> tileSelectionStartPos { 0.f, 0.f };
   int m_SelectedTileset;
   
+  std::vector<std::vector<Tile>> selectedTiles;
+  
   game::vec2<int> tileSelectionPos { -1, -1 };
   game::vec2<int> tileSelectionSize { 0, 0 };
   

@@ -60,16 +60,16 @@ void Editor::handleKeyState(const Uint8* keystate)
         m_Map->for_each_chunk_in_box(
           m_Renderer->pixelToXYAuto(mousePosition), game::vec2<float>(tileSelectionSize[0] + 1, tileSelectionSize[1] + 1) , [&](auto&& chunk) -> void
           {
-            for (auto x = 0u; x <= tileSelectionSize[0] + 1; x++)
+            for (auto x = 0u; x <= tileSelectionSize[0]; x++)
             {
-              for (auto y = 0u; y <= tileSelectionSize[1] + 1; y++)
+              for (auto y = 0u; y <= tileSelectionSize[1]; y++)
               {
                 auto chunkLock = m_Map->getIdealChunk(m_Renderer->pixelToXYAuto(mousePosition) + game::vec2<float> { x, y });
                 if (chunkLock)
                 {
                   Chunk* chunk = chunkLock->get();
-                  auto tilePos = m_Renderer->pixelToXYAuto(mousePosition) - game::math::chunkToEntityPos(chunk->getPos());
-                  chunk->m_Data.m_Tilesets[0].tileData[static_cast<int>(tilePos[1])][static_cast<int>(tilePos[0])] = Tile { 10, 0.f };
+                  auto tilePos = game::vec2<float>{m_Renderer->pixelToXYAuto(mousePosition)[1], m_Renderer->pixelToXYAuto(mousePosition)[0]} - game::math::chunkToEntityPos(chunk->getPos());
+                  chunk->m_Data.m_Tilesets[m_SelectedTileset].tileData[static_cast<int>(tilePos[0] + y)][static_cast<int>(tilePos[1] + x)] = selectedTiles[x][y];
                 }
               }
             }
@@ -103,7 +103,9 @@ void Editor::tileSelectionTick()
       auto prev = mouseToTilePos(tileSelectionStartPos);
       auto now = mouseToTilePos(mousePosition) + game::vec2<int>{ 1, 1 };
       //auto prev = tileSelectionStartPos;
-      //auto now = mousePosition;
+      //auto now = mousePosition;float tileSizeF = m_Renderer->getHeight()/16;
+     float tileSizeF = m_Renderer->getHeight()/16;
+      int tileSizePx = static_cast<int>(tileSizeF);
       auto diff = now - prev;
       m_Renderer->renderBox(tileToMousePos(prev)[0],
                             tileToMousePos(prev)[1],
@@ -125,6 +127,30 @@ void Editor::tileSelectionTick()
       
       tileSelectionPos = mouseToTilePos(tileSelectionStartPos);
       tileSelectionSize = now - tileSelectionPos;
+      
+      if (tileSelectionSize[0] < 0)
+      {
+        tileSelectionPos = {tileSelectionPos[0] + tileSelectionSize[0], tileSelectionPos[1]};
+        tileSelectionSize = {tileSelectionSize[0] * -1, tileSelectionSize[1]};
+      }
+      
+      if (tileSelectionSize[1] < 0)
+      {
+        tileSelectionPos = {tileSelectionPos[0], tileSelectionPos[1] + tileSelectionSize[1]};
+        tileSelectionSize = {tileSelectionSize[0], tileSelectionSize[1] * -1};
+      }
+      
+      selectedTiles.clear();
+      
+      for (auto x = 0u; x <= tileSelectionSize[0]; x++)
+      {
+        std::vector<Tile> temp;
+        for (auto y = 0u; y <= tileSelectionSize[1]; y++)
+        {
+          temp.push_back(Tile {tileSelectionPos[0] + x + ( 16 * ( tileSelectionPos[1] + y)), 0.f});
+        }
+        selectedTiles.push_back(temp);
+      }
       
       selectingTile = false;
     }
