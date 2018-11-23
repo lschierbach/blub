@@ -128,6 +128,14 @@ void Controller::handleSDLEvents()
           }
         }
         break;
+      case SDL_WINDOWEVENT:
+      switch(evt.window.event)
+      {
+        case SDL_WINDOWEVENT_RESIZED:
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+          m_Renderer->fitWindow();
+          break;
+      }
     }
   }
 }

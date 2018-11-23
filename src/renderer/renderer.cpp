@@ -31,7 +31,7 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   renderTarget = NULL;
   //Add error handling!
   SDL_Init(SDL_INIT_VIDEO);
-  SDL_Window* win = SDL_CreateWindow("Hier kann Ihr Titel stehen" , SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN|SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_OPENGL);
+  win = SDL_CreateWindow("Hier kann Ihr Titel stehen" , SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN|SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
   GPU_SetInitWindow(SDL_GetWindowID(win));
   renderTarget = GPU_Init(w, h, RENDERER_INIT_FLAGS);
   setFullscreen(fullscreen);
@@ -233,6 +233,13 @@ void Renderer::setSize(float w, float h)
   GPU_SetWindowResolution(w, h);
 
   resizeCameras();
+}
+
+void Renderer::fitWindow() {
+  int w;
+  int h;
+  SDL_GetWindowSize(win, &w, &h);
+  setSize(static_cast<float>(w), static_cast<float>(h));
 }
 
 void Renderer::setFullscreen(bool fs)
