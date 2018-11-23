@@ -245,13 +245,13 @@ void Renderer::fitWindow() {
 void Renderer::setFullscreen(bool fs)
 {
   GPU_SetFullscreen(fs, true);
+  resizeCameras();
   isFullscreen = fs;
 }
 
 void Renderer::toggleFullscreen()
 {
   setFullscreen(!isFullscreen);
-  resizeCameras();
 }
 
 void Renderer::resizeCameras() {
