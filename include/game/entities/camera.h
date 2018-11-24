@@ -73,6 +73,7 @@ class Camera: public Entity
         void track(Map::SharedEntityPtr entity);
 
         vec2<float> pixelToXY(vec2<float> pixel);
+        vec2<float> worldToPixel(vec2<float> worldPos);
 };
 
 #endif /* CAMERA_H */

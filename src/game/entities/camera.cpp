@@ -312,3 +312,7 @@ vec2<float> Camera::pixelToXY(vec2<float> pixel)
 {
   return ((pixel - (getSize()/2.f)) * unitsInPixel()) + getPos();
 }
+
+vec2<float> Camera::worldToPixel(vec2<float> worldPos) {
+  return (worldPos - getPos())*pixelsInUnit() + getSize()/2.f;
+}

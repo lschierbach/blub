@@ -94,10 +94,12 @@ class Renderer
     void clearOverlays(size_t cameraId);
 
     void renderBox(float x, float y, float w, float h, SDL_Color borderColor = {0,0,255,255}, SDL_Color areaColor = {0,0,0,0}, float borderRadius = 0.f);
+    void renderBox2(float x, float y, float x2, float y2, SDL_Color borderColor = {0,0,255,255}, SDL_Color areaColor = {0,0,0,0}, float borderRadius = 0.f);
 
     void tick(const float tickTime);
 
     vec2<float> pixelToXYAuto(vec2<float> pixel);
+    vec2<float> worldToPixel(size_t cameraIndex, vec2<float> worldPos);
     
     CameraEntry getCamera(size_t index);
     

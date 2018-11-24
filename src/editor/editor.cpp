@@ -77,14 +77,12 @@ void Editor::handleKeyState(const Uint8* keystate)
         auto prev = mapTileSelectionStartPos - game::math::chunkToEntityPos(m_LastChunkPos);
         auto now = game::vec2<float>{m_Renderer->pixelToXYAuto(mousePosition)[0], m_Renderer->pixelToXYAuto(mousePosition)[1]} - game::math::chunkToEntityPos(m_LastChunkPos);
         auto diff = now - prev;
-        /*HIEEEEER*/
-      
-        /*
-        m_Renderer->renderBox(worldToPixel(Ecke)[0],
-                              worldToPixel(Ecke)[1],
-                              worldToPixel(Ecke + groeße)[0],
-                              worldToPixel(Ecke + groeße)[1]);
-         */
+
+        /*ERSETZEN DURCH RICHTIGE WERTE*/
+        m_Renderer->renderBox2(m_Renderer->worldToPixel(0, {0.f,0.f})[0],
+                              m_Renderer->worldToPixel(0, {0.f,0.f})[1],
+                              m_Renderer->worldToPixel(0, {1.5f,1.5f})[0],
+                              m_Renderer->worldToPixel(0, {1.5f,1.5f})[1]);
       }
       else
       {

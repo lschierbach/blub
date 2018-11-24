@@ -468,6 +468,10 @@ void Renderer::renderBox(float x, float y, float w, float h, SDL_Color borderCol
 {
   boxQueue.push_back({x, y, w, h, borderColor, areaColor, borderRadius});
 }
+void Renderer::renderBox2(float x, float y, float x2, float y2, SDL_Color borderColor, SDL_Color areaColor, float borderRadius)
+{
+  boxQueue.push_back({x, y, x2-x, y2-y, borderColor, areaColor, borderRadius});
+}
 
 vec2<float> Renderer::pixelToXYAuto(vec2<float> pixel)
 {
@@ -486,7 +490,11 @@ vec2<float> Renderer::pixelToXYAuto(vec2<float> pixel)
   return vec2<float>(NAN, NAN);
 }
 
-GPU_Image* Renderer::getTilesetImage(const std::string& imgName) 
+vec2<float> Renderer::worldToPixel(size_t cameraIndex, vec2<float> worldPos) {
+  return std::static_pointer_cast<Camera>(getCamera(cameraIndex).camera).get()->worldToPixel(worldPos);
+}
+
+GPU_Image* Renderer::getTilesetImage(const std::string& imgName)
 {
   auto iter = tilesetImgs.find(imgName);
   auto& tilesetImg = std::get<LODImage>(*(iter));
