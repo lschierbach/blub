@@ -16,8 +16,12 @@ class Editor
   game::vec2<int> tileToMousePos(game::vec2<int> tilePos);
   bool m_LastTickTilesetChanged = false;
   bool selectingTile = false;
+  bool selectingMapTile = false;
   game::vec2<float> tileSelectionStartPos { 0.f, 0.f };
   int m_SelectedTileset;
+  
+  game::vec2<float> mapTileSelectionStartPos { 0.f, 0.f };
+  
   
   std::vector<std::vector<Tile>> selectedTiles;
   

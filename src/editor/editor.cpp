@@ -55,39 +55,46 @@ void Editor::handleKeyState(const Uint8* keystate)
     {
       if (tileSelectionPos != game::vec2<int> { -1, -1 })
       {
-        printf("\t%d, %d\n", tileSelectionSize[0], tileSelectionSize[1]);
-        printf("\t%d, %d\n", tileSelectionPos[0], tileSelectionPos[1]);
-        m_Map->for_each_chunk_in_box(
-          m_Renderer->pixelToXYAuto(mousePosition), game::vec2<float>(tileSelectionSize[0] + 1, tileSelectionSize[1] + 1) , [&](auto&& chunk) -> void
+        for (auto x = 0u; x <= tileSelectionSize[0]; x++)
+        {
+          for (auto y = 0u; y <= tileSelectionSize[1]; y++)
           {
-            for (auto x = 0u; x <= tileSelectionSize[0]; x++)
+            auto chunkLock = m_Map->getIdealChunk(m_Renderer->pixelToXYAuto(mousePosition) + game::vec2<float> { x, y });
+            if (chunkLock)
             {
-              for (auto y = 0u; y <= tileSelectionSize[1]; y++)
+              Chunk* chunk = chunkLock->get();
+              if (chunk->getPos() == m_LastChunkPos)
               {
-                auto chunkLock = m_Map->getIdealChunk(m_Renderer->pixelToXYAuto(mousePosition) + game::vec2<float> { x, y });
-                if (chunkLock)
-                {
-                  Chunk* chunk = chunkLock->get();
-                  auto tilePos = game::vec2<float>{m_Renderer->pixelToXYAuto(mousePosition)[1], m_Renderer->pixelToXYAuto(mousePosition)[0]} - game::math::chunkToEntityPos(chunk->getPos());
-                  chunk->m_Data.m_Tilesets[m_SelectedTileset].tileData[static_cast<int>(tilePos[0] + y)][static_cast<int>(tilePos[1] + x)] = selectedTiles[x][y];
-                }
+                auto tilePos = game::vec2<float>{m_Renderer->pixelToXYAuto(mousePosition)[0] + x, m_Renderer->pixelToXYAuto(mousePosition)[1] + y} - game::math::chunkToEntityPos(chunk->getPos());
+                chunk->m_Data.m_Tilesets[m_SelectedTileset].tileData[static_cast<int>(tilePos[1]) % game::math::chunkSize][static_cast<int>(tilePos[0]) % game::math::chunkSize] = selectedTiles[x][y];
               }
             }
-            printf("yeah boi %d, %d\n", chunk.getPos()[0], chunk.getPos()[1]);
           }
-        );
-          /*
-        auto chunkLock = m_Map->getIdealChunk(m_Renderer->pixelToXYAuto(mousePosition));
-        if (chunkLock)
-        {
-          Chunk* chunk = chunkLock->get();
-          auto tilePos = mousePosition - game::math::chunkToEntityPos(chunk->getPos());
-          
-          chunk->m_Data.m_Tilesets[0].tileData[static_cast<int>(tilePos[0])][static_cast<int>(tilePos[1])] = Tile { tileSelectionPos[0] + 16 * tileSelectionPos[1], 0.f };
-          printf("click\n");
         }
-           */
       }
+      else if (selectingMapTile)
+      {
+        auto prev = mapTileSelectionStartPos - game::math::chunkToEntityPos(m_LastChunkPos);
+        auto now = game::vec2<float>{m_Renderer->pixelToXYAuto(mousePosition)[0], m_Renderer->pixelToXYAuto(mousePosition)[1]} - game::math::chunkToEntityPos(m_LastChunkPos);
+        auto diff = now - prev;
+        /*HIEEEEER*/
+      
+        /*
+        m_Renderer->renderBox(worldToPixel(Ecke)[0],
+                              worldToPixel(Ecke)[1],
+                              worldToPixel(Ecke + groeße)[0],
+                              worldToPixel(Ecke + groeße)[1]);
+         */
+      }
+      else
+      {
+        mapTileSelectionStartPos = m_Renderer->pixelToXYAuto(mousePosition);
+        selectingMapTile = true;
+      }
+    }
+    else if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT) && !selectingTile)
+    {
+      tileSelectionPos = { -1, -1 };
     }
     shiftingView = false;
   }
@@ -102,15 +109,31 @@ void Editor::tileSelectionTick()
     {
       auto prev = mouseToTilePos(tileSelectionStartPos);
       auto now = mouseToTilePos(mousePosition) + game::vec2<int>{ 1, 1 };
-      //auto prev = tileSelectionStartPos;
-      //auto now = mousePosition;float tileSizeF = m_Renderer->getHeight()/16;
-     float tileSizeF = m_Renderer->getHeight()/16;
-      int tileSizePx = static_cast<int>(tileSizeF);
+      
       auto diff = now - prev;
-      m_Renderer->renderBox(tileToMousePos(prev)[0],
-                            tileToMousePos(prev)[1],
-                            tileToMousePos(diff)[0],
-                            tileToMousePos(diff)[1]);
+      
+      auto rectangleCorner = tileToMousePos(prev);
+      auto rectangleSize = tileToMousePos(diff);
+
+      float tileSizeF = m_Renderer->getHeight()/16;
+      int tileSizePx = static_cast<int>(tileSizeF);
+    
+      if (rectangleSize[0] <= 0)
+      {
+        rectangleCorner = {rectangleCorner[0] + rectangleSize[0] - tileSizePx, rectangleCorner[1]};
+        rectangleSize = {rectangleSize[0] * -1 + 2*tileSizePx, rectangleSize[1]};
+      }
+      
+      if (rectangleSize[1] <= 0)
+      {
+        rectangleCorner = {rectangleCorner[0], rectangleCorner[1] + rectangleSize[1] - tileSizePx};
+        rectangleSize = {rectangleSize[0], rectangleSize[1] * -1 + 2*tileSizePx};
+      }
+      
+      m_Renderer->renderBox(rectangleCorner[0],
+                            rectangleCorner[1],
+                            rectangleSize[0],
+                            rectangleSize[1]);
       
     }
     else
