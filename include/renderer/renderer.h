@@ -40,11 +40,13 @@ class Renderer
 
     static constexpr char tilesetDirectory[] = "data/img/tileset/";
     std::map<std::string, LODImage> tilesetImgs;
+    std::map<std::string, LODImage> tilesetNormals;
 
     std::vector<CameraEntry> cameras;
     std::vector<ColoredRect> boxQueue;
 
     GPU_Target* renderTarget;
+    SDL_Window* win;
     const static GPU_InitFlagEnum RENDERER_INIT_FLAGS = GPU_DEFAULT_INIT_FLAGS;
     Map* map;
     bool isFullscreen;
@@ -77,6 +79,7 @@ class Renderer
     void setSize(float w, float h);
     void setFullscreen(bool fs);
     void toggleFullscreen();
+    void fitWindow();
 
     void renderFrame();
     void show();

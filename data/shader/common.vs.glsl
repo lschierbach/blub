@@ -12,7 +12,7 @@ varying float ftime;
 uniform float time;
 
 float rand(float seed) {
-  return fract(sin(seed)*584216.0);;
+  return fract(sin(seed)*584216.0);
 }
 
 void main(void)

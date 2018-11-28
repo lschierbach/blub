@@ -30,12 +30,18 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
 {
   renderTarget = NULL;
   //Add error handling!
+  SDL_Init(SDL_INIT_VIDEO);
+  win = SDL_CreateWindow("Hier kann Ihr Titel stehen" , SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN|SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
+  GPU_SetInitWindow(SDL_GetWindowID(win));
   renderTarget = GPU_Init(w, h, RENDERER_INIT_FLAGS);
   setFullscreen(fullscreen);
+  SDL_GL_SetSwapInterval(1);
   this->map = map;
 //#ifdef DEBUG_RENDERER_PRINTID
   std::cout << "[RENDERER] Current rendering backend: " << GPU_GetCurrentRenderer()->id.name << " (major Version " << GPU_GetCurrentRenderer()->id.major_version << "; minor version " << GPU_GetCurrentRenderer()->id.minor_version << ")" << std::endl;
 //#endif
+
+  //////////////////////////////////// SHADERS ////////////////////////////////////
 
   auto vs = GPU_LoadShader(GPU_VERTEX_SHADER, "data/shader/common.vs.glsl");
   if(!vs) { std::cout << "Loading/compiling vertex shader failed" << std::endl; }
@@ -80,12 +86,30 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   }
 
   GPU_ActivateShaderProgram(sp_tile, &block_tile);
-  float color[] = {1.f, 0.8f, 1.2f};
+
+  float ambient[] = {
+    0.8f, 0.8f, 0.8f
+  };
+  float lights[] = {
+    1.0, 1.0, 4.0,
+    10.0, 10.0, 2.0,
+    20.0, 5.0, 6.0
+  };
+  float lightColors[] = {
+    2.0, 0.0, 0.0,
+    0.0, 2.0, 0.0,
+    0.0, 0.0, 2.0
+  };
 
   //Set static uniforms
-  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "tileColor"), 3, 1, color);
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "ambient"), 3, 1, ambient);
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lights"), 3, 3, lights);
+  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lightColors"), 3, 3, lightColors);
+  GPU_SetUniformi(GPU_GetUniformLocation(sp_tile, "numLights"), 3);
 
   GPU_DeactivateShaderProgram();
+
+  ////////////////////////////////// SHADERS END //////////////////////////////////
 
   std::ifstream tsJson("data/img/tileset/tilesets.json");
 
@@ -99,17 +123,26 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
     std::cout << "Loading tileset \"" << value << "\"..." << std::endl;
 
     std::vector<std::string> paths;
+    std::vector<std::string> paths_n;
+
     for(const auto& image: entry["image"].GetArray()) {
       paths.push_back(tilesetDirectory + std::string(image.GetString()));
     }
+    for(const auto& image: entry["normal_image"].GetArray()) {
+      paths_n.push_back(tilesetDirectory + std::string(image.GetString()));
+    }
 
     LODImage newlod(&paths[0], paths.size(), entry["min_resolution"].GetInt());
-    tilesetImgs.insert(
-      std::make_pair(
+    tilesetImgs.insert(std::make_pair(
         std::string(entry["tileset"].GetString()),
         newlod
-      )
-    );
+    ));
+
+    LODImage newlod_n(&paths_n[0], paths_n.size(), entry["min_resolution"].GetInt());
+    tilesetNormals.insert(std::make_pair(
+        std::string(entry["tileset"].GetString()),
+        newlod_n
+    ));
   }
 }
 
@@ -202,16 +235,23 @@ void Renderer::setSize(float w, float h)
   resizeCameras();
 }
 
+void Renderer::fitWindow() {
+  int w;
+  int h;
+  SDL_GetWindowSize(win, &w, &h);
+  setSize(static_cast<float>(w), static_cast<float>(h));
+}
+
 void Renderer::setFullscreen(bool fs)
 {
   GPU_SetFullscreen(fs, true);
+  resizeCameras();
   isFullscreen = fs;
 }
 
 void Renderer::toggleFullscreen()
 {
   setFullscreen(!isFullscreen);
-  resizeCameras();
 }
 
 void Renderer::resizeCameras() {
@@ -238,17 +278,21 @@ void Renderer::renderFrame()
   GPU_ClearRGB(renderTarget, 50, 50, 50);
   
   GPU_ActivateShaderProgram(sp_tile, &block_tile);
+  GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "time"), SDL_GetTicks()/1000.f);
   //tiles & entities
   for(CameraEntry& camera: cameras)
   {
+    std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
+
+    GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "pixelsInUnit"), camcast.get()->pixelsInUnit());
     renderCamera(camera);
   }
-  GPU_DeactivateShaderProgram();
 
   for(CameraEntry& camera: cameras)
   {
     renderCameraEntities(camera);
   }
+  GPU_DeactivateShaderProgram();
 
   //overlays
   for(CameraEntry& camera: cameras)
@@ -372,8 +416,11 @@ void Renderer::renderCamera(CameraEntry& camera)
         vec2<float> chunkOffset = game::math::chunkToEntityPos(chunk.getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
 
         auto iter = tilesetImgs.find(ts.imgName);
+        auto iter_n = tilesetNormals.find(ts.imgName);
         auto& tilesetImg = std::get<LODImage>(*(iter));
+        auto& tilesetImg_n = std::get<LODImage>(*(iter_n));
 
+        GPU_SetShaderImage(tilesetImg_n.bestImage(camcast.get()), GPU_GetUniformLocation(sp_tile, "nmap"), 1);
         camcast.get()->renderTileset(ts, tilesetImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
 
       }

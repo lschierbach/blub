@@ -133,6 +133,14 @@ void Controller::handleSDLEvents()
           }
         }
         break;
+      case SDL_WINDOWEVENT:
+      switch(evt.window.event)
+      {
+        case SDL_WINDOWEVENT_RESIZED:
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+          m_Renderer->fitWindow();
+          break;
+      }
     }
   }
 }
@@ -220,10 +228,10 @@ bool Controller::tick()
   auto time2 = SDL_GetTicks();
   
   
-  if (time2 - time1 < m_IdealFrameTime)
+  /*if (time2 - time1 < m_IdealFrameTime)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(m_IdealFrameTime - (time2 - time1)));
-  }
+  }*/
   
   global::lastTickDuration = (SDL_GetTicks() - time1) / 1000.f;
   

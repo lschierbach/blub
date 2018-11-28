@@ -6,6 +6,9 @@
             "stein_2048.png",
             "stein_1024.png"
         ],
+        "normal_image": [
+            "stein_n.png"
+        ],
         "min_resolution": 512
     },
     {
@@ -14,6 +17,9 @@
             "gras.png",
             "gras_2048.png",
             "gras_1024.png"
+        ],
+        "normal_image": [
+            "stein_n.png"
         ],
         "min_resolution": 1024
     },
@@ -25,5 +31,4 @@
         "min_resolution": 512
     }
 ]
-
 
