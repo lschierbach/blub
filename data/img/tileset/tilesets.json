@@ -28,6 +28,9 @@
         "image": [
             "grass_main.png"
         ],
+        "normal_image": [
+            "stein_n.png"
+        ],
         "min_resolution": 512
     }
 ]
