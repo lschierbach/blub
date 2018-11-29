@@ -37,9 +37,7 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   setFullscreen(fullscreen);
   SDL_GL_SetSwapInterval(1);
   this->map = map;
-//#ifdef DEBUG_RENDERER_PRINTID
   std::cout << "[RENDERER] Current rendering backend: " << GPU_GetCurrentRenderer()->id.name << " (major Version " << GPU_GetCurrentRenderer()->id.major_version << "; minor version " << GPU_GetCurrentRenderer()->id.minor_version << ")" << std::endl;
-//#endif
 
   //////////////////////////////////// SHADERS ////////////////////////////////////
 
@@ -159,9 +157,6 @@ size_t Renderer::getCameraId() const
 
 size_t Renderer::addCamera(float x, float y, float w, float h, float scale)
 {
-#ifdef DEBUG_RENDERER_VERBOSE
-  std::cout << "[RENDERER] making camera" << std::endl;
-#endif
 
   size_t theId = getCameraId();
   cameras.push_back(CameraEntry{
@@ -177,14 +172,8 @@ size_t Renderer::addCamera(float x, float y, float w, float h, float scale)
 
     theId
   });
-    
-#ifdef DEBUG_RENDERER_VERBOSE
-  std::cout << "[RENDERER] adding camera " << theId << " to map" << std::endl;
-#endif
+
   map->addEntity(getCamera(theId).camera);
-#ifdef DEBUG_RENDERER_VERBOSE
-  std::cout << "[RENDERER] done adding camera" << std::endl;
-#endif
 
   return theId;
 }
@@ -226,9 +215,6 @@ void Renderer::setHeight(float h)
 
 void Renderer::setSize(float w, float h)
 {
-#ifdef DEBUG_RENDERER_RESIZE
-  std::cout << "resizing to " << w << " x " << h << std::endl;
-#endif
 
   GPU_SetWindowResolution(w, h);
 
@@ -260,10 +246,7 @@ void Renderer::resizeCameras() {
   
   for(CameraEntry& camera: cameras)
   {
-#ifdef DEBUG_RENDERER_RESIZE
-  std::cout << "[RENDERER] camera resize to " << w << " x " << h << std::endl;
-#endif
-  std::static_pointer_cast<Camera>(camera.camera).get()->setSize(
+    std::static_pointer_cast<Camera>(camera.camera).get()->setSize(
       vec2<float>(
         w*camera.data[2],
         h*camera.data[3]
@@ -386,17 +369,10 @@ LODImage testLoadLOD()
 
 void Renderer::renderCamera(CameraEntry& camera)
 {
-#ifdef DEBUG_RENDERER_VERBOSE
-  std::cout << "[RENDERER] Rendering camera frames" << std::endl;
-#endif
 
   //static LODImage testImg = testLoadLOD();
   Map::SharedEntityPtr theCam = camera.camera;
   std::shared_ptr camcast = std::static_pointer_cast<Camera>(theCam);
-
-#ifdef DEBUG_RENDERER_VERBOSE
-  std::cout << "[RENDERER] got camera plus metadata. scale " << camcast.get()->getScale() << std::endl;
-#endif
 
   camcast.get()->clearRender();
 
@@ -408,9 +384,6 @@ void Renderer::renderCamera(CameraEntry& camera)
     {
       for(const auto& ts: chunk.m_Data.m_Tilesets)
       {
-  #ifdef DEBUG_RENDERER_VERBOSE
-    std::cout << "[RENDERER] tilesets for chunk relative " << j << "|" << i << std::endl;
-  #endif
         //render all tilesets of current chunk
 
         vec2<float> chunkOffset = game::math::chunkToEntityPos(chunk.getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
