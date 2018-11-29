@@ -1,6 +1,7 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
+#include <optional>
 #include "logic/map.h"
 #include "renderer/renderer.h"
 
@@ -9,16 +10,18 @@ class Editor
   game::vec2<int> m_LastChunkPos;
   
   Overlay m_TilesetSelection;
-  void changeSelectedTileset(int newTileset);
   void tileSelectionTick();
   void addTileset();
+  void addTilesetWithId(unsigned id, Chunk* chunk);
   game::vec2<int> mouseToTilePos(game::vec2<float> mousePos);
   game::vec2<int> tileToMousePos(game::vec2<int> tilePos);
   bool m_LastTickTilesetChanged = false;
   bool selectingTile = false;
   bool selectingMapTile = false;
   game::vec2<float> tileSelectionStartPos { 0.f, 0.f };
-  int m_SelectedTileset;
+  
+  std::optional<Tileset*> m_SelectedTileset {};
+  unsigned m_SelectedTilesetId { 0 };
   
   game::vec2<float> mapTileSelectionStartPos { 0.f, 0.f };
   
@@ -33,6 +36,8 @@ class Editor
   game::vec2<float> shiftStartPos { 0.f, 0.f };
   game::vec2<float> shiftStartMousPos { 0.f, 0.f };
   game::vec2<float> mousePosition { 0.f, 0.f };
+  
+  std::optional<Tileset*> getTilesetById(unsigned id, Chunk* chunk);
   
 public:
   Editor(Map* map, Renderer* renderer);

@@ -40,6 +40,7 @@ Map::Map()
 void Map::init() 
 {
   m_Data.m_EntityCount = 1;
+  m_Data.m_TilesetCount = 1;
 }
 
 
@@ -54,6 +55,11 @@ unsigned int Map::getNextEntityId()
   return m_Data.m_EntityCount++;
 }
 
+unsigned int Map::getNextTilesetId()
+{
+  std::scoped_lock(m_DataMutex);
+  return m_Data.m_TilesetCount++;
+}
 
 void Map::tick()
 {

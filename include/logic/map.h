@@ -147,6 +147,7 @@ class Map
     struct Data : public Saveable
     {
       unsigned int m_EntityCount;
+      unsigned int m_TilesetCount;
       
       void write(std::ofstream& out) override
       {
@@ -186,6 +187,7 @@ class Map
     void removeEntity(SharedEntityPtr entity);
 
     unsigned int getNextEntityId();
+    unsigned int getNextTilesetId();
     
     char getGamelayerIdAt(game::vec2<float> pos);
     

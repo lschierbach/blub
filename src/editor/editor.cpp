@@ -7,7 +7,6 @@ Editor::Editor(Map* map, Renderer* renderer) : m_Map(map), m_Renderer(renderer)
   m_TilesetSelection = {GPU_LoadImage("data/img/testEntity.png"), 0, 0, -1, 1, true};
   m_Renderer->addOverlay(0, &m_TilesetSelection);
   
-  m_SelectedTileset = -1;
   m_LastChunkPos = game::vec2<int> { -100, -100 };
 }
 
@@ -19,18 +18,41 @@ void Editor::handleKeyState(const Uint8* keystate)
 {
   if (game::math::entityToChunkPos(m_Renderer->getCamera(0).camera.get()->getPos()) != m_LastChunkPos)
   {
-    changeSelectedTileset(0);
     m_LastChunkPos = game::math::entityToChunkPos(m_Renderer->getCamera(0).camera.get()->getPos());
   }
   m_TilesetSelection.visible = false;
 
   if (keystate[SDL_SCANCODE_SPACE]) tileSelectionTick();
   else selectingTile = false;
-  if (keystate[SDL_SCANCODE_0]) changeSelectedTileset(0);
-  if (keystate[SDL_SCANCODE_1]) changeSelectedTileset(1);
-  if (keystate[SDL_SCANCODE_2]) changeSelectedTileset(2);
-  if (keystate[SDL_SCANCODE_3]) changeSelectedTileset(3);
+  if (keystate[SDL_SCANCODE_0]) m_SelectedTilesetId = 0u;
+  if (keystate[SDL_SCANCODE_1]) m_SelectedTilesetId = 1u;
+  if (keystate[SDL_SCANCODE_2]) m_SelectedTilesetId = 2u;
+  if (keystate[SDL_SCANCODE_3]) m_SelectedTilesetId = 3u;
+  if (keystate[SDL_SCANCODE_4]) m_SelectedTilesetId = 4u;
+  if (keystate[SDL_SCANCODE_5]) m_SelectedTilesetId = 5u;
+  if (keystate[SDL_SCANCODE_6]) m_SelectedTilesetId = 6u;
+  if (keystate[SDL_SCANCODE_7]) m_SelectedTilesetId = 7u;
+  if (keystate[SDL_SCANCODE_8]) m_SelectedTilesetId = 8u;
+  if (keystate[SDL_SCANCODE_9]) m_SelectedTilesetId = 9u;
   if (keystate[SDL_SCANCODE_N]) addTileset();
+  
+  
+  auto chunkLock = m_Map->getIdealChunk(m_Renderer->getCamera(0).camera.get()->getPos());
+  if (chunkLock)
+  {
+    Chunk* chunk = chunkLock->get();
+    m_SelectedTileset = getTilesetById(m_SelectedTilesetId, chunk);
+    if (m_SelectedTileset)
+    {
+      Tileset* tileset = *m_SelectedTileset;
+      auto* tilesetImg = m_Renderer->getTilesetImage(tileset->imgName);
+      m_TilesetSelection.image = tilesetImg;
+    }
+    else
+    {
+      m_TilesetSelection.image = GPU_LoadImage("data/img/testEntity.png");
+    }
+  }
   
   if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_MIDDLE))
   {
@@ -66,7 +88,11 @@ void Editor::handleKeyState(const Uint8* keystate)
               if (chunk->getPos() == m_LastChunkPos)
               {
                 auto tilePos = game::vec2<float>{m_Renderer->pixelToXYAuto(mousePosition)[0] + x, m_Renderer->pixelToXYAuto(mousePosition)[1] + y} - game::math::chunkToEntityPos(chunk->getPos());
-                chunk->m_Data.m_Tilesets[m_SelectedTileset].tileData[static_cast<int>(tilePos[1]) % game::math::chunkSize][static_cast<int>(tilePos[0]) % game::math::chunkSize] = selectedTiles[x][y];
+                auto tileset = getTilesetById(m_SelectedTilesetId, chunk);
+                if (tileset)
+                {
+                  (*tileset)->tileData[static_cast<int>(tilePos[1]) % game::math::chunkSize][static_cast<int>(tilePos[0]) % game::math::chunkSize] = selectedTiles[x][y];
+                }
               }
             }
           }
@@ -205,29 +231,16 @@ game::vec2<int> Editor::tileToMousePos(game::vec2<int> tilePos)
   };
 }
 
-void Editor::changeSelectedTileset(int newTileset)
+std::optional<Tileset*> Editor::getTilesetById(unsigned id, Chunk* chunk)
 {
-  if (newTileset == m_SelectedTileset)
+  for(auto& tileset : chunk->m_Data.m_Tilesets)
   {
-    return;
-  }
-  auto chunkLock = m_Map->getIdealChunk(m_Renderer->getCamera(0).camera.get()->getPos());
-  if (chunkLock)
-  {
-    Chunk* chunk = chunkLock->get();
-    if (chunk->m_Data.m_Tilesets.size() - 1 < newTileset)
+    if (tileset.id == id)
     {
-      printf("[EDITOR]\t[ERR]\tPlease pick a Tileset between 0 and %u.\n", chunk->m_Data.m_Tilesets.size() - 1);
-    }
-    else
-    {      
-      auto* tilesetImg = m_Renderer->getTilesetImage(chunk->m_Data.m_Tilesets[newTileset].imgName);
-      
-      m_TilesetSelection.image = tilesetImg;
-      
-      m_SelectedTileset = newTileset;
+      return { &tileset };
     }
   }
+  return {};
 }
 
 void Editor::mouseButtonEvent(SDL_MouseButtonEvent& mouseButton) 
@@ -316,8 +329,13 @@ void Editor::addTileset()
       }
       
       
-      chunk->m_Data.m_Tilesets.push_back(Tileset(0.f, 0.f, 1.0f, tilesetImg, tileData));
+      chunk->m_Data.m_Tilesets.push_back(Tileset(m_Map->getNextTilesetId(), 0.f, 0.f, 1.0f, tilesetImg, tileData));
       m_LastTickTilesetChanged = true;
     }
   }
+}
+
+void Editor::addTilesetWithId(unsigned id, Chunk* chunk)
+{
+  
 }

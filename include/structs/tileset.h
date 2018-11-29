@@ -18,8 +18,11 @@ struct Tileset : public Saveable
   std::vector<std::vector<Tile>> tileData;
 
   std::string imgName;
+  
+  // unique tilesetid
+  unsigned id;
 
-  Tileset(float offsetX, float offsetY, float scale, const std::string& imgName, std::vector<std::vector<Tile>>& tileData)
+  Tileset(unsigned id, float offsetX, float offsetY, float scale, const std::string& imgName, std::vector<std::vector<Tile>>& tileData)
   {
     this->offsetX = offsetX;
     this->offsetY = offsetY;
@@ -28,9 +31,11 @@ struct Tileset : public Saveable
     this->imgName = imgName;
 
     this->tileData = tileData;
+    
+    this->id = id;
   }
 
-  Tileset() {}
+  Tileset() {};
 
   void printTiles() const
   {
@@ -50,6 +55,7 @@ struct Tileset : public Saveable
     filesystem::writeStruct(out, offsetX);
     filesystem::writeStruct(out, offsetY);
     filesystem::writeStruct(out, scale);
+    filesystem::writeStruct(out, id);
 
     // write tiledata
     filesystem::writeRange(out, tileData);
@@ -64,6 +70,7 @@ struct Tileset : public Saveable
     filesystem::readStruct(in, offsetX);
     filesystem::readStruct(in, offsetY);
     filesystem::readStruct(in, scale);
+    filesystem::readStruct(in, id);
 
     // read tileData
     filesystem::readRange(in, tileData);

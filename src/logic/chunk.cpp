@@ -11,7 +11,6 @@
 
 #include "game/global.h"
 #include "logic/chunk.h"
-#include "game/generator.hpp"
 #include "game/gamemath.hpp"
 
 Chunk::Chunk(int x, int y, Map* map) : m_pos({x, y}), m_Map(map)
@@ -87,9 +86,7 @@ void Chunk::load()
 
 void Chunk::generate()
 {
-  std::lock_guard<std::mutex> lock(m_DataMutex);
-
-  generator::generateChunk<game::math::chunkSize>(m_Data, m_pos[0], m_pos[1], game::math::chunkSize, m_Map);
+  // ✝ generator - 20.11.2018
 }
 
 void Chunk::reload()
