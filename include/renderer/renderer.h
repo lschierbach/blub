@@ -66,6 +66,8 @@ class Renderer
     Uint32 sp_tile;
     GPU_ShaderBlock block_tile;
 
+    Tileset* globalTs;
+
   public:
     Renderer(float w, float h, bool fullscreen, Map* map);
     ~Renderer();
@@ -96,6 +98,8 @@ class Renderer
     void addOverlay(size_t cameraId, const Overlay* const o);
     void removeOverlay(size_t cameraId, const Overlay* const element);
     void clearOverlays(size_t cameraId);
+
+    void setGlobalTileset(Tileset* ts);
 
     void renderBox(float x, float y, float w, float h, SDL_Color borderColor = {0,0,255,255}, SDL_Color areaColor = {0,0,0,0}, float borderRadius = 0.f);
 
