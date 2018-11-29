@@ -139,10 +139,10 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
       {
         GPU_Rect sourceRect = getTile(img, c, 0);
         GPU_Rect roundedTarget = GPU_MakeRect(
-          floor(targetRect.x)-overlap,
-          floor(targetRect.y)-overlap,
-          ceil(targetRect.w)+overlap,
-          ceil(targetRect.h)+overlap
+          floor(targetRect.x),
+          floor(targetRect.y),
+          ceil(targetRect.w),
+          ceil(targetRect.h)
         );
 
         GPU_BlitRect(img, &sourceRect, image->target, &roundedTarget); //render from tile on given image to this cam's render image
