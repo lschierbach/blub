@@ -40,7 +40,6 @@ Map::Map()
 void Map::init() 
 {
   m_Data.m_EntityCount = 1;
-  m_Data.m_TilesetCount = 1;
 }
 
 
@@ -55,11 +54,26 @@ unsigned int Map::getNextEntityId()
   return m_Data.m_EntityCount++;
 }
 
-unsigned int Map::getNextTilesetId()
+unsigned int Map::addNewTileset(const std::string& imgName) 
 {
   std::scoped_lock(m_DataMutex);
-  return m_Data.m_TilesetCount++;
+  m_Data.m_TileSetImgs.push_back(imgName);
+  return m_Data.m_TileSetImgs.size() - 1;
 }
+
+std::optional<std::string> Map::getTilesetImgName(unsigned id) 
+{
+  std::scoped_lock(m_DataMutex);
+  if (m_Data.m_TileSetImgs.size() < id)
+  {
+    return { m_Data.m_TileSetImgs[id] };
+  }
+  else
+  {
+    return { };
+  }
+}
+
 
 void Map::tick()
 {

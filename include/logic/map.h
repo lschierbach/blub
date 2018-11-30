@@ -85,6 +85,7 @@ class Map
         bool previouslyLocked;
       
       public:
+        // @todo: put this somewhere else 
         ScopedChunkLock(ChunkLogicLock& c) : chunkLock(&c)
         {
           previouslyLocked = chunkLock->isLogicLocked;
@@ -147,16 +148,20 @@ class Map
     struct Data : public Saveable
     {
       unsigned int m_EntityCount;
-      unsigned int m_TilesetCount;
+      // @todo: do this in a map, needs filesystem std::map-support
+      std::vector<std::string> m_TileSetImgs;
+
       
       void write(std::ofstream& out) override
       {
         filesystem::writeStruct(out, m_EntityCount);
+        filesystem::writeRange(out, m_TileSetImgs);
       }
       
       void read(std::ifstream& in) override
       {
         filesystem::readStruct(in, m_EntityCount);
+        filesystem::readRange(in, m_TileSetImgs);
       }
     };
     
@@ -187,7 +192,9 @@ class Map
     void removeEntity(SharedEntityPtr entity);
 
     unsigned int getNextEntityId();
-    unsigned int getNextTilesetId();
+    unsigned int addNewTileset(const std::string& imgName);
+    
+    std::optional<std::string> getTilesetImgName(unsigned id);
     
     char getGamelayerIdAt(game::vec2<float> pos);
     

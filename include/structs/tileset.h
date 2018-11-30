@@ -17,18 +17,14 @@ struct Tileset : public Saveable
 
   std::vector<std::vector<Tile>> tileData;
 
-  std::string imgName;
-  
   // unique tilesetid
   unsigned id;
 
-  Tileset(unsigned id, float offsetX, float offsetY, float scale, const std::string& imgName, std::vector<std::vector<Tile>>& tileData)
+  Tileset(unsigned id, float offsetX, float offsetY, float scale, std::vector<std::vector<Tile>>& tileData)
   {
     this->offsetX = offsetX;
     this->offsetY = offsetY;
     this->scale = scale;
-
-    this->imgName = imgName;
 
     this->tileData = tileData;
     
@@ -59,9 +55,6 @@ struct Tileset : public Saveable
 
     // write tiledata
     filesystem::writeRange(out, tileData);
-
-    // write imgName
-    filesystem::writeRange(out, imgName);
   }
 
   void read(std::ifstream& in) override
@@ -74,9 +67,6 @@ struct Tileset : public Saveable
 
     // read tileData
     filesystem::readRange(in, tileData);
-
-    // read imgName
-    filesystem::readRange(in, imgName);
   }
 };
 

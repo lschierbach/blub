@@ -388,25 +388,34 @@ void Renderer::renderCamera(CameraEntry& camera)
 
         vec2<float> chunkOffset = game::math::chunkToEntityPos(chunk.getPos()) + vec2<float>(ts.offsetX,ts.offsetY);
 
-        auto iter = tilesetImgs.find(ts.imgName);
-        auto iter_n = tilesetNormals.find(ts.imgName);
-        auto& tilesetImg = std::get<LODImage>(*(iter));
-        auto& tilesetImg_n = std::get<LODImage>(*(iter_n));
+        auto imgName = map->getTilesetImgName(ts.id);
+        
+        if (imgName)
+        {
+          auto iter = tilesetImgs.find(*imgName);
+          auto iter_n = tilesetNormals.find(*imgName);
+          auto& tilesetImg = std::get<LODImage>(*(iter));
+          auto& tilesetImg_n = std::get<LODImage>(*(iter_n));
 
-        GPU_SetShaderImage(tilesetImg_n.bestImage(camcast.get()), GPU_GetUniformLocation(sp_tile, "nmap"), 1);
-        camcast.get()->renderTileset(ts, tilesetImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
-
+          GPU_SetShaderImage(tilesetImg_n.bestImage(camcast.get()), GPU_GetUniformLocation(sp_tile, "nmap"), 1);
+          camcast.get()->renderTileset(ts, tilesetImg.bestImage(camcast.get()), 0.f, 0.f, chunkOffset[0], chunkOffset[1]);
+        }
       }
     }
   );
   
   if(globalTs != NULL) {
-    auto iter = tilesetImgs.find(globalTs->imgName);
-    auto iter_n = tilesetNormals.find(globalTs->imgName);
-    auto& tilesetImg = std::get<LODImage>(*(iter));
-    auto& tilesetImg_n = std::get<LODImage>(*(iter_n));
-    GPU_SetShaderImage(tilesetImg_n.bestImage(camcast.get()), GPU_GetUniformLocation(sp_tile, "nmap"), 1);
-    camcast.get()->renderTileset(*globalTs, tilesetImg.bestImage(camcast.get()), 0.f, 0.f, globalTs->offsetX, globalTs->offsetY);
+    auto imgName = map->getTilesetImgName(globalTs->id);
+        
+    if (imgName)
+    {
+      auto iter = tilesetImgs.find(*imgName);
+      auto iter_n = tilesetNormals.find(*imgName);
+      auto& tilesetImg = std::get<LODImage>(*(iter));
+      auto& tilesetImg_n = std::get<LODImage>(*(iter_n));
+      GPU_SetShaderImage(tilesetImg_n.bestImage(camcast.get()), GPU_GetUniformLocation(sp_tile, "nmap"), 1);
+      camcast.get()->renderTileset(*globalTs, tilesetImg.bestImage(camcast.get()), 0.f, 0.f, globalTs->offsetX, globalTs->offsetY);
+    }
   }
 
   return;

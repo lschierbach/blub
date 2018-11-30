@@ -20,7 +20,6 @@ class Editor
   bool selectingMapTile = false;
   game::vec2<float> tileSelectionStartPos { 0.f, 0.f };
   
-  std::optional<Tileset*> m_SelectedTileset {};
   unsigned m_SelectedTilesetId { 0 };
   
   game::vec2<float> mapTileSelectionStartPos { 0.f, 0.f };
