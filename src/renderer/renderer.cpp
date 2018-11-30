@@ -89,9 +89,9 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
     0.8f, 0.8f, 0.8f
   };
   float lights[] = {
-    1.0, 1.0, 4.0,
-    10.0, 10.0, 2.0,
-    20.0, 5.0, 6.0
+    1.f, 1.f, 4.f,
+    10.f, 10.f, 2.f,
+    20.f, 5.f, 6.f
   };
   float lightColors[] = {
     2.0, 0.0, 0.0,
@@ -261,11 +261,23 @@ void Renderer::renderFrame()
   GPU_ClearRGB(renderTarget, 50, 50, 50);
   
   GPU_ActivateShaderProgram(sp_tile, &block_tile);
+
   GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "time"), SDL_GetTicks()/1000.f);
   //tiles & entities
   for(CameraEntry& camera: cameras)
   {
     std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
+
+    game::vec2<> camPos = camcast->getPos() - game::vec2<>(
+      camcast->getSize()[0] * camcast->unitsInPixel() * 0.5f,
+      camcast->getSize()[1] * camcast->unitsInPixel() * 0.5f
+    );;
+    float lights[] = {
+      1.f-camPos[0], 1.f-camPos[1], 4.f,
+      10.f-camPos[0], 10.f-camPos[1], 2.f,
+      20.f-camPos[0], 5.f-camPos[1], 6.f
+    };
+    GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lights"), 3, 3, lights);
 
     GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "pixelsInUnit"), camcast.get()->pixelsInUnit());
     renderCamera(camera);
