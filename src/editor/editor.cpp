@@ -79,14 +79,25 @@ void Editor::handleKeyState(const Uint8* keystate)
             if (chunkLock)
             {
               Chunk* chunk = chunkLock->get();
-              if (chunk->getPos() == m_LastChunkPos)
+              auto tilePos = game::vec2<float>{m_Renderer->pixelToXYAuto(mousePosition)[0] + x, m_Renderer->pixelToXYAuto(mousePosition)[1] + y} -game::math::chunkToEntityPos(chunk->getPos());
+              auto tileset = getTilesetById(m_SelectedTilesetId, chunk);
+              if (tileset)
               {
-                auto tilePos = game::vec2<float>{m_Renderer->pixelToXYAuto(mousePosition)[0] + x, m_Renderer->pixelToXYAuto(mousePosition)[1] + y} - game::math::chunkToEntityPos(chunk->getPos());
-                auto tileset = getTilesetById(m_SelectedTilesetId, chunk);
-                if (tileset)
+                (*tileset)->tileData[static_cast<int> (tilePos[1]) % game::math::chunkSize][static_cast<int> (tilePos[0]) % game::math::chunkSize] = selectedTiles[x][y];
+              } else
+              {
+                std::vector<std::vector < Tile>> tileData;
+
+                for (int y = 0; y < game::math::chunkSize; y++)
                 {
-                  (*tileset)->tileData[static_cast<int>(tilePos[1]) % game::math::chunkSize][static_cast<int>(tilePos[0]) % game::math::chunkSize] = selectedTiles[x][y];
+                  std::vector<Tile> temp;
+                  temp.resize(game::math::chunkSize, Tile(0, .0f));
+                  tileData.push_back(temp);
                 }
+
+                chunk->m_Data.m_Tilesets.push_back(Tileset(m_SelectedTilesetId, 0.f, 0.f, 1.0f, tileData));
+                y--;
+                continue;
               }
             }
           }

@@ -64,7 +64,7 @@ unsigned int Map::addNewTileset(const std::string& imgName)
 std::optional<std::string> Map::getTilesetImgName(unsigned id) 
 {
   std::scoped_lock(m_DataMutex);
-  if (m_Data.m_TileSetImgs.size() < id)
+  if (m_Data.m_TileSetImgs.size() > id)
   {
     return { m_Data.m_TileSetImgs[id] };
   }
