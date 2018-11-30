@@ -493,6 +493,11 @@ void Renderer::clearOverlays(size_t cameraIndex)
   std::static_pointer_cast<Camera>(getCamera(cameraIndex).camera).get()->clearOverlays();
 }
 
+void Renderer::setGlobalTileset(Tileset* ts)
+{
+  globalTs = ts;
+}
+
 void Renderer::renderBox(float x, float y, float w, float h, SDL_Color borderColor, SDL_Color areaColor, float borderRadius)
 {
   boxQueue.push_back({x, y, w, h, borderColor, areaColor, borderRadius});
