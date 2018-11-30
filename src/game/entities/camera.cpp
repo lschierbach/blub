@@ -139,17 +139,14 @@ void Camera::renderTileset(const Tileset& ts, GPU_Image* img, float pad_x, float
       {
         GPU_Rect sourceRect = getTile(img, c, 0);
         GPU_Rect roundedTarget = GPU_MakeRect(
-          floor(targetRect.x)-overlap,
-          floor(targetRect.y)-overlap,
-          ceil(targetRect.w)+overlap,
-          ceil(targetRect.h)+overlap
+          floor(targetRect.x),
+          floor(targetRect.y),
+          ceil(targetRect.w),
+          ceil(targetRect.h)
         );
 
         GPU_BlitRect(img, &sourceRect, image->target, &roundedTarget); //render from tile on given image to this cam's render image
 
-#ifdef DEBUG_CAMERA_BOUNDING_BOXES
-  GPU_Rectangle2(image->target, targetRect, SDL_Color{255,0,255,255});
-#endif
       }
       targetRect.x += logicalWidth;
     }
@@ -214,14 +211,6 @@ void Camera::renderEntity(Entity& e)
   //get upper left on-screen x and y
   float entityX = (getSize()[0]/2) - (getPos()[0] - e.getPos()[0] + e.getAnchor()[0]*e.getSize()[0]) * pixelsInUnit();
   float entityY = (getSize()[1]/2) - (getPos()[1] - e.getPos()[1] + e.getAnchor()[1]*e.getSize()[1]) * pixelsInUnit();
-
-#ifdef DEBUG_CAMERA_VERBOSE
-  std::cout << "[CAMERA] Entity screen pos:"
-  "( size:" << getSize()[0] << "|" << getSize()[1] << " - " <<
-  "camera:" << getPos()[0] << "|" << getPos()[1] << " - " <<
-  "entity:" << e.getPos()[0] << "|" << e.getPos()[1] << " ) * " <<
-  "p_unit:" << pixelsInUnit() << " = " << entityX << "|" << entityY << std::endl;
-#endif
 
   if(e.sprite != nullptr) {
     GPU_Rect sourceRect = e.sprite.get()->getFrame();
