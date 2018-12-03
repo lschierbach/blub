@@ -24,6 +24,7 @@
 
 #include "renderer/renderer.h"
 #include "game/entity.h"
+#include "game/entities/lightentity.h"
 #include "game/gamemath.hpp"
 
 Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
@@ -88,7 +89,7 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
   float ambient[] = {
     0.8f, 0.8f, 0.8f
   };
-  float lights[] = {
+  /*float lights[] = {
     1.f, 1.f, 4.f,
     10.f, 10.f, 2.f,
     20.f, 5.f, 6.f
@@ -97,13 +98,13 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
     2.0, 0.0, 0.0,
     0.0, 2.0, 0.0,
     0.0, 0.0, 2.0
-  };
+  };*/
 
   //Set static uniforms
   GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "ambient"), 3, 1, ambient);
-  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lights"), 3, 3, lights);
-  GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lightColors"), 3, 3, lightColors);
-  GPU_SetUniformi(GPU_GetUniformLocation(sp_tile, "numLights"), 3);
+  //GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lights"), 3, 3, lights);
+  //GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lightColors"), 3, 3, lightColors);
+  //GPU_SetUniformi(GPU_GetUniformLocation(sp_tile, "numLights"), 3);
 
   GPU_DeactivateShaderProgram();
 
@@ -268,16 +269,35 @@ void Renderer::renderFrame()
   {
     std::shared_ptr camcast = std::static_pointer_cast<Camera>(camera.camera);
 
+    //Lights stuff
     game::vec2<> camPos = camcast->getPos() - game::vec2<>(
       camcast->getSize()[0] * camcast->unitsInPixel() * 0.5f,
       camcast->getSize()[1] * camcast->unitsInPixel() * 0.5f
-    );;
-    float lights[] = {
-      1.f-camPos[0], 1.f-camPos[1], 4.f,
-      10.f-camPos[0], 10.f-camPos[1], 2.f,
-      20.f-camPos[0], 5.f-camPos[1], 6.f
-    };
-    GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lights"), 3, 3, lights);
+    );
+
+    std::vector<float> lights;
+    std::vector<float> lightColors;
+
+    auto topLeftScreen =     pixelToXYAuto(vec2<float>(1.f, 1.f));
+    auto bottomRightScreen = pixelToXYAuto(camcast.get()->getSize() - vec2<float>(1.f, 1.f));
+
+    map->for_each_entity_in_box<LightEntity>(topLeftScreen, bottomRightScreen - topLeftScreen,
+      [&](auto& entity) -> void
+      {
+        //Performance?
+        lights.push_back(entity.getPos()[0] - camPos[0]);
+        lights.push_back(entity.getPos()[1] - camPos[1]);
+        lights.push_back(entity.getRadius());
+
+        lightColors.push_back(entity.getColor()[0]);
+        lightColors.push_back(entity.getColor()[1]);
+        lightColors.push_back(entity.getColor()[2]);
+      }
+    );
+    GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lights"), 3, std::min<int>(lights.size()/3, 12), &lights[0]);
+    GPU_SetUniformfv(GPU_GetUniformLocation(sp_tile, "lightColors"), 3, std::min<int>(lightColors.size()/3, 12), &lightColors[0]);
+    GPU_SetUniformi(GPU_GetUniformLocation(sp_tile, "numLights"), std::min<int>(lights.size()/3, 12));
+    //Lights stuff ends here
 
     GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "pixelsInUnit"), camcast.get()->pixelsInUnit());
     renderCamera(camera);

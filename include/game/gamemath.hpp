@@ -4,11 +4,12 @@
 #include "game/vector.hpp"
 #include "entity.h"
 #include "entities/physicsEntity.h"
+#include "entities/lightentity.h"
 #include <variant>
 
 namespace game 
 {
-  using EntityVariant = std::variant<Entity, PhysicsEntity>;
+  using EntityVariant = std::variant<Entity, PhysicsEntity, LightEntity>;
   
   using EntityVector = std::vector<EntityVariant>;
   

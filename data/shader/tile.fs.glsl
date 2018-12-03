@@ -56,7 +56,7 @@ TODO:
 -Also use the light shader for entities (combine renderer loops?)
 -Add Z index for entities or other way for background/foreground tilesets
 -Make separate function to load shaders (why isn't it working with refs?)
--Normal maps? Maybe use SDL_gpu texture slots? Dot product?
+[WORKS]-Normal maps? Maybe use SDL_gpu texture slots? Dot product?
 -Basic Vertex Animation? (Probably not, eating cpu)
 -Add raw pointer to CameraEntry
 */

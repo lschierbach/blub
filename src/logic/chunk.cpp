@@ -87,6 +87,7 @@ void Chunk::load()
 void Chunk::generate()
 {
   // ✝ generator - 20.11.2018
+  m_Data.m_Entities.push_back(LightEntity({0.f,5.f}, {1.f,0.f,1.f}, 1.f, 0)); //back from the dead one final time
 }
 
 void Chunk::reload()
