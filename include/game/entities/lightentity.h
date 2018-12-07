@@ -20,6 +20,20 @@ class LightEntity: public Entity
     void setRadius(float r);
     game::Vector<3,float> getColor();
     void setColor(game::Vector<3,float> c);
+
+    void write(std::ofstream& out) override
+    {
+      Entity::write(out);
+      filesystem::writeStruct(out, color);
+      filesystem::writeStruct(out, radius);
+    }
+
+    void read(std::ifstream& in) override
+    {
+      Entity::read(in);
+      filesystem::readStruct(in, color);
+      filesystem::readStruct(in, radius);
+    }
 };
 
 #endif /* LIGHTENTITY_H */
