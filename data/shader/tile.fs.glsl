@@ -4,11 +4,11 @@ in vec4 color;
 in vec2 texCoord;
 out vec4 fragColor;
 in float ftime;
+in float pixelsInUnit;
 
 uniform sampler2D tex;
 uniform vec3 ambient;
 
-uniform float pixelsInUnit;
 uniform vec3[12] lights;
 uniform vec3[12] lightColors;
 uniform int numLights;

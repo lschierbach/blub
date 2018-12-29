@@ -42,6 +42,10 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
 
   //////////////////////////////////// SHADERS ////////////////////////////////////
 
+  //Why can I not make a function for this stuff?
+
+
+  //Common shaders
   auto vs = GPU_LoadShader(GPU_VERTEX_SHADER, "data/shader/common.vs.glsl");
   if(!vs) { std::cout << "Loading/compiling vertex shader failed" << std::endl; }
 
@@ -70,7 +74,8 @@ Renderer::Renderer(float w, float h, bool fullscreen, Map* map)
 
   GPU_DeactivateShaderProgram();
   
-  auto vs_tile = GPU_LoadShader(GPU_VERTEX_SHADER, "data/shader/common.vs.glsl");
+  //Tile shaders
+  auto vs_tile = GPU_LoadShader(GPU_VERTEX_SHADER, "data/shader/tile.vs.glsl");
   if(!vs_tile) { std::cout << "Loading/compiling vertex shader failed:" << std::endl << GPU_GetShaderMessage() << std::endl; }
 
   auto fs_tile = GPU_LoadShader(GPU_FRAGMENT_SHADER, "data/shader/tile.fs.glsl");
@@ -299,7 +304,7 @@ void Renderer::renderFrame()
     GPU_SetUniformi(GPU_GetUniformLocation(sp_tile, "numLights"), std::min<int>(lights.size()/3, 12));
     //Lights stuff ends here
 
-    GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "pixelsInUnit"), camcast.get()->pixelsInUnit());
+    GPU_SetUniformf(GPU_GetUniformLocation(sp_tile, "piu"), camcast.get()->pixelsInUnit());
     renderCamera(camera);
   }
 
